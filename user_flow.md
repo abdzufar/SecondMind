@@ -20,7 +20,7 @@ graph TD
     J --> |Rename, Delete, Drag Wires| I
 
     I --> K[AI 'Elaborate' Actions]
-    K --> |Explain, Quiz, Expand Node| I
+    K --> |Explain, Expand Node| I
 
     I --> L{Export / Share Menu}
     L --> M[/Download Image .PNG/]
