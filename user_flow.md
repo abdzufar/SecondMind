@@ -1,7 +1,5 @@
 # SecondMind User Flow
 
-Below is the complete user journey for SecondMind. Because this diagram is built using Mermaid (a text-based diagramming tool), it is entirely editable! You can change the text inside the blocks to adjust the flow as we refine the app.
-
 ```mermaid
 graph TD
     A([Landing Page]) --> B{Logged In?}
@@ -14,7 +12,7 @@ graph TD
 
     F --> G[/Input Parameters Modal/]
     G --> |1. Paste Text / Upload PDF<br>2. Set Goal & Verbosity| H[Loading: Gemini AI Generation]
-    
+
     H --> I[Interactive Canvas View]
     E --> I
 
