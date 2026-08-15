@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SEO — Second Mind</title>
+    <link rel="icon" href="icons&logo/svg/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="icons&logo/png/favicon-32.png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="icons&logo/png/apple-touch-icon-180.png" />
+    <meta name="theme-color" content="#221B14" />
+    <style>
+      @import url("icons&logo/tokens.css");
+
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
+
+      a {
+        transition: border-color 150ms ease-out, color 150ms ease-out;
+      }
+
+      :focus-visible {
+        outline: 2px solid var(--sm-clay);
+        outline-offset: 2px;
+        border-radius: var(--sm-radius-sm);
+      }
+
+      .sm-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      /* header (same as canvas) */
+
+      .canvas-header {
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 var(--sm-space-5);
+        background: var(--sm-surface);
+        border-bottom: 1px solid var(--sm-line);
+      }
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: var(--sm-space-4);
+        min-width: 0;
+      }
+
+      .icon-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--sm-radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--sm-ink-70);
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: background 150ms ease-out, color 150ms ease-out;
+      }
+
+      .icon-btn:hover {
+        background: var(--sm-paper);
+        color: var(--sm-ink);
+      }
+
+      .icon-btn svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .doc-info strong {
+        display: block;
+        font-size: var(--sm-fs-body);
+        font-weight: 700;
+        color: var(--sm-ink);
+      }
+
+      .doc-info span {
+        font-size: 12px;
+        color: var(--sm-ink-45);
+      }
+
+      .header-actions {
+        display: flex;
+        gap: var(--sm-space-3);
+      }
+
+      /* body: canvas underlay + drawer */
+
+      .canvas-body {
+        position: relative;
+        height: calc(100vh - 56px);
+        display: flex;
+      }
+
+      .canvas-underlay {
+        position: relative;
+        flex: 1;
+        background: var(--sm-paper);
+        overflow: hidden;
+      }
+
+      .canvas-underlay::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(#e0d4c3 1.5px, transparent 1.5px);
+        background-size: 22px 22px;
+        opacity: 0.6;
+      }
+
+      .mm-lines {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+      }
+
+      .mm-lines path {
+        fill: none;
+        stroke: var(--sm-line);
+        stroke-width: 1.5;
+      }
+
+      .mm-lines circle {
+        fill: var(--sm-ink-45);
+      }
+
+      .mm-node {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        white-space: nowrap;
+      }
+
+      .mm-node--spine {
+        background: var(--sm-paper);
+        border: 1px solid var(--sm-line);
+        border-radius: var(--sm-radius-sm);
+        padding: 7px 14px;
+        color: var(--sm-ink-70);
+        font-size: 12.5px;
+        font-weight: 600;
+      }
+
+      .mm-node--branch {
+        background: var(--sm-surface);
+        border: 1px solid var(--sm-line);
+        border-radius: var(--sm-radius-md);
+        padding: 10px 16px;
+        color: var(--sm-ink);
+        font-size: 13px;
+        font-weight: 700;
+        box-shadow: var(--sm-shadow-sm);
+      }
+
+      .mm-node--branch.is-selected {
+        border: 2px solid var(--sm-clay);
+      }
+
+      /* drawer panel */
+
+      .drawer {
+        width: 320px;
+        flex-shrink: 0;
+        background: var(--sm-surface);
+        border-left: 1px solid var(--sm-line);
+        box-shadow: var(--sm-shadow-md);
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+      }
+
+      .drawer-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--sm-space-4) var(--sm-space-5);
+        border-bottom: 1px solid var(--sm-line);
+      }
+
+      .drawer-body {
+        padding: var(--sm-space-5);
+        display: flex;
+        flex-direction: column;
+        gap: var(--sm-space-5);
+      }
+
+      .drawer-eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--sm-ink-45);
+      }
+
+      .drawer-eyebrow svg {
+        width: 13px;
+        height: 13px;
+      }
+
+      .node-title {
+        width: 100%;
+        border: 1px solid transparent;
+        border-radius: var(--sm-radius-sm);
+        padding: 6px 8px;
+        margin-left: -8px;
+        font-family: var(--sm-font);
+        font-size: var(--sm-fs-h3);
+        font-weight: 700;
+        color: var(--sm-ink);
+        transition: border-color 150ms ease-out, background 150ms ease-out;
+      }
+
+      .node-title:hover,
+      .node-title:focus-visible {
+        border-color: var(--sm-line);
+        background: var(--sm-paper);
+        outline: none;
+      }
+
+      .drawer-section h4 {
+        font-size: var(--sm-fs-small);
+        color: var(--sm-ink-45);
+        margin: 0 0 var(--sm-space-2);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      .drawer-section p {
+        margin: 0;
+        font-size: var(--sm-fs-small);
+      }
+
+      .drawer-section textarea {
+        width: 100%;
+        min-height: 90px;
+        padding: var(--sm-space-3);
+        background: var(--sm-paper);
+        border: 1px solid var(--sm-line);
+        border-radius: var(--sm-radius-sm);
+        color: var(--sm-ink);
+        font-family: var(--sm-font);
+        font-size: var(--sm-fs-small);
+        resize: vertical;
+        transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+      }
+
+      .drawer-section textarea::placeholder {
+        color: var(--sm-ink-45);
+      }
+
+      .drawer-section textarea:focus-visible {
+        border-color: var(--sm-clay);
+        outline: none;
+        box-shadow: 0 0 0 3px var(--sm-clay-tint);
+      }
+
+      .ask-ai {
+        display: flex;
+        align-items: center;
+        gap: var(--sm-space-2);
+        background: var(--sm-paper);
+        border: 1px solid var(--sm-line);
+        border-radius: var(--sm-radius-pill);
+        padding: 4px 4px 4px 14px;
+      }
+
+      .ask-ai input {
+        flex: 1;
+        min-width: 0;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-family: var(--sm-font);
+        font-size: 13px;
+        color: var(--sm-ink);
+      }
+
+      .ask-ai input::placeholder {
+        color: var(--sm-ink-45);
+      }
+
+      .ask-ai button {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: none;
+        background: var(--sm-clay);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: background 0.18s ease;
+      }
+
+      .ask-ai button:hover {
+        background: #b24e2f;
+      }
+
+      .ask-ai button svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .tag {
+        background: var(--sm-clay-tint);
+        color: var(--sm-clay);
+        border-radius: var(--sm-radius-pill);
+        padding: 3px 10px;
+        font-size: 11.5px;
+        font-weight: 600;
+      }
+
+      @media (max-width: 900px) {
+        .canvas-underlay {
+          display: none;
+        }
+        .drawer {
+          width: 100%;
+          border-left: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="canvas-header">
+      <div class="header-left">
+        <a class="icon-btn" href="canvas.html" aria-label="Kembali ke canvas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+        </a>
+        <div class="doc-info">
+          <strong>Strategi Growth 2026</strong>
+          <span>18 node · diperbarui 2 jam lalu</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="sm-btn sm-btn--ghost">Bagikan</button>
+        <button type="button" class="sm-btn sm-btn--dark">Export</button>
+      </div>
+    </header>
+
+    <div class="canvas-body">
+      <div class="canvas-underlay" aria-hidden="true">
+        <svg class="mm-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <path d="M50,8 L50,28" />
+          <path d="M50,28 L50,52" />
+          <path d="M50,52 L50,74" />
+          <path d="M50,74 L50,92" />
+
+          <path d="M50,8 L17,4" />
+          <path d="M50,8 L17,13" />
+
+          <path d="M50,28 L83,19" />
+          <path d="M50,28 L83,28" />
+          <path d="M50,28 L83,37" />
+
+          <path d="M50,52 L17,40" />
+          <path d="M50,52 L17,47" />
+          <path d="M50,52 L17,55" />
+          <path d="M50,52 L17,63" />
+
+          <path d="M50,74 L83,74" />
+
+          <path d="M50,92 L17,84" />
+          <path d="M50,92 L17,91" />
+          <path d="M50,92 L17,98" />
+        </svg>
+
+        <div class="mm-node mm-node--spine" style="left: 50%; top: 8%">Riset Pasar</div>
+        <div class="mm-node mm-node--spine" style="left: 50%; top: 28%">Strategi Konten</div>
+        <div class="mm-node mm-node--spine" style="left: 50%; top: 52%">Distribusi &amp; Channel</div>
+        <div class="mm-node mm-node--spine" style="left: 50%; top: 74%">Anggaran</div>
+        <div class="mm-node mm-node--spine" style="left: 50%; top: 92%">Evaluasi &amp; KPI</div>
+
+        <div class="mm-node mm-node--branch" style="left: 17%; top: 4%">Analisis Kompetitor</div>
+        <div class="mm-node mm-node--branch" style="left: 17%; top: 13%">Segmentasi Audiens</div>
+
+        <div class="mm-node mm-node--branch" style="left: 83%; top: 19%">Kalender Konten Q1</div>
+        <div class="mm-node mm-node--branch" style="left: 83%; top: 28%">20 Ide Topik</div>
+        <div class="mm-node mm-node--branch" style="left: 83%; top: 37%">Kolaborasi Kreator</div>
+
+        <div class="mm-node mm-node--branch" style="left: 17%; top: 40%">Email Marketing</div>
+        <div class="mm-node mm-node--branch is-selected" style="left: 17%; top: 47%">SEO</div>
+        <div class="mm-node mm-node--branch" style="left: 17%; top: 55%">Media Sosial</div>
+        <div class="mm-node mm-node--branch" style="left: 17%; top: 63%">Partnership</div>
+
+        <div class="mm-node mm-node--branch" style="left: 83%; top: 74%">Estimasi Biaya</div>
+
+        <div class="mm-node mm-node--branch" style="left: 17%; top: 84%">KPI Engagement</div>
+        <div class="mm-node mm-node--branch" style="left: 17%; top: 91%">KPI Konversi</div>
+        <div class="mm-node mm-node--branch" style="left: 17%; top: 98%">Review Bulanan</div>
+      </div>
+
+      <aside class="drawer">
+        <div class="drawer-head">
+          <span class="drawer-eyebrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10" /><path d="M18 20V4" /><path d="M6 20v-4" /></svg>
+            Bagian dari Distribusi &amp; Channel
+          </span>
+          <a class="icon-btn" href="canvas.html" aria-label="Tutup panel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+          </a>
+        </div>
+
+        <div class="drawer-body">
+          <div>
+            <input class="node-title" value="SEO" />
+            <div class="tag-list" style="margin-top: 8px">
+              <span class="tag">Item</span>
+              <span class="tag">Distribusi &amp; Channel</span>
+            </div>
+          </div>
+
+          <div class="drawer-section">
+            <h4>Ringkasan</h4>
+            <p>Rencana optimasi pencarian buat konten yang udah dibuat — target kata kunci, backlink, dan halaman mana yang diprioritaskan dulu.</p>
+          </div>
+
+          <div class="drawer-section">
+            <h4>Catatan</h4>
+            <textarea placeholder="Tambahkan catatan buat item ini…">Prioritaskan 5 kata kunci dengan volume tertinggi dulu, sisanya nyusul bulan depan.</textarea>
+          </div>
+
+          <div class="drawer-section">
+            <h4>Tanya AI tentang bagian ini</h4>
+            <form class="ask-ai" onsubmit="event.preventDefault();">
+              <input type="text" placeholder="Contoh: ringkas jadi 3 poin utama" />
+              <button type="submit" aria-label="Kirim">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z" /><path d="M22 2 11 13" /></svg>
+              </button>
+            </form>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </body>
+</html>
