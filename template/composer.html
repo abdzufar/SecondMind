@@ -244,9 +244,54 @@
         margin-top: var(--sm-space-5);
       }
 
-      .field:first-child {
-        margin-top: 0;
+      .field-row {
+        display: flex;
+        gap: var(--sm-space-4);
         margin-bottom: var(--sm-space-6);
+      }
+
+      .field-row .field {
+        margin-top: 0;
+      }
+
+      .field-row .field--grow {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .field-row .field--timeframe {
+        flex: 0 0 190px;
+      }
+
+      @media (max-width: 560px) {
+        .field-row {
+          flex-direction: column;
+          gap: var(--sm-space-5);
+        }
+
+        .field-row .field--timeframe {
+          flex: 1;
+        }
+      }
+
+      .select {
+        width: 100%;
+        height: 44px;
+        padding: 0 var(--sm-space-3);
+        background: var(--sm-surface);
+        border: 1px solid var(--sm-line);
+        border-radius: var(--sm-radius-sm);
+        color: var(--sm-ink);
+        font-family: var(--sm-font);
+        font-size: var(--sm-fs-body);
+        cursor: pointer;
+        transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+      }
+
+      .select:focus-visible {
+        border-color: var(--sm-clay);
+        outline: none;
+        box-shadow: 0 0 0 3px var(--sm-clay-tint);
       }
 
       .label {
@@ -446,13 +491,25 @@
       </div>
 
       <div class="upload-card">
-        <div class="field">
-          <label class="label" for="learning-goal">Mau belajar apa?</label>
-          <div class="input-wrap">
-            <span class="input-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5A5.5 5.5 0 1 0 7 8c0 2 1 3 1.5 3.5.8.8 1.3 1.5 1.5 2.5" /><path d="M9 18h6" /><path d="M10 22h4" /></svg>
-            </span>
-            <input class="input" type="text" id="learning-goal" name="learning-goal" placeholder="Contoh: strategi growth marketing, dasar machine learning" />
+        <div class="field-row">
+          <div class="field field--grow">
+            <label class="label" for="learning-goal">Mau belajar apa?</label>
+            <div class="input-wrap">
+              <span class="input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5A5.5 5.5 0 1 0 7 8c0 2 1 3 1.5 3.5.8.8 1.3 1.5 1.5 2.5" /><path d="M9 18h6" /><path d="M10 22h4" /></svg>
+              </span>
+              <input class="input" type="text" id="learning-goal" name="learning-goal" placeholder="Contoh: strategi growth marketing, dasar machine learning" />
+            </div>
+          </div>
+          <div class="field field--timeframe">
+            <label class="label" for="timeframe">Target waktu</label>
+            <select class="select" id="timeframe" name="timeframe">
+              <option value="1-week">1 minggu (kilat)</option>
+              <option value="2-week">2 minggu</option>
+              <option value="1-month" selected>1 bulan</option>
+              <option value="3-month">3 bulan</option>
+              <option value="flexible">Santai, gak buru-buru</option>
+            </select>
           </div>
         </div>
 

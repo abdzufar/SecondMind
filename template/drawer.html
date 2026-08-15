@@ -32,7 +32,7 @@
         height: 16px;
       }
 
-      /* header (same as canvas) */
+      /* ===== header (sama dengan canvas) ===== */
 
       .canvas-header {
         height: 56px;
@@ -93,7 +93,7 @@
         gap: var(--sm-space-3);
       }
 
-      /* body: canvas underlay + drawer */
+      /* ===== body: canvas underlay + drawer ===== */
 
       .canvas-body {
         position: relative;
@@ -104,72 +104,193 @@
       .canvas-underlay {
         position: relative;
         flex: 1;
-        background: var(--sm-paper);
+        min-width: 0;
+        background-color: var(--sm-paper);
+        background-image: radial-gradient(#e0d4c3 1.5px, transparent 1.5px);
+        background-size: 22px 22px;
         overflow: hidden;
       }
 
-      .canvas-underlay::before {
+      /* ===== roadmap (sistem sama persis dengan canvas.html) ===== */
+
+      .roadmap {
+        width: 100%;
+        max-width: 920px;
+        margin: 0 auto;
+        padding: var(--sm-space-5) var(--sm-space-5);
+      }
+
+      .rm-stage {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        column-gap: 96px;
+        padding: var(--sm-space-4) 0;
+      }
+
+      /* di underlay batangnya sengaja lari ke atas & bawah layar —
+         menandakan ini cuma potongan tengah dari roadmap yang lebih panjang */
+      .rm-stage::before {
         content: "";
         position: absolute;
-        inset: 0;
-        background-image: radial-gradient(#e0d4c3 1.5px, transparent 1.5px);
-        background-size: 22px 22px;
-        opacity: 0.6;
+        left: 50%;
+        margin-left: -1px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--sm-line);
       }
 
-      .mm-lines {
+      .rm-step {
+        position: relative;
+        z-index: 1;
+        grid-column: 2;
+        box-sizing: border-box;
+        width: 280px;
+        display: flex;
+        align-items: center;
+        gap: var(--sm-space-3);
+        background: var(--sm-ink);
+        border: 1px solid var(--sm-ink);
+        border-radius: var(--sm-radius-md);
+        padding: 12px 16px;
+        text-decoration: none;
+      }
+
+      .rm-step-num {
+        flex-shrink: 0;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: var(--sm-clay);
+        color: var(--sm-surface);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1;
+      }
+
+      .rm-step-body {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+
+      .rm-step-time {
+        font-size: 9.5px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--sm-clay-bright);
+        line-height: 12px;
+      }
+
+      .rm-step-label {
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: var(--sm-paper);
+        line-height: 19px;
+      }
+
+      .rm-cluster {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: var(--sm-space-3);
+      }
+
+      .rm-cluster--left {
+        grid-column: 1;
+        align-items: flex-end;
+      }
+
+      .rm-cluster--right {
+        grid-column: 3;
+        align-items: flex-start;
+      }
+
+      .rm-cluster::before {
+        content: "";
         position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        overflow: visible;
+        top: 21px;
+        bottom: 21px;
+        width: 1px;
+        background: var(--sm-line);
       }
 
-      .mm-lines path {
-        fill: none;
-        stroke: var(--sm-line);
-        stroke-width: 1.5;
+      .rm-cluster--left::before {
+        right: -32px;
       }
 
-      .mm-lines circle {
-        fill: var(--sm-ink-45);
+      .rm-cluster--right::before {
+        left: -32px;
       }
 
-      .mm-node {
+      .rm-cluster::after {
+        content: "";
         position: absolute;
-        transform: translate(-50%, -50%);
-        white-space: nowrap;
+        top: 50%;
+        width: 64px;
+        height: 1px;
+        background: var(--sm-line);
       }
 
-      .mm-node--spine {
-        background: var(--sm-paper);
-        border: 1px solid var(--sm-line);
-        border-radius: var(--sm-radius-sm);
-        padding: 7px 14px;
-        color: var(--sm-ink-70);
-        font-size: 12.5px;
-        font-weight: 600;
+      .rm-cluster--left::after {
+        right: -96px;
       }
 
-      .mm-node--branch {
+      .rm-cluster--right::after {
+        left: -96px;
+      }
+
+      .rm-branch {
+        position: relative;
+        box-sizing: border-box;
+        width: 210px;
         background: var(--sm-surface);
         border: 1px solid var(--sm-line);
         border-radius: var(--sm-radius-md);
-        padding: 10px 16px;
+        padding: 10px 14px;
         color: var(--sm-ink);
-        font-size: 13px;
-        font-weight: 700;
+        font-size: 12.5px;
+        font-weight: 600;
+        line-height: 20px;
+        text-decoration: none;
         box-shadow: var(--sm-shadow-sm);
       }
 
-      .mm-node--branch.is-selected {
-        border: 2px solid var(--sm-clay);
+      .rm-branch.is-active {
+        border-color: var(--sm-clay);
+        border-width: 2px;
+        padding: 9px 13px;
       }
 
-      /* drawer panel */
+      .rm-branch::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 32px;
+        height: 1px;
+        background: var(--sm-line);
+      }
+
+      .rm-cluster--left .rm-branch::after {
+        right: -32px;
+      }
+
+      .rm-cluster--right .rm-branch::after {
+        left: -32px;
+      }
+
+      /* ===== drawer panel ===== */
 
       .drawer {
-        width: 320px;
+        width: clamp(400px, 32vw, 500px);
         flex-shrink: 0;
         background: var(--sm-surface);
         border-left: 1px solid var(--sm-line);
@@ -180,42 +301,113 @@
       }
 
       .drawer-head {
+        position: sticky;
+        top: 0;
+        z-index: 2;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: var(--sm-space-4) var(--sm-space-5);
+        gap: var(--sm-space-3);
+        padding: var(--sm-space-4) var(--sm-space-6);
+        background: var(--sm-surface);
         border-bottom: 1px solid var(--sm-line);
       }
 
+      .drawer-head-title {
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--sm-ink-45);
+      }
+
       .drawer-body {
-        padding: var(--sm-space-5);
+        padding: var(--sm-space-6);
         display: flex;
         flex-direction: column;
         gap: var(--sm-space-5);
       }
 
-      .drawer-eyebrow {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 12px;
-        color: var(--sm-ink-45);
+      .drawer-divider {
+        height: 1px;
+        background: var(--sm-line);
       }
 
-      .drawer-eyebrow svg {
-        width: 13px;
-        height: 13px;
+      /* konteks: langkah roadmap induk — versi mini dari node di canvas */
+
+      .parent-step {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--sm-ink);
+        border-radius: var(--sm-radius-md);
+        padding: 10px 14px;
+        text-decoration: none;
+        transition: transform 150ms ease-out;
+      }
+
+      .parent-step:hover {
+        transform: translateY(-1px);
+      }
+
+      .parent-step-num {
+        flex-shrink: 0;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--sm-clay);
+        color: var(--sm-surface);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 800;
+        line-height: 1;
+      }
+
+      .parent-step-body {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        min-width: 0;
+      }
+
+      .parent-step-time {
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--sm-clay-bright);
+        line-height: 11px;
+      }
+
+      .parent-step-label {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: var(--sm-paper);
+        line-height: 17px;
+      }
+
+      /* judul node */
+
+      .node-head {
+        display: flex;
+        flex-direction: column;
+        gap: var(--sm-space-2);
       }
 
       .node-title {
         width: 100%;
+        box-sizing: border-box;
+        margin-left: -8px;
+        padding: 4px 8px;
+        background: transparent;
         border: 1px solid transparent;
         border-radius: var(--sm-radius-sm);
-        padding: 6px 8px;
-        margin-left: -8px;
         font-family: var(--sm-font);
-        font-size: var(--sm-fs-h3);
-        font-weight: 700;
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
         color: var(--sm-ink);
         transition: border-color 150ms ease-out, background 150ms ease-out;
       }
@@ -227,30 +419,61 @@
         outline: none;
       }
 
-      .drawer-section h4 {
-        font-size: var(--sm-fs-small);
-        color: var(--sm-ink-45);
-        margin: 0 0 var(--sm-space-2);
+      .node-type {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 12px;
         font-weight: 600;
+        color: var(--sm-ink-70);
+      }
+
+      .node-type::before {
+        content: "";
+        width: 13px;
+        height: 10px;
+        border-radius: 3px;
+        background: var(--sm-surface);
+        border: 1px solid var(--sm-line);
+        flex-shrink: 0;
+      }
+
+      /* seksi isi */
+
+      .drawer-section {
+        display: flex;
+        flex-direction: column;
+        gap: var(--sm-space-2);
+      }
+
+      .drawer-section h4 {
+        margin: 0;
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
-        letter-spacing: 0.06em;
+        color: var(--sm-ink-45);
       }
 
       .drawer-section p {
         margin: 0;
-        font-size: var(--sm-fs-small);
+        font-size: 14px;
+        line-height: 1.65;
+        color: var(--sm-ink-70);
       }
 
       .drawer-section textarea {
         width: 100%;
-        min-height: 90px;
+        box-sizing: border-box;
+        min-height: 84px;
         padding: var(--sm-space-3);
         background: var(--sm-paper);
         border: 1px solid var(--sm-line);
         border-radius: var(--sm-radius-sm);
         color: var(--sm-ink);
         font-family: var(--sm-font);
-        font-size: var(--sm-fs-small);
+        font-size: 13px;
+        line-height: 1.6;
         resize: vertical;
         transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
       }
@@ -265,11 +488,63 @@
         box-shadow: 0 0 0 3px var(--sm-clay-tint);
       }
 
+      /* cabang lain di langkah yang sama */
+
+      .sibling-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .sibling {
+        background: var(--sm-paper);
+        border: 1px solid var(--sm-line);
+        border-radius: var(--sm-radius-pill);
+        padding: 5px 11px;
+        font-size: 11.5px;
+        font-weight: 600;
+        color: var(--sm-ink-70);
+        text-decoration: none;
+        transition: border-color 150ms ease-out, color 150ms ease-out;
+      }
+
+      .sibling:hover {
+        border-color: var(--sm-clay);
+        color: var(--sm-clay);
+      }
+
+      /* zona aksi AI */
+
+      .ai-zone {
+        display: flex;
+        flex-direction: column;
+        gap: var(--sm-space-3);
+        background: var(--sm-clay-tint);
+        border-radius: var(--sm-radius-md);
+        padding: var(--sm-space-4);
+      }
+
+      .ai-zone-title {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--sm-clay);
+      }
+
+      .ai-zone-title svg {
+        width: 13px;
+        height: 13px;
+      }
+
       .ask-ai {
         display: flex;
         align-items: center;
         gap: var(--sm-space-2);
-        background: var(--sm-paper);
+        background: var(--sm-surface);
         border: 1px solid var(--sm-line);
         border-radius: var(--sm-radius-pill);
         padding: 4px 4px 4px 14px;
@@ -314,28 +589,86 @@
         height: 14px;
       }
 
-      .tag-list {
+      .expand-btn {
         display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-      }
-
-      .tag {
-        background: var(--sm-clay-tint);
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        background: transparent;
+        border: 1px dashed var(--sm-clay);
+        border-radius: var(--sm-radius-sm);
+        padding: 9px;
         color: var(--sm-clay);
-        border-radius: var(--sm-radius-pill);
-        padding: 3px 10px;
-        font-size: 11.5px;
-        font-weight: 600;
+        font-family: var(--sm-font);
+        font-size: 12.5px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 150ms ease-out;
       }
 
-      @media (max-width: 900px) {
+      .expand-btn:hover {
+        background: var(--sm-surface);
+      }
+
+      .expand-btn svg {
+        width: 15px;
+        height: 15px;
+      }
+
+      .drawer-meta {
+        font-size: 11.5px;
+        color: var(--sm-ink-45);
+      }
+
+      @media (max-width: 1400px) {
+        .rm-stage {
+          column-gap: 64px;
+        }
+        .rm-step {
+          width: 232px;
+        }
+        .rm-branch {
+          width: 168px;
+          font-size: 12px;
+        }
+        .rm-cluster--left::before {
+          right: -24px;
+        }
+        .rm-cluster--right::before {
+          left: -24px;
+        }
+        .rm-cluster--left::after {
+          right: -64px;
+          width: 40px;
+        }
+        .rm-cluster--right::after {
+          left: -64px;
+          width: 40px;
+        }
+        .rm-cluster--left .rm-branch::after {
+          right: -24px;
+          width: 24px;
+        }
+        .rm-cluster--right .rm-branch::after {
+          left: -24px;
+          width: 24px;
+        }
+      }
+
+      @media (max-width: 1100px) {
         .canvas-underlay {
           display: none;
         }
         .drawer {
           width: 100%;
           border-left: none;
+        }
+        .drawer-body {
+          max-width: 640px;
+          margin: 0 auto;
+          width: 100%;
+          box-sizing: border-box;
         }
       }
     </style>
@@ -348,7 +681,7 @@
         </a>
         <div class="doc-info">
           <strong>Strategi Growth 2026</strong>
-          <span>18 node · diperbarui 2 jam lalu</span>
+          <span>Roadmap 5 minggu · 18 node · diperbarui 2 jam lalu</span>
         </div>
       </div>
       <div class="header-actions">
@@ -359,75 +692,76 @@
 
     <div class="canvas-body">
       <div class="canvas-underlay" aria-hidden="true">
-        <svg class="mm-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <path d="M50,8 L50,28" />
-          <path d="M50,28 L50,52" />
-          <path d="M50,52 L50,74" />
-          <path d="M50,74 L50,92" />
+        <div class="roadmap">
+          <div class="rm-stage">
+            <a class="rm-step" href="drawer.html">
+              <span class="rm-step-num">02</span>
+              <span class="rm-step-body">
+                <span class="rm-step-time">Minggu 2</span>
+                <span class="rm-step-label">Strategi Konten</span>
+              </span>
+            </a>
+            <div class="rm-cluster rm-cluster--right">
+              <a class="rm-branch" href="drawer.html">Kalender Konten Q1</a>
+              <a class="rm-branch" href="drawer.html">20 Ide Topik</a>
+              <a class="rm-branch" href="drawer.html">Kolaborasi Kreator</a>
+            </div>
+          </div>
 
-          <path d="M50,8 L17,4" />
-          <path d="M50,8 L17,13" />
+          <div class="rm-stage">
+            <div class="rm-cluster rm-cluster--left">
+              <a class="rm-branch" href="drawer.html">Email Marketing</a>
+              <a class="rm-branch is-active" href="drawer.html">SEO</a>
+              <a class="rm-branch" href="drawer.html">Media Sosial</a>
+              <a class="rm-branch" href="drawer.html">Partnership</a>
+            </div>
+            <a class="rm-step" href="drawer.html">
+              <span class="rm-step-num">03</span>
+              <span class="rm-step-body">
+                <span class="rm-step-time">Minggu 3</span>
+                <span class="rm-step-label">Distribusi &amp; Channel</span>
+              </span>
+            </a>
+          </div>
 
-          <path d="M50,28 L83,19" />
-          <path d="M50,28 L83,28" />
-          <path d="M50,28 L83,37" />
-
-          <path d="M50,52 L17,40" />
-          <path d="M50,52 L17,47" />
-          <path d="M50,52 L17,55" />
-          <path d="M50,52 L17,63" />
-
-          <path d="M50,74 L83,74" />
-
-          <path d="M50,92 L17,84" />
-          <path d="M50,92 L17,91" />
-          <path d="M50,92 L17,98" />
-        </svg>
-
-        <div class="mm-node mm-node--spine" style="left: 50%; top: 8%">Riset Pasar</div>
-        <div class="mm-node mm-node--spine" style="left: 50%; top: 28%">Strategi Konten</div>
-        <div class="mm-node mm-node--spine" style="left: 50%; top: 52%">Distribusi &amp; Channel</div>
-        <div class="mm-node mm-node--spine" style="left: 50%; top: 74%">Anggaran</div>
-        <div class="mm-node mm-node--spine" style="left: 50%; top: 92%">Evaluasi &amp; KPI</div>
-
-        <div class="mm-node mm-node--branch" style="left: 17%; top: 4%">Analisis Kompetitor</div>
-        <div class="mm-node mm-node--branch" style="left: 17%; top: 13%">Segmentasi Audiens</div>
-
-        <div class="mm-node mm-node--branch" style="left: 83%; top: 19%">Kalender Konten Q1</div>
-        <div class="mm-node mm-node--branch" style="left: 83%; top: 28%">20 Ide Topik</div>
-        <div class="mm-node mm-node--branch" style="left: 83%; top: 37%">Kolaborasi Kreator</div>
-
-        <div class="mm-node mm-node--branch" style="left: 17%; top: 40%">Email Marketing</div>
-        <div class="mm-node mm-node--branch is-selected" style="left: 17%; top: 47%">SEO</div>
-        <div class="mm-node mm-node--branch" style="left: 17%; top: 55%">Media Sosial</div>
-        <div class="mm-node mm-node--branch" style="left: 17%; top: 63%">Partnership</div>
-
-        <div class="mm-node mm-node--branch" style="left: 83%; top: 74%">Estimasi Biaya</div>
-
-        <div class="mm-node mm-node--branch" style="left: 17%; top: 84%">KPI Engagement</div>
-        <div class="mm-node mm-node--branch" style="left: 17%; top: 91%">KPI Konversi</div>
-        <div class="mm-node mm-node--branch" style="left: 17%; top: 98%">Review Bulanan</div>
+          <div class="rm-stage">
+            <a class="rm-step" href="drawer.html">
+              <span class="rm-step-num">04</span>
+              <span class="rm-step-body">
+                <span class="rm-step-time">Minggu 4</span>
+                <span class="rm-step-label">Anggaran</span>
+              </span>
+            </a>
+            <div class="rm-cluster rm-cluster--right">
+              <a class="rm-branch" href="drawer.html">Estimasi Biaya</a>
+            </div>
+          </div>
+        </div>
       </div>
 
       <aside class="drawer">
         <div class="drawer-head">
-          <span class="drawer-eyebrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10" /><path d="M18 20V4" /><path d="M6 20v-4" /></svg>
-            Bagian dari Distribusi &amp; Channel
-          </span>
+          <span class="drawer-head-title">Detail node</span>
           <a class="icon-btn" href="canvas.html" aria-label="Tutup panel">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
           </a>
         </div>
 
         <div class="drawer-body">
-          <div>
-            <input class="node-title" value="SEO" />
-            <div class="tag-list" style="margin-top: 8px">
-              <span class="tag">Item</span>
-              <span class="tag">Distribusi &amp; Channel</span>
-            </div>
+          <a class="parent-step" href="canvas.html">
+            <span class="parent-step-num">03</span>
+            <span class="parent-step-body">
+              <span class="parent-step-time">Minggu 3</span>
+              <span class="parent-step-label">Distribusi &amp; Channel</span>
+            </span>
+          </a>
+
+          <div class="node-head">
+            <input class="node-title" value="SEO" aria-label="Judul node" />
+            <span class="node-type">Cabang mindmap</span>
           </div>
+
+          <div class="drawer-divider"></div>
 
           <div class="drawer-section">
             <h4>Ringkasan</h4>
@@ -436,18 +770,38 @@
 
           <div class="drawer-section">
             <h4>Catatan</h4>
-            <textarea placeholder="Tambahkan catatan buat item ini…">Prioritaskan 5 kata kunci dengan volume tertinggi dulu, sisanya nyusul bulan depan.</textarea>
+            <textarea placeholder="Tambahkan catatan buat cabang ini…">Prioritaskan 5 kata kunci dengan volume tertinggi dulu, sisanya nyusul bulan depan.</textarea>
           </div>
 
+          <div class="drawer-divider"></div>
+
           <div class="drawer-section">
-            <h4>Tanya AI tentang bagian ini</h4>
+            <h4>Cabang lain di langkah ini</h4>
+            <div class="sibling-list">
+              <a class="sibling" href="drawer.html">Email Marketing</a>
+              <a class="sibling" href="drawer.html">Media Sosial</a>
+              <a class="sibling" href="drawer.html">Partnership</a>
+            </div>
+          </div>
+
+          <div class="ai-zone">
+            <span class="ai-zone-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4" /><path d="M12 17v4" /><path d="M3 12h4" /><path d="M17 12h4" /><path d="m6.3 6.3 2.8 2.8" /><path d="m14.9 14.9 2.8 2.8" /><path d="m17.7 6.3-2.8 2.8" /><path d="m9.1 14.9-2.8 2.8" /></svg>
+              Aksi AI
+            </span>
             <form class="ask-ai" onsubmit="event.preventDefault();">
-              <input type="text" placeholder="Contoh: ringkas jadi 3 poin utama" />
+              <input type="text" placeholder="Tanya soal cabang ini…" />
               <button type="submit" aria-label="Kirim">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z" /><path d="M22 2 11 13" /></svg>
               </button>
             </form>
+            <button type="button" class="expand-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14" /><path d="M5 12h14" /></svg>
+              Pecah jadi sub-cabang
+            </button>
           </div>
+
+          <p class="drawer-meta">Dibuat otomatis dari riset-pasar.pdf · diperbarui 2 jam lalu</p>
         </div>
       </aside>
     </div>
