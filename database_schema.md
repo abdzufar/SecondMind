@@ -1,0 +1,74 @@
+# SecondMind Database Schema Documentation
+
+This document outlines the MongoDB collections and Mongoose schemas used for SecondMind.
+
+## 1. `User` Schema
+Handles authentication and relates users to their saved roadmaps. Managed primarily via NextAuth.
+
+```javascript
+const UserSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, unique: true, required: true },
+  image: { type: String },
+  mindmaps: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Mindmap' }],
+  createdAt: { type: Date, default: Date.now }
+});
+```
+
+---
+
+## 2. `Mindmap` Schema (Hybrid Roadmap)
+Stores the generated React Flow canvas data and generation metadata.
+
+```javascript
+const MindmapSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  title: { type: String, required: true },
+  
+  topic: { type: String, required: true },
+  timeframe: { type: String, required: true },
+  language: { type: String, required: true },
+  feasibilityWarning: { type: String, default: null },
+  
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+  
+  nodes: [{
+    id: { type: String, required: true },
+    type: { type: String, enum: ['roadmap-step', 'mindmap-branch'], required: true },
+    
+    data: { 
+      label: { type: String, required: true },
+      description: { type: String, required: true }, // ENFORCED: AI must pre-generate details
+      timeMark: { type: String } // NEW: Tracks timeframe (e.g., "Day 1", "Week 2")
+    }
+  }],
+  
+  edges: [{
+    id: { type: String, required: true },
+    source: { type: String, required: true },
+    target: { type: String, required: true }
+  }]
+});
+```
+
+---
+
+## 3. `Todo` Schema (NEW)
+Stores actionable tasks generated from the roadmap to support email reminders.
+
+```javascript
+const TodoSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  mindmapId: { type: mongoose.Schema.Types.ObjectId, ref: 'Mindmap', required: true },
+  
+  taskText: { type: String, required: true },
+  dueDate: { type: Date, required: true },
+  isCompleted: { type: Boolean, default: false },
+  
+  // Tracking to ensure we don't spam the user
+  emailReminderSent: { type: Boolean, default: false },
+  
+  createdAt: { type: Date, default: Date.now }
+});
+```
