@@ -2,6 +2,24 @@
 
 This document outlines the technical foundation and architecture for SecondMind, an educational hybrid roadmap/mindmap generator.
 
+## Phase 4: Production Polish
+- Setup Vercel Cron
+- Implement Resend email templating
+- Next.js build optimizations and final PWA asset generation.
+
+---
+
+## 🛠️ Partner Revisions (Architecture Refinements)
+Based on recent feedback, we have made the following vital architectural pivots:
+1. **Integer Time Offsets:** Replaced fragile `timeMark` string parsing with `timeOffsetDays` (Number) inside the node data. Gemini will output a raw integer (e.g., `1`, `7`), which is vastly more reliable for our Todo `dueDate` calculations. The frontend will handle formatting it as "Day X" or "Week Y".
+2. **Frontend Dagre Layout:** Confirmed that `position` is deliberately omitted from the DB schema. The React Flow layout MUST be generated natively on the client using `dagre` when the roadmap loads.
+3. **Strict Ownership Checks:** Ensure that dynamic routes (`GET/PUT/DELETE /api/mindmap/:id`) explicitly filter by `userId` to prevent ID guessing vulnerabilities.
+4. **Cascading Deletes:** `DELETE /api/mindmap/:id` must now perform a `Todo.deleteMany({ mindmapId: id })` to prevent deleted roadmaps from firing orphaned email reminders via the cron job.
+5. **Decoupled User Relational Array:** Removed the `mindmaps: [ObjectId]` array from the `User` schema. Querying `Mindmap.find({ userId: user._id })` is faster and completely avoids the two-way binding sync headaches during creation and deletion.
+
+## User Review Required
+Please review the 5 revisions above (specifically the `timeOffsetDays` approach). If approved, I will immediately update our existing Mongoose models and tests to pass.
+
 ## Proposed Changes
 
 We will build this application within the existing `c:\Users\abdzu\Documents\Hacktiv8\P3\Final Project\SecondMind` repository. 

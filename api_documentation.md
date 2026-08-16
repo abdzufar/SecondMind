@@ -112,6 +112,7 @@ Fetches a lightweight list of all roadmaps for the User Dashboard.
 ### `GET /mindmap/:id`
 Fetches the full Mindmap object (used for loading the canvas or read-only links).
 * **Format:** `application/json`
+* **Security:** Enforces strict `userId` ownership checking.
 * **Success Output (200 OK):**
 ```json
 {
@@ -141,7 +142,9 @@ Saves manual user edits (moved wires, deleted nodes).
 * **Success Output (200 OK):** `{ "success": true, "message": "Mindmap updated successfully." }`
 
 ### `DELETE /mindmap/:id`
-* **Success Output (200 OK):** `{ "success": true, "message": "Mindmap deleted." }`
+* **Security:** Enforces strict `userId` ownership checking.
+* **Process:** Deletes the Mindmap AND executes a cascading delete to remove all associated `Todo` objects from the database to prevent orphaned cron emails.
+* **Success Output (200 OK):** `{ "success": true, "message": "Mindmap and associated todos deleted." }`
 
 ### `GET /mindmap/share/:shareId` (NEW)
 * **Purpose:** Public endpoint for the Read-Only URL feature.
