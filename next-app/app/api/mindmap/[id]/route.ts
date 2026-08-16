@@ -29,10 +29,20 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     
     await dbConnect();
     
+    const mindmap = await Mindmap.findOne({ _id: params.id, userId: session.user.id });
+    if (!mindmap) return NextResponse.json({ error: 'Mindmap not found' }, { status: 404 });
+    
     const updateData: Record<string, unknown> = { updatedAt: Date.now() };
     if (nodes !== undefined) updateData.nodes = nodes;
     if (edges !== undefined) updateData.edges = edges;
-    if (typeof isPublic === 'boolean') updateData.isPublic = isPublic;
+    
+    if (typeof isPublic === 'boolean') {
+      updateData.isPublic = isPublic;
+      // Anomaly fix: Generate a unique shareId if it doesn't exist and the user is making it public
+      if (isPublic && !mindmap.shareId) {
+        updateData.shareId = crypto.randomUUID();
+      }
+    }
 
     const updated = await Mindmap.findOneAndUpdate(
       { _id: params.id, userId: session.user.id },
