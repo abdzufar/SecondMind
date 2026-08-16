@@ -93,8 +93,8 @@ export default function LandingPage() {
               Baca strukturnya <em>sebelum</em> baca isinya.
             </h1>
             <p className="lede sm-rise" style={{ animationDelay: "80ms" }}>
-              Tempel catatan kuliah atau unggah PDF. Isinya dipecah jadi cabang yang bisa kamu telusuri, lengkap
-              dengan tempat bertanya kalau ada yang belum jelas.
+              Tempel catatan atau unggah PDF. Second Mind memetakannya jadi struktur yang bisa ditelusuri
+              dan ditanya — bukan cuma dirangkum.
             </p>
             <div className="cta-row sm-rise" style={{ animationDelay: "80ms" }}>
               <Link href="/register" className="sm-btn sm-btn--primary">
@@ -104,68 +104,23 @@ export default function LandingPage() {
                 </svg>
               </Link>
               <a href="#contoh" className="sm-btn sm-btn--ghost">
-                Lihat contoh jadi
+                Lihat contoh peta
               </a>
             </div>
             <p className="under sm-rise" style={{ animationDelay: "120ms" }}>
-              gratis · tanpa kartu kredit · pdf dan teks
+              Gratis · tanpa kartu kredit · PDF &amp; teks
             </p>
           </div>
 
           <div className="art art-rise" style={{ animationDelay: "120ms" }} ref={artRef}>
-            <div className="mm-illustration" aria-hidden="true">
-              <svg className="mm-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
-                <path d="M50,10 L50,45" />
-                <path d="M50,45 L50,85" />
-
-                <path d="M50,10 L17,5" />
-                <path d="M50,10 L17,15" />
-
-                <path d="M50,45 L83,36" />
-                <path d="M50,45 L83,45" />
-                <path d="M50,45 L83,54" />
-
-                <path d="M50,85 L17,80" />
-                <path d="M50,85 L17,90" />
-              </svg>
-
-              <div className="mm-node mm-node--spine" style={{ left: "50%", top: "10%" }}>
-                Riset Pasar
-              </div>
-              <div className="mm-node mm-node--spine" style={{ left: "50%", top: "45%" }}>
-                Strategi Konten
-              </div>
-              <div className="mm-node mm-node--spine" style={{ left: "50%", top: "85%" }}>
-                Distribusi &amp; Channel
-              </div>
-
-              <div className="mm-node mm-node--branch" style={{ left: "17%", top: "5%" }}>
-                Analisis Kompetitor
-              </div>
-              <div className="mm-node mm-node--branch" style={{ left: "17%", top: "15%" }}>
-                Segmentasi Audiens
-              </div>
-
-              <div className="mm-node mm-node--branch" style={{ left: "83%", top: "36%" }}>
-                Kalender Konten Q1
-              </div>
-              <div className="mm-node mm-node--branch is-active" style={{ left: "83%", top: "45%" }}>
-                20 Ide Topik
-              </div>
-              <div className="mm-node mm-node--branch" style={{ left: "83%", top: "54%" }}>
-                Kolaborasi Kreator
-              </div>
-
-              <div className="mm-node mm-node--branch" style={{ left: "17%", top: "80%" }}>
-                SEO &amp; Email
-              </div>
-              <div className="mm-node mm-node--branch" style={{ left: "17%", top: "90%" }}>
-                Partnership
-              </div>
-            </div>
-            <p className="cap">
-              dari riset-pasar.pdf · 8 simpul <span className="tag">siap</span>
-            </p>
+            <Image
+              src="/screenshots/canvas-full.png"
+              alt="Canvas Second Mind menampilkan roadmap dan cabang mindmap"
+              width={1400}
+              height={816}
+              className="art-shot"
+              priority
+            />
           </div>
         </div>
       </header>
@@ -198,8 +153,8 @@ export default function LandingPage() {
             </div>
             <div className="step reveal">
               <span className="num">02</span>
-              <h3>Isinya dibaca</h3>
-              <p>Gagasan utama dipisahkan dari detail pendukung, lalu disusun jadi cabang.</p>
+              <h3>Second Mind memetakan</h3>
+              <p>Gagasan utama dipisahkan dari detail pendukung, lalu disusun jadi cabang berurutan.</p>
             </div>
             <div className="step reveal">
               <span className="num">03</span>
@@ -212,10 +167,10 @@ export default function LandingPage() {
 
       <section className="feat" id="fitur">
         <div className="in">
-          <h2>Yang membedakannya dari ringkasan biasa</h2>
+          <h2>Bukan ringkasan biasa.</h2>
           <p className="lede">
-            Ringkasan memaksa kamu membaca dari awal lagi. Peta menunjukkan letak setiap bagian, jadi kamu bisa
-            langsung lompat.
+            Ringkasan cuma memangkas panjangnya. Peta menunjukkan letak tiap bagian — kamu tahu persis ke mana
+            harus lompat.
           </p>
           <div className="fcards">
             <div className="fc reveal">
@@ -245,7 +200,7 @@ export default function LandingPage() {
                   <path d="M12 3v13m0 0-5-5m5 5 5-5M4 21h16" />
                 </svg>
               </span>
-              <h3>Bawa keluar</h3>
+              <h3>Ekspor dan bagikan</h3>
               <p>Ekspor jadi Markdown atau gambar, atau bagikan lewat tautan yang bisa dibuka siapa saja.</p>
             </div>
           </div>
@@ -256,10 +211,9 @@ export default function LandingPage() {
         <div className="in">
           <div className="section-head reveal">
             <span className="sm-eyebrow">Bukti, bukan janji</span>
-            <h2>Nih, canvasnya.</h2>
+            <h2>Bukan mockup — ini aplikasinya.</h2>
             <p className="lede">
-              Ini tangkapan layar asli canvas Second Mind, termasuk command bar buat nanya ke AI-nya langsung —
-              bukan rekayasa desain.
+              Tangkapan layar canvas Second Mind, lengkap dengan command bar buat nanya ke AI-nya langsung.
             </p>
           </div>
 
@@ -273,96 +227,16 @@ export default function LandingPage() {
               <div className="preview-url">app.secondmind.id/canvas</div>
             </div>
 
-            <div className="preview-app-header">
-              <div className="preview-back">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="m15 18-6-6 6-6" />
-                </svg>
-              </div>
-              <div className="preview-doc-info">
-                <strong>Strategi Growth 2026</strong>
-                <span>18 node · diperbarui 2 jam lalu</span>
-              </div>
-              <div className="preview-app-actions">
-                <span className="preview-btn">Bagikan</span>
-                <span className="preview-btn preview-btn--dark">Export</span>
-              </div>
-            </div>
-
-            <div className="preview-canvas">
-              <svg className="mm-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
-                <path d="M11,50 C27,50 27,16 44,16" />
-                <path d="M11,50 L44,50" />
-                <path d="M11,50 C27,50 27,78 44,78" />
-                <path d="M44,16 L87,16" />
-                <path d="M44,50 L87,50" />
-                <path d="M44,78 L87,78" />
-              </svg>
-
-              <div className="mm-node mm-node--root" style={{ left: "11%", top: "50%" }}>
-                <span className="mm-node-eyebrow">Dokumen</span>
-                <span className="mm-node-title">Strategi Growth 2026</span>
-              </div>
-
-              <div className="mm-node mm-node--spine" style={{ left: "44%", top: "16%" }}>
-                Riset Pasar
-              </div>
-              <div className="mm-node mm-node--spine" style={{ left: "44%", top: "50%" }}>
-                Strategi Konten
-              </div>
-              <div className="mm-node mm-node--spine" style={{ left: "44%", top: "78%" }}>
-                Distribusi &amp; Channel
-              </div>
-
-              <div className="mm-node mm-node--branch" style={{ left: "87%", top: "16%" }}>
-                Analisis Kompetitor
-              </div>
-              <div className="mm-node mm-node--branch is-active" style={{ left: "87%", top: "50%" }}>
-                Kalender Konten Q1
-              </div>
-              <div className="mm-node mm-node--branch" style={{ left: "87%", top: "78%" }}>
-                SEO &amp; Email
-              </div>
-
-              <div className="preview-toolbar">
-                <span aria-label="Perbesar">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="11" cy="11" r="7" />
-                    <line x1="11" y1="8" x2="11" y2="14" />
-                    <line x1="8" y1="11" x2="14" y2="11" />
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                  </svg>
-                </span>
-                <span aria-label="Perkecil">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="11" cy="11" r="7" />
-                    <line x1="8" y1="11" x2="14" y2="11" />
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                  </svg>
-                </span>
-                <span aria-label="Sesuaikan tampilan">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M8 3H5a2 2 0 0 0-2 2v3" />
-                    <path d="M21 8V5a2 2 0 0 0-2-2h-3" />
-                    <path d="M3 16v3a2 2 0 0 0 2 2h3" />
-                    <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
-                  </svg>
-                </span>
-              </div>
-
-              <div className="preview-command">
-                <span>Rangkum jadi 3 prioritas utama</span>
-                <span className="preview-command-send" aria-label="Kirim">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="m22 2-7 20-4-9-9-4Z" />
-                    <path d="M22 2 11 13" />
-                  </svg>
-                </span>
-              </div>
-            </div>
+            <Image
+              src="/screenshots/canvas-full.png"
+              alt="Tangkapan layar canvas Second Mind: roadmap Strategi Growth 2026 dengan cabang mindmap"
+              width={1400}
+              height={816}
+              className="preview-shot"
+            />
           </div>
 
-          <p className="showcase-cap reveal">Tampilan ilustratif — data contoh, bukan akun asli.</p>
+          <p className="showcase-cap reveal">Data contoh dari akun demo — bukan akun pengguna asli.</p>
         </div>
       </section>
 
