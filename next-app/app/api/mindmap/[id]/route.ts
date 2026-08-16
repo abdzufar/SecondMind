@@ -10,7 +10,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     if (!session || !session.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     
     await dbConnect();
-    const mindmap = await Mindmap.findOne({ _id: params.id, userId: (session.user as any).id });
+    const mindmap = await Mindmap.findOne({ _id: params.id, userId: session.user.id });
     
     if (!mindmap) return NextResponse.json({ error: 'Mindmap not found' }, { status: 404 });
     return NextResponse.json(mindmap, { status: 200 });
@@ -29,13 +29,13 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     
     await dbConnect();
     
-    const updateData: any = { updatedAt: Date.now() };
+    const updateData: Record<string, unknown> = { updatedAt: Date.now() };
     if (nodes !== undefined) updateData.nodes = nodes;
     if (edges !== undefined) updateData.edges = edges;
     if (typeof isPublic === 'boolean') updateData.isPublic = isPublic;
 
     const updated = await Mindmap.findOneAndUpdate(
-      { _id: params.id, userId: (session.user as any).id },
+      { _id: params.id, userId: session.user.id },
       { $set: updateData },
       { new: true } // Return updated doc
     );
@@ -54,7 +54,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     if (!session || !session.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     
     await dbConnect();
-    const deleted = await Mindmap.findOneAndDelete({ _id: params.id, userId: (session.user as any).id });
+    const deleted = await Mindmap.findOneAndDelete({ _id: params.id, userId: session.user.id });
     
     if (!deleted) return NextResponse.json({ error: 'Mindmap not found' }, { status: 404 });
     

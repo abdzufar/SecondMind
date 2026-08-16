@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       newEdges: validEdges
     }, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[ELABORATE_ERROR]:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }

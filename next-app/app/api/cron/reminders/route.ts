@@ -29,8 +29,8 @@ export async function GET(req: NextRequest) {
     let emailsSent = 0;
 
     for (const todo of dueTodos) {
-      if (!todo.userId || !(todo.userId as any).email) continue;
-      const userEmail = (todo.userId as any).email;
+      if (!todo.userId || !(todo.userId as unknown as { email: string }).email) continue;
+      const userEmail = (todo.userId as unknown as { email: string }).email;
       
       // Dispatch email via Resend
       await resend.emails.send({

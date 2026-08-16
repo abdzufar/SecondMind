@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     await dbConnect();
     
     const newMindmap = new Mindmap({
-      userId: (session.user as any).id, // NextAuth ID injected via mock
+      userId: session.user.id, // NextAuth ID injected via mock
       title: parsedData.title || `Learning ${topic}`,
       topic,
       timeframe,
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     // Return the exact saved mongoose document, which includes the new _id
     return NextResponse.json(newMindmap, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[GENERATE_ERROR]:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }

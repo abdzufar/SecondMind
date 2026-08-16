@@ -1,4 +1,4 @@
-export function validateEdges(nodes: any[], edges: any[]) {
+export function validateEdges(nodes: { id: string; [key: string]: unknown }[], edges: { id: string; source: string; target: string; [key: string]: unknown }[]) {
   if (!nodes || !edges) return [];
   
   // Create a fast lookup set for valid node IDs

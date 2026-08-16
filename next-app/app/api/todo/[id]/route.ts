@@ -27,7 +27,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     await dbConnect();
     
     // Security check
-    const todo = await checkOwnership(params.id, (session.user as any).id);
+    const todo = await checkOwnership(params.id, session.user.id);
     if (!todo) return NextResponse.json({ error: 'Todo not found or unauthorized' }, { status: 404 });
 
     todo.isCompleted = isCompleted;
@@ -48,7 +48,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     await dbConnect();
     
     // Security check
-    const todo = await checkOwnership(params.id, (session.user as any).id);
+    const todo = await checkOwnership(params.id, session.user.id);
     if (!todo) return NextResponse.json({ error: 'Todo not found or unauthorized' }, { status: 404 });
 
     await Todo.findByIdAndDelete(params.id);

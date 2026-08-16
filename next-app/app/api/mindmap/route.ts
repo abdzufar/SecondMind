@@ -13,7 +13,7 @@ export async function GET() {
     await dbConnect();
 
     // Fetch lightweight list (exclude heavy nodes and edges arrays to save bandwidth on Dashboard)
-    const mindmaps = await Mindmap.find({ userId: (session.user as any).id })
+    const mindmaps = await Mindmap.find({ userId: session.user.id })
       .select('_id title topic timeframe createdAt isPublic shareId')
       .sort({ createdAt: -1 }); // Newest first
 

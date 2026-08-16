@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     await dbConnect();
     
     // Verify ownership of mindmap and extract its createdAt timestamp
-    const mindmap = await Mindmap.findOne({ _id: mindmapId, userId: (session.user as any).id });
+    const mindmap = await Mindmap.findOne({ _id: mindmapId, userId: session.user.id });
     if (!mindmap) return NextResponse.json({ error: 'Mindmap not found or unauthorized' }, { status: 404 });
 
     // Mathematically calculate dueDate using the Mindmap's creation date as the anchor
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     }
 
     const newTodo = await Todo.create({
-      userId: (session.user as any).id,
+      userId: session.user.id,
       mindmapId,
       taskText,
       dueDate,
@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
     await dbConnect();
     
     // Ensure the user actually owns the mindmap they are querying Todos for (Security)
-    const mindmap = await Mindmap.findOne({ _id: mindmapId, userId: (session.user as any).id });
+    const mindmap = await Mindmap.findOne({ _id: mindmapId, userId: session.user.id });
     if (!mindmap) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
 
     const todos = await Todo.find({ mindmapId }).sort({ dueDate: 1 });
