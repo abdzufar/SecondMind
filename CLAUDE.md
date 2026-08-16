@@ -212,7 +212,7 @@ Status per 2026-08-16, dicek ulang terhadap working tree — bukan cuma niat.
 - [ ] Tandai visual node yang sudah punya task — belum ada
 
 ### M9 — Share dan export
-- [ ] Export PNG (`toPng` + `getNodesBounds` dari reactflow) — belum ada
+- [x] Export PNG (`toPng` + `getNodesBounds` dari reactflow) — `components/canvas/ExportButton.tsx`, tombol Export di header
 - [ ] Toggle publik → tampilkan URL share + tombol copy — belum ada
 - [ ] Halaman `/share/[shareId]` — belum ada
 

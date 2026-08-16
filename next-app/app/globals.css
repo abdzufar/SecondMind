@@ -203,7 +203,12 @@ a:hover {
   transition:
     background 0.18s ease,
     color 0.18s ease,
-    border-color 0.18s ease;
+    border-color 0.18s ease,
+    opacity 0.18s ease;
+}
+.sm-btn:disabled {
+  opacity: 0.55;
+  pointer-events: none;
 }
 .sm-btn--primary {
   background: var(--sm-clay);

@@ -32,7 +32,7 @@ export function CanvasView() {
       nodesConnectable={false}
       fitView
       proOptions={{ hideAttribution: true }}
-      defaultEdgeOptions={{ type: "smoothstep" }}
+      defaultEdgeOptions={{ type: "smoothstep", style: { stroke: "#e7d9c6", strokeWidth: 1.5 } }}
     >
       <Background gap={22} size={1.5} color="#e0d4c3" />
       <Controls showInteractive={false} position="bottom-right" />
