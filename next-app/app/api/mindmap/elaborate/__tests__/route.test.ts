@@ -19,7 +19,7 @@ jest.mock('@google/generative-ai', () => ({
             newNodes: [{
               id: "node-1-branch-1",
               type: "mindmap-branch",
-              data: { label: "Images vs Containers", description: "Desc", timeMark: null }
+              data: { label: "Images vs Containers", description: "Desc", timeOffsetDays: null }
             }],
             newEdges: [{
               id: "edge-1",

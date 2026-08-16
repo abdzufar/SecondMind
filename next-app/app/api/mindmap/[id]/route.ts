@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import dbConnect from '@/lib/db';
 import Mindmap from '@/models/Mindmap';
+import Todo from '@/models/Todo';
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -50,6 +51,10 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     const deleted = await Mindmap.findOneAndDelete({ _id: params.id, userId: (session.user as any).id });
     
     if (!deleted) return NextResponse.json({ error: 'Mindmap not found' }, { status: 404 });
+    
+    // Cascading delete for Todos
+    await Todo.deleteMany({ mindmapId: params.id });
+
     return NextResponse.json({ success: true, message: 'Mindmap deleted.' }, { status: 200 });
   } catch (err) {
     console.error('[DELETE_MINDMAP_ID_ERROR]:', err);

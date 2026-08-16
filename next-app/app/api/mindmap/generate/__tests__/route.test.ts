@@ -23,7 +23,7 @@ jest.mock('@google/generative-ai', () => ({
             nodes: [{
               id: "node-1",
               type: "roadmap-step",
-              data: { label: "Step 1", description: "Learn Containers", timeMark: "Day 1" }
+              data: { label: "Step 1", description: "Learn Containers", timeOffsetDays: 1 }
             }],
             edges: []
           })

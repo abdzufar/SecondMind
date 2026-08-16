@@ -18,7 +18,7 @@ export interface IMindmap extends Document {
     data: {
       label: string;
       description: string;
-      timeMark?: string;
+      timeOffsetDays?: number;
     }
   }[];
   edges: {
@@ -50,7 +50,7 @@ const MindmapSchema: Schema = new Schema({
     data: {
       label: { type: String, required: true },
       description: { type: String, required: true },
-      timeMark: { type: String }
+      timeOffsetDays: { type: Number, default: null }
     }
   }],
   
