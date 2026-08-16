@@ -25,12 +25,18 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     const session = await getServerSession();
     if (!session || !session.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     
-    const { nodes, edges } = await req.json();
+    const { nodes, edges, isPublic } = await req.json();
     
     await dbConnect();
+    
+    const updateData: any = { updatedAt: Date.now() };
+    if (nodes !== undefined) updateData.nodes = nodes;
+    if (edges !== undefined) updateData.edges = edges;
+    if (typeof isPublic === 'boolean') updateData.isPublic = isPublic;
+
     const updated = await Mindmap.findOneAndUpdate(
       { _id: params.id, userId: (session.user as any).id },
-      { $set: { nodes, edges, updatedAt: Date.now() } },
+      { $set: updateData },
       { new: true } // Return updated doc
     );
     
