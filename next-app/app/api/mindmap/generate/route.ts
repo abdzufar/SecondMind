@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import dbConnect from '@/lib/db';
 import Mindmap from '@/models/Mindmap';
+import { getGeneratePrompt } from '@/lib/aiPrompt';
+import { validateEdges } from '@/lib/validateEdges';
 
 export const maxDuration = 60; // Avoid Vercel timeout limits
 
@@ -26,8 +28,7 @@ export async function POST(req: NextRequest) {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'fake-api-key');
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
-    // Minimal mock prompt string. The actual prompt logic will be expanded in Phase 3.
-    const prompt = `Generate a JSON learning roadmap about ${topic} in ${language} for a timeframe of ${timeframe}.`;
+    const prompt = getGeneratePrompt(topic, timeframe, language, verbosity);
     
     const result = await model.generateContent(prompt);
     const responseText = result.response.text();
@@ -35,6 +36,9 @@ export async function POST(req: NextRequest) {
     // Strip markdown code blocks if Gemini returns them
     const cleanJson = responseText.replace(/```json\n?|```/g, '').trim();
     const parsedData = JSON.parse(cleanJson);
+
+    const validNodes = parsedData.nodes || [];
+    const validEdges = validateEdges(validNodes, parsedData.edges || []);
 
     // Connect to DB and Auto-Save
     await dbConnect();
@@ -46,8 +50,8 @@ export async function POST(req: NextRequest) {
       timeframe,
       language,
       feasibilityWarning: parsedData.feasibilityWarning || null,
-      nodes: parsedData.nodes || [],
-      edges: parsedData.edges || [],
+      nodes: validNodes,
+      edges: validEdges,
     });
 
     await newMindmap.save();
