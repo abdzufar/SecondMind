@@ -10,7 +10,6 @@ const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, unique: true, required: true },
   image: { type: String },
-  mindmaps: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Mindmap' }],
   createdAt: { type: Date, default: Date.now }
 });
 ```
@@ -46,7 +45,7 @@ const MindmapSchema = new mongoose.Schema({
     data: { 
       label: { type: String, required: true },
       description: { type: String, required: true }, // ENFORCED: AI must pre-generate details
-      timeMark: { type: String } // NEW: Tracks timeframe (e.g., "Day 1", "Week 2")
+      timeOffsetDays: { type: Number, default: null } // Gemini returns an integer. Frontend maps this to "Day X".
     }
   }],
   
