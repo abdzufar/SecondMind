@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="248" height="48" viewBox="0 0 248 48" fill="none">
+  
+  <path d="M13 24 C22 24 24 12 32 12" stroke="#F7F1E9" stroke-width="3.5" stroke-linecap="round"></path>
+  <path d="M13 24 H32" stroke="#F7F1E9" stroke-width="3.5" stroke-linecap="round"></path>
+  <path d="M13 24 C22 24 24 36 32 36" stroke="#F7F1E9" stroke-width="3.5" stroke-linecap="round"></path>
+  <rect x="7" y="13" width="6" height="22" rx="3" fill="#F7F1E9"></rect>
+  <circle cx="36" cy="12" r="4" fill="#E0794F"></circle>
+  <circle cx="36" cy="24" r="4" fill="#F7F1E9"></circle>
+  <circle cx="36" cy="36" r="4" fill="#F7F1E9"></circle>
+  <text x="57" y="24" dominant-baseline="central" font-family="Plus Jakarta Sans, sans-serif" font-size="36" letter-spacing="-1.37" fill="#F7F1E9"><tspan font-weight="500">Second</tspan><tspan font-weight="800">Mind</tspan></text>
+</svg>

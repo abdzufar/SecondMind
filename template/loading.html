@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Memproses — Second Mind</title>
+    <link rel="icon" href="icons&logo/svg/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="icons&logo/png/favicon-32.png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="icons&logo/png/apple-touch-icon-180.png" />
+    <meta name="theme-color" content="#221B14" />
+    <style>
+      @import url("icons&logo/tokens.css");
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .loading-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--sm-space-6);
+        text-align: center;
+        padding: var(--sm-space-5);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: var(--sm-space-3);
+      }
+
+      .brand .sm-wordmark {
+        font-size: 19px;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 3px solid var(--sm-line);
+        border-top-color: var(--sm-clay);
+        animation: spin 800ms linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .status {
+        min-height: 20px;
+        font-family: var(--sm-font);
+        font-size: 13px;
+        color: var(--sm-ink-45);
+      }
+
+      .skeleton-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--sm-space-3);
+        width: 340px;
+        max-width: 80vw;
+      }
+
+      .skeleton-bar {
+        height: 14px;
+        border-radius: var(--sm-radius-sm);
+        background: var(--sm-line);
+        animation: pulse 1400ms ease-in-out infinite;
+      }
+
+      .skeleton-bar:nth-child(1) {
+        width: 100%;
+        animation-delay: 0ms;
+      }
+      .skeleton-bar:nth-child(2) {
+        width: 88%;
+        animation-delay: 120ms;
+      }
+      .skeleton-bar:nth-child(3) {
+        width: 94%;
+        animation-delay: 240ms;
+      }
+      .skeleton-bar:nth-child(4) {
+        width: 70%;
+        animation-delay: 360ms;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 0.5;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .spinner {
+          animation: none;
+        }
+        .skeleton-bar {
+          animation: none;
+          opacity: 0.7;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loading-wrap">
+      <div class="brand">
+        <img src="icons&logo/svg/mark.svg" width="28" height="28" alt="Second Mind" />
+        <span class="sm-wordmark"><span>Second</span><b>Mind</b></span>
+      </div>
+
+      <div class="spinner" role="status" aria-label="Memproses"></div>
+
+      <p class="status" id="status-text">Membaca dokumen…</p>
+
+      <div class="skeleton-list" aria-hidden="true">
+        <div class="skeleton-bar"></div>
+        <div class="skeleton-bar"></div>
+        <div class="skeleton-bar"></div>
+        <div class="skeleton-bar"></div>
+      </div>
+    </div>
+
+    <script>
+      var messages = ["Membaca dokumen…", "Menyusun topik utama…", "Menghubungkan cabang…", "Merapikan mindmap…"];
+      var i = 0;
+      setInterval(function () {
+        i = (i + 1) % messages.length;
+        document.getElementById("status-text").textContent = messages[i];
+      }, 1100);
+
+      setTimeout(function () {
+        window.location.href = "canvas.html";
+      }, 4000);
+    </script>
+  </body>
+</html>

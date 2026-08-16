@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload Dokumen — Second Mind</title>
+    <link rel="icon" href="icons&logo/svg/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="icons&logo/png/favicon-32.png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="icons&logo/png/apple-touch-icon-180.png" />
+    <meta name="theme-color" content="#221B14" />
+    <style>
+      @import url("icons&logo/tokens.css");
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      a {
+        transition: color 150ms ease-out;
+      }
+
+      :focus-visible {
+        outline: 2px solid var(--sm-clay);
+        outline-offset: 2px;
+        border-radius: var(--sm-radius-sm);
+      }
+
+      body {
+        background: var(--sm-paper);
+      }
+
+      .sm-btn svg {
+        width: 16px;
+        height: 16px;
+        transition: transform 0.18s ease;
+      }
+
+      .sm-btn:hover svg {
+        transform: translateX(3px);
+      }
+
+      /* brand */
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: var(--sm-space-3);
+      }
+
+      .brand .sm-wordmark {
+        font-size: 19px;
+      }
+
+      /* header */
+
+      .site-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 72px;
+        padding: 0 var(--sm-space-7);
+        background: var(--sm-surface);
+        border-bottom: 1px solid var(--sm-line);
+      }
+
+      .account-chip {
+        display: flex;
+        align-items: center;
+        gap: var(--sm-space-3);
+      }
+
+      .account-chip a {
+        font-size: var(--sm-fs-small);
+        font-weight: 600;
+        color: var(--sm-ink-70);
+      }
+
+      .account-chip a:hover {
+        color: var(--sm-ink);
+      }
+
+      .avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: var(--sm-ink);
+        color: var(--sm-paper);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font: 700 13px/1 var(--sm-font);
+        flex-shrink: 0;
+      }
+
+      /* page */
+
+      .page {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: var(--sm-space-8) var(--sm-space-5) var(--sm-space-9);
+      }
+
+      .page-head {
+        margin-bottom: var(--sm-space-6);
+      }
+
+      .page-head h1 {
+        font-size: var(--sm-fs-h2);
+        margin-bottom: var(--sm-space-2);
+      }
+
+      .page-head p {
+        margin: 0;
+      }
+
+      /* upload card */
+
+      .upload-card {
+        background: var(--sm-surface);
+        border: 1px solid var(--sm-line);
+        border-radius: var(--sm-radius-lg);
+        padding: var(--sm-space-6);
+      }
+
+      .dropzone {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: var(--sm-space-2);
+        text-align: center;
+        height: 220px;
+        border: 2px dashed var(--sm-line);
+        border-radius: var(--sm-radius-lg);
+        cursor: pointer;
+        transition: border-color 150ms ease-out, background 150ms ease-out;
+      }
+
+      .dropzone:hover {
+        border-color: var(--sm-clay);
+        background: var(--sm-clay-tint);
+      }
+
+      .dropzone svg {
+        width: 32px;
+        height: 32px;
+        stroke: var(--sm-ink-45);
+        margin-bottom: var(--sm-space-2);
+      }
+
+      .dropzone strong {
+        font-size: var(--sm-fs-body);
+        color: var(--sm-ink);
+      }
+
+      .dropzone span {
+        font-size: var(--sm-fs-small);
+        color: var(--sm-ink-45);
+      }
+
+      .dropzone input[type="file"] {
+        display: none;
+      }
+
+      .file-preview {
+        display: none;
+        align-items: center;
+        gap: var(--sm-space-4);
+        height: 220px;
+        padding: 0 var(--sm-space-6);
+        border: 1px solid var(--sm-line);
+        border-radius: var(--sm-radius-lg);
+        background: var(--sm-paper);
+      }
+
+      .file-preview.is-visible {
+        display: flex;
+      }
+
+      .file-preview.is-visible + .dropzone {
+        display: none;
+      }
+
+      .file-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: var(--sm-radius-md);
+        background: var(--sm-clay-tint);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .file-icon svg {
+        width: 20px;
+        height: 20px;
+        stroke: var(--sm-clay);
+      }
+
+      .file-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .file-info strong {
+        display: block;
+        font-size: var(--sm-fs-body);
+        color: var(--sm-ink);
+      }
+
+      .file-info span {
+        font-size: var(--sm-fs-small);
+        color: var(--sm-ink-45);
+      }
+
+      .file-remove {
+        border: none;
+        background: transparent;
+        color: var(--sm-ink-45);
+        width: 32px;
+        height: 32px;
+        border-radius: var(--sm-radius-sm);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: background 150ms ease-out, color 150ms ease-out;
+      }
+
+      .file-remove:hover {
+        background: var(--sm-paper);
+        color: var(--sm-ink);
+      }
+
+      .file-remove svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .field {
+        margin-top: var(--sm-space-5);
+      }
+
+      .field-row {
+        display: flex;
+        gap: var(--sm-space-4);
+        margin-bottom: var(--sm-space-6);
+      }
+
+      .field-row .field {
+        margin-top: 0;
+      }
+
+      .field-row .field--grow {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .field-row .field--timeframe {
+        flex: 0 0 190px;
+      }
+
+      @media (max-width: 560px) {
+        .field-row {
+          flex-direction: column;
+          gap: var(--sm-space-5);
+        }
+
+        .field-row .field--timeframe {
+          flex: 1;
+        }
+      }
+
+      .select {
+        width: 100%;
+        height: 44px;
+        padding: 0 var(--sm-space-3);
+        background: var(--sm-surface);
+        border: 1px solid var(--sm-line);
+        border-radius: var(--sm-radius-sm);
+        color: var(--sm-ink);
+        font-family: var(--sm-font);
+        font-size: var(--sm-fs-body);
+        cursor: pointer;
+        transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+      }
+
+      .select:focus-visible {
+        border-color: var(--sm-clay);
+        outline: none;
+        box-shadow: 0 0 0 3px var(--sm-clay-tint);
+      }
+
+      .label {
+        display: block;
+        font-size: var(--sm-fs-small);
+        font-weight: 600;
+        color: var(--sm-ink);
+        margin-bottom: var(--sm-space-2);
+      }
+
+      .input-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .input-icon {
+        position: absolute;
+        left: 12px;
+        display: flex;
+        color: var(--sm-ink-45);
+        pointer-events: none;
+        transition: color 150ms ease-out;
+      }
+
+      .input-icon svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .input-wrap:has(.input:focus) .input-icon {
+        color: var(--sm-clay);
+      }
+
+      .input {
+        width: 100%;
+        height: 44px;
+        padding: 0 var(--sm-space-3) 0 40px;
+        background: var(--sm-surface);
+        border: 1px solid var(--sm-line);
+        border-radius: var(--sm-radius-sm);
+        color: var(--sm-ink);
+        font-family: var(--sm-font);
+        font-size: var(--sm-fs-body);
+        transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+      }
+
+      .input::placeholder {
+        color: var(--sm-ink-45);
+      }
+
+      .input:focus-visible {
+        border-color: var(--sm-clay);
+        outline: none;
+        box-shadow: 0 0 0 3px var(--sm-clay-tint);
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 90px;
+        padding: var(--sm-space-3);
+        background: var(--sm-paper);
+        border: 1px solid var(--sm-line);
+        border-radius: var(--sm-radius-sm);
+        color: var(--sm-ink);
+        font-family: var(--sm-font);
+        font-size: var(--sm-fs-body);
+        resize: vertical;
+        transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
+      }
+
+      textarea::placeholder {
+        color: var(--sm-ink-45);
+      }
+
+      textarea:focus-visible {
+        border-color: var(--sm-clay);
+        outline: none;
+        box-shadow: 0 0 0 3px var(--sm-clay-tint);
+      }
+
+      .upload-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: var(--sm-space-6);
+        gap: var(--sm-space-3);
+      }
+
+      /* history */
+
+      .history {
+        margin-top: var(--sm-space-8);
+      }
+
+      .history h2 {
+        font-size: var(--sm-fs-h3);
+        margin-bottom: var(--sm-space-4);
+      }
+
+      .history-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--sm-space-3);
+      }
+
+      .history-item {
+        display: flex;
+        align-items: center;
+        gap: var(--sm-space-4);
+        padding: var(--sm-space-4);
+        background: var(--sm-surface);
+        border: 1px solid var(--sm-line);
+        border-radius: var(--sm-radius-md);
+        transition: border-color 150ms ease-out;
+      }
+
+      .history-item:hover {
+        border-color: var(--sm-clay);
+      }
+
+      .history-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--sm-radius-sm);
+        background: var(--sm-paper);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .history-icon svg {
+        width: 16px;
+        height: 16px;
+        stroke: var(--sm-ink-45);
+      }
+
+      .history-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .history-info strong {
+        display: block;
+        font-size: var(--sm-fs-body);
+        color: var(--sm-ink);
+      }
+
+      .history-info span {
+        font-size: 12px;
+        color: var(--sm-ink-45);
+      }
+
+      .history-item .link-sm {
+        font-size: var(--sm-fs-small);
+        font-weight: 600;
+        color: var(--sm-clay);
+        flex-shrink: 0;
+      }
+
+      @media (max-width: 560px) {
+        .site-header {
+          padding: 0 var(--sm-space-5);
+        }
+
+        .upload-actions {
+          flex-direction: column-reverse;
+          align-items: stretch;
+        }
+
+        .file-preview {
+          flex-direction: column;
+          height: auto;
+          padding: var(--sm-space-5);
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html">
+        <img src="icons&logo/svg/mark.svg" width="28" height="28" alt="Second Mind" />
+        <span class="sm-wordmark"><span>Second</span><b>Mind</b></span>
+      </a>
+      <div class="account-chip">
+        <a href="composer.html">Riwayat</a>
+        <div class="avatar">AP</div>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="page-head">
+        <h1>Upload dokumenmu</h1>
+        <p>Tempel teks atau upload file, nanti Second Mind yang susun jadi mindmap.</p>
+      </div>
+
+      <div class="upload-card">
+        <div class="field-row">
+          <div class="field field--grow">
+            <label class="label" for="learning-goal">Mau belajar apa?</label>
+            <div class="input-wrap">
+              <span class="input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5A5.5 5.5 0 1 0 7 8c0 2 1 3 1.5 3.5.8.8 1.3 1.5 1.5 2.5" /><path d="M9 18h6" /><path d="M10 22h4" /></svg>
+              </span>
+              <input class="input" type="text" id="learning-goal" name="learning-goal" placeholder="Contoh: strategi growth marketing, dasar machine learning" />
+            </div>
+          </div>
+          <div class="field field--timeframe">
+            <label class="label" for="timeframe">Target waktu</label>
+            <select class="select" id="timeframe" name="timeframe">
+              <option value="1-week">1 minggu (kilat)</option>
+              <option value="2-week">2 minggu</option>
+              <option value="1-month" selected>1 bulan</option>
+              <option value="3-month">3 bulan</option>
+              <option value="flexible">Santai, gak buru-buru</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="file-preview is-visible" id="file-preview">
+          <div class="file-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" /><path d="M14 2v6h6" /></svg>
+          </div>
+          <div class="file-info">
+            <strong>riset-pasar.pdf</strong>
+            <span>2.4 MB — siap diproses</span>
+          </div>
+          <button type="button" class="file-remove" aria-label="Hapus file" onclick="removeFile()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+          </button>
+        </div>
+
+        <label class="dropzone" for="file-input" id="dropzone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12" /><path d="m7 8 5-5 5 5" /><path d="M5 21h14" /></svg>
+          <strong>Tarik &amp; lepas file di sini</strong>
+          <span>atau klik untuk pilih file — .pdf, .docx, .txt, maks 10MB</span>
+          <input type="file" id="file-input" onchange="selectFile(this)" />
+        </label>
+
+        <div class="field">
+          <label class="label" for="instruction">Instruksi tambahan (opsional)</label>
+          <textarea id="instruction" placeholder="Contoh: fokus ke bagian strategi konten"></textarea>
+        </div>
+
+        <div class="upload-actions">
+          <button type="button" class="sm-btn sm-btn--ghost" onclick="document.getElementById('file-input').click()">Unggah File</button>
+          <button type="button" class="sm-btn sm-btn--primary" onclick="window.location.href = 'loading.html'">
+            Buat Mindmap
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="history">
+        <h2>Riwayat</h2>
+        <div class="history-list">
+          <a class="history-item" href="canvas.html">
+            <div class="history-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" /><path d="M14 2v6h6" /></svg>
+            </div>
+            <div class="history-info">
+              <strong>Strategi Growth 2026</strong>
+              <span>riset-pasar.pdf — diproses 2 jam lalu</span>
+            </div>
+            <span class="link-sm">Lihat →</span>
+          </a>
+          <a class="history-item" href="canvas.html">
+            <div class="history-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" /><path d="M14 2v6h6" /></svg>
+            </div>
+            <div class="history-info">
+              <strong>Fondasi Machine Learning</strong>
+              <span>catatan-kuliah.docx — diproses kemarin</span>
+            </div>
+            <span class="link-sm">Lihat →</span>
+          </a>
+          <a class="history-item" href="canvas.html">
+            <div class="history-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" /><path d="M14 2v6h6" /></svg>
+            </div>
+            <div class="history-info">
+              <strong>Notulen Rapat Q1</strong>
+              <span>notulen-q1.txt — diproses 3 hari lalu</span>
+            </div>
+            <span class="link-sm">Lihat →</span>
+          </a>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      function selectFile(input) {
+        if (!input.files || !input.files.length) return;
+        var file = input.files[0];
+        document.querySelector("#file-preview strong").textContent = file.name;
+        var kb = file.size / 1024;
+        var size = kb > 1024 ? (kb / 1024).toFixed(1) + " MB" : Math.round(kb) + " KB";
+        document.querySelector("#file-preview .file-info span").textContent = size + " — siap diproses";
+        document.getElementById("file-preview").classList.add("is-visible");
+      }
+
+      function removeFile() {
+        document.getElementById("file-preview").classList.remove("is-visible");
+        document.getElementById("file-input").value = "";
+      }
+    </script>
+  </body>
+</html>

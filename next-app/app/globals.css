@@ -1,26 +1,292 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
+@custom-variant dark (&:is(.dark *));
+
+/* SecondMind — brand tokens (ported from template/icons&logo/tokens.css) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Warna */
+  --sm-ink: #221b14;
+  --sm-ink-70: #6e6255;
+  --sm-ink-45: #9a8b79;
+  --sm-clay: #c75b39;
+  --sm-clay-bright: #e0794f;
+  --sm-clay-tint: #f6e7e0;
+  --sm-paper: #f7f1e9;
+  --sm-surface: #ffffff;
+  --sm-line: #e7d9c6;
+
+  /* Tipografi */
+  --sm-font: var(--font-plus-jakarta-sans), system-ui, -apple-system, sans-serif;
+  --sm-fs-display: clamp(38px, 5.2vw, 68px);
+  --sm-fs-h1: clamp(30px, 3.4vw, 44px);
+  --sm-fs-h2: clamp(22px, 2.2vw, 30px);
+  --sm-fs-h3: 20px;
+  --sm-fs-body: 16px;
+  --sm-fs-small: 13.5px;
+  --sm-fs-eyebrow: 12px;
+
+  --sm-lsp-display: -0.042em;
+  --sm-lsp-heading: -0.028em;
+  --sm-lsp-logo: -0.038em;
+  --sm-lsp-eyebrow: 0.1em;
+
+  /* Ruang & bentuk */
+  --sm-space-1: 4px;
+  --sm-space-2: 8px;
+  --sm-space-3: 12px;
+  --sm-space-4: 16px;
+  --sm-space-5: 24px;
+  --sm-space-6: 32px;
+  --sm-space-7: 48px;
+  --sm-space-8: 64px;
+  --sm-space-9: 96px;
+  --sm-radius-sm: 8px;
+  --sm-radius-md: 12px;
+  --sm-radius-lg: 22px;
+  --sm-radius-pill: 999px;
+  --sm-shadow-sm: 0 1px 2px rgba(34, 27, 20, 0.06);
+  --sm-shadow-md: 0 8px 28px rgba(34, 27, 20, 0.09);
+
+  /* shadcn/ui semantic tokens — dipetakan ke token SecondMind di atas,
+     bukan palet abu-abu default shadcn. */
+  --background: var(--sm-surface);
+  --foreground: var(--sm-ink);
+  --card: var(--sm-surface);
+  --card-foreground: var(--sm-ink);
+  --popover: var(--sm-surface);
+  --popover-foreground: var(--sm-ink);
+  --primary: var(--sm-clay);
+  --primary-foreground: #ffffff;
+  --secondary: var(--sm-paper);
+  --secondary-foreground: var(--sm-ink);
+  --muted: var(--sm-paper);
+  --muted-foreground: var(--sm-ink-45);
+  --accent: var(--sm-clay-tint);
+  --accent-foreground: var(--sm-clay);
+  --destructive: oklch(0.577 0.245 27.325); /* belum ada warna danger di token brand, pakai default shadcn */
+  --border: var(--sm-line);
+  --input: var(--sm-line);
+  --ring: var(--sm-clay);
+  --radius: 0.75rem;
 }
 
 @theme inline {
-  --color-background: var(--background);
+  --color-ink: var(--sm-ink);
+  --color-ink-70: var(--sm-ink-70);
+  --color-ink-45: var(--sm-ink-45);
+  --color-clay: var(--sm-clay);
+  --color-clay-bright: var(--sm-clay-bright);
+  --color-clay-tint: var(--sm-clay-tint);
+  --color-paper: var(--sm-paper);
+  --color-surface: var(--sm-surface);
+  --color-line: var(--sm-line);
+  --font-sans: var(--sm-font);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --radius-sm: var(--sm-radius-sm);
+  --radius-md: var(--sm-radius-md);
+  --radius-lg: var(--sm-radius-lg);
+  --radius-xl: var(--sm-radius-lg);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  font-family: var(--sm-font);
+  font-size: var(--sm-fs-body);
+  line-height: 1.65;
+  color: var(--sm-ink-70);
+  background: var(--sm-surface);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--sm-ink);
+  line-height: 1.1;
+  margin: 0;
+  text-wrap: balance;
+}
+h1 {
+  font-size: var(--sm-fs-h1);
+  font-weight: 800;
+  letter-spacing: var(--sm-lsp-display);
+}
+h2 {
+  font-size: var(--sm-fs-h2);
+  font-weight: 700;
+  letter-spacing: var(--sm-lsp-heading);
+}
+h3 {
+  font-size: var(--sm-fs-h3);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+p {
+  text-wrap: pretty;
+}
+
+a {
+  color: var(--sm-clay);
+  text-decoration: none;
+  transition: color 150ms ease-out;
+}
+a:hover {
+  color: var(--sm-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--sm-clay);
+  outline-offset: 2px;
+  border-radius: var(--sm-radius-sm);
+}
+
+.sm-eyebrow {
+  font-size: var(--sm-fs-eyebrow);
+  font-weight: 700;
+  letter-spacing: var(--sm-lsp-eyebrow);
+  text-transform: uppercase;
+  color: var(--sm-clay);
+}
+
+/* Wordmark: pakai kelas ini kalau logo dirender sebagai teks */
+.sm-wordmark {
+  font-family: var(--sm-font);
+  letter-spacing: var(--sm-lsp-logo);
+  color: var(--sm-ink);
+  line-height: 1;
+}
+.sm-wordmark b {
+  font-weight: 800;
+}
+.sm-wordmark span {
+  font-weight: 500;
+}
+
+/* Tombol */
+.sm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 700 14px/1 var(--sm-font);
+  letter-spacing: -0.01em;
+  padding: 14px 26px;
+  border-radius: var(--sm-radius-pill);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease,
+    opacity 0.18s ease;
+}
+.sm-btn:disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+.sm-btn--primary {
+  background: var(--sm-clay);
+  color: #fff;
+}
+.sm-btn--primary:hover {
+  background: #b24e2f;
+  color: #fff;
+  text-decoration: none;
+}
+.sm-btn--dark {
+  background: var(--sm-ink);
+  color: var(--sm-paper);
+}
+.sm-btn--dark:hover {
+  background: #38291c;
+  color: var(--sm-paper);
+  text-decoration: none;
+}
+.sm-btn--ghost {
+  background: var(--sm-surface);
+  color: var(--sm-ink);
+  border-color: var(--sm-line);
+}
+.sm-btn--ghost:hover {
+  background: var(--sm-paper);
+  color: var(--sm-ink);
+  text-decoration: none;
+}
+.sm-btn--block {
+  width: 100%;
+  justify-content: center;
+}
+.sm-btn svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.18s ease;
+}
+.sm-btn:hover svg {
+  transform: translateX(3px);
+}
+
+.sm-card {
+  background: var(--sm-surface);
+  border: 1px solid var(--sm-line);
+  border-radius: var(--sm-radius-md);
+  padding: var(--sm-space-6);
+}
+
+.sm-section-paper {
+  background: var(--sm-paper);
+}
+.sm-section-dark {
+  background: var(--sm-ink);
+  color: #a2937f;
+}
+.sm-section-dark h1,
+.sm-section-dark h2,
+.sm-section-dark h3 {
+  color: var(--sm-paper);
+}
+.sm-section-dark a {
+  color: var(--sm-clay-bright);
+}
+
+/* Belum ada rencana dark mode (§4) — .dark sengaja tidak didefinisikan.
+   @custom-variant dark di atas tetap ada karena beberapa utility class
+   bawaan shadcn (mis. Button) memakainya; tanpa .dark yang di-toggle,
+   varian itu tidak pernah aktif. */
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
 }
