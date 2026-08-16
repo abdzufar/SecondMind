@@ -1,34 +1,33 @@
 "use client";
 
-import { BRANCH_DETAILS, DEFAULT_BRANCH_DETAIL, STEP_SUMMARY, findStage, type Stage } from "./data";
+import { useCanvasStore } from "@/store/canvasStore";
+import { MOCK_MINDMAP } from "@/lib/mock/mindmap";
 
-export type Selected = { kind: "step"; stageId: string } | { kind: "branch"; stageId: string; branchId: string };
+export function Drawer() {
+  const nodes = useCanvasStore((s) => s.nodes);
+  const edges = useCanvasStore((s) => s.edges);
+  const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
+  const selectNode = useCanvasStore((s) => s.selectNode);
 
-export function Drawer({
-  selected,
-  onSelect,
-  onClose,
-}: {
-  selected: Selected;
-  onSelect: (s: Selected) => void;
-  onClose: () => void;
-}) {
-  const stage = findStage(selected.stageId) as Stage;
-  const isBranch = selected.kind === "branch";
-  const branch = isBranch ? stage.branches.find((b) => b.id === selected.branchId) : undefined;
+  const node = selectedNodeId ? nodes.find((n) => n.id === selectedNodeId) : undefined;
+  if (!node) return null;
 
-  const title = isBranch && branch ? branch.label : stage.label;
+  const isBranch = node.type === "mindmap-branch";
+  const parentEdge = isBranch ? edges.find((e) => e.target === node.id) : undefined;
+  const parentStep = parentEdge ? nodes.find((n) => n.id === parentEdge.source) : undefined;
+
+  const stepId = isBranch ? parentStep?.id : node.id;
+  const siblingIds = edges.filter((e) => e.source === stepId && e.target !== node.id).map((e) => e.target);
+  const siblings = nodes.filter((n) => siblingIds.includes(n.id));
+
   const typeLabel = isBranch ? "Cabang mindmap" : "Langkah roadmap";
-  const detail = isBranch && branch ? (BRANCH_DETAILS[branch.id] ?? DEFAULT_BRANCH_DETAIL) : { summary: STEP_SUMMARY, note: "" };
-  const siblings = isBranch ? stage.branches.filter((b) => b.id !== branch?.id) : stage.branches;
   const siblingsLabel = isBranch ? "Cabang lain di langkah ini" : "Cabang di langkah ini";
-  const nodeKey = isBranch ? `branch-${stage.id}-${branch?.id}` : `step-${stage.id}`;
 
   return (
     <aside className="drawer">
       <div className="drawer-head">
         <span className="drawer-head-title">Detail node</span>
-        <button type="button" className="icon-btn" aria-label="Tutup panel" onClick={onClose}>
+        <button type="button" className="icon-btn" aria-label="Tutup panel" onClick={() => selectNode(null)}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 6 6 18" />
             <path d="m6 6 12 12" />
@@ -37,18 +36,18 @@ export function Drawer({
       </div>
 
       <div className="drawer-body">
-        {isBranch && (
-          <button type="button" className="parent-step" onClick={() => onSelect({ kind: "step", stageId: stage.id })}>
-            <span className="parent-step-num">{stage.num}</span>
+        {isBranch && parentStep && (
+          <button type="button" className="parent-step" onClick={() => selectNode(parentStep.id)}>
+            <span className="parent-step-num">{parentStep.data.num}</span>
             <span className="parent-step-body">
-              <span className="parent-step-time">{stage.time}</span>
-              <span className="parent-step-label">{stage.label}</span>
+              <span className="parent-step-time">{parentStep.data.timeMark}</span>
+              <span className="parent-step-label">{parentStep.data.label}</span>
             </span>
           </button>
         )}
 
         <div className="node-head">
-          <input key={nodeKey} className="node-title" defaultValue={title} aria-label="Judul node" />
+          <input key={node.id} className="node-title" defaultValue={node.data.label} aria-label="Judul node" />
           <span className={`node-type${isBranch ? "" : " is-step"}`}>{typeLabel}</span>
         </div>
 
@@ -56,12 +55,12 @@ export function Drawer({
 
         <div className="drawer-section">
           <h4>Ringkasan</h4>
-          <p>{detail.summary}</p>
+          <p>{node.data.description}</p>
         </div>
 
         <div className="drawer-section">
           <h4>Catatan</h4>
-          <textarea key={nodeKey} placeholder="Tambahkan catatan buat cabang ini…" defaultValue={detail.note}></textarea>
+          <textarea key={node.id} placeholder="Tambahkan catatan buat cabang ini…"></textarea>
         </div>
 
         <div className="drawer-divider"></div>
@@ -70,8 +69,8 @@ export function Drawer({
           <h4>{siblingsLabel}</h4>
           <div className="sibling-list">
             {siblings.map((s) => (
-              <button type="button" key={s.id} className="sibling" onClick={() => onSelect({ kind: "branch", stageId: stage.id, branchId: s.id })}>
-                {s.label}
+              <button type="button" key={s.id} className="sibling" onClick={() => selectNode(s.id)}>
+                {s.data.label}
               </button>
             ))}
           </div>
@@ -109,7 +108,7 @@ export function Drawer({
           </button>
         </div>
 
-        <p className="drawer-meta">Dibuat otomatis dari riset-pasar.pdf · diperbarui 2 jam lalu</p>
+        <p className="drawer-meta">Topik: {MOCK_MINDMAP.topic}</p>
       </div>
     </aside>
   );

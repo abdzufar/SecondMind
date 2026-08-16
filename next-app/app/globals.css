@@ -1,4 +1,8 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
 
 /* SecondMind — brand tokens (ported from template/icons&logo/tokens.css) */
 :root {
@@ -44,6 +48,28 @@
   --sm-radius-pill: 999px;
   --sm-shadow-sm: 0 1px 2px rgba(34, 27, 20, 0.06);
   --sm-shadow-md: 0 8px 28px rgba(34, 27, 20, 0.09);
+
+  /* shadcn/ui semantic tokens — dipetakan ke token SecondMind di atas,
+     bukan palet abu-abu default shadcn. */
+  --background: var(--sm-surface);
+  --foreground: var(--sm-ink);
+  --card: var(--sm-surface);
+  --card-foreground: var(--sm-ink);
+  --popover: var(--sm-surface);
+  --popover-foreground: var(--sm-ink);
+  --primary: var(--sm-clay);
+  --primary-foreground: #ffffff;
+  --secondary: var(--sm-paper);
+  --secondary-foreground: var(--sm-ink);
+  --muted: var(--sm-paper);
+  --muted-foreground: var(--sm-ink-45);
+  --accent: var(--sm-clay-tint);
+  --accent-foreground: var(--sm-clay);
+  --destructive: oklch(0.577 0.245 27.325); /* belum ada warna danger di token brand, pakai default shadcn */
+  --border: var(--sm-line);
+  --input: var(--sm-line);
+  --ring: var(--sm-clay);
+  --radius: 0.75rem;
 }
 
 @theme inline {
@@ -57,6 +83,28 @@
   --color-surface: var(--sm-surface);
   --color-line: var(--sm-line);
   --font-sans: var(--sm-font);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: var(--sm-radius-sm);
+  --radius-md: var(--sm-radius-md);
+  --radius-lg: var(--sm-radius-lg);
+  --radius-xl: var(--sm-radius-lg);
 }
 
 html,
@@ -219,4 +267,21 @@ a:hover {
 }
 .sm-section-dark a {
   color: var(--sm-clay-bright);
+}
+
+/* Belum ada rencana dark mode (§4) — .dark sengaja tidak didefinisikan.
+   @custom-variant dark di atas tetap ada karena beberapa utility class
+   bawaan shadcn (mis. Button) memakainya; tanpa .dark yang di-toggle,
+   varian itu tidak pernah aktif. */
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
 }
