@@ -18,13 +18,13 @@ Handles OAuth and Credentials authentication flows. Managed internally by `next-
 ### `POST /mindmap/generate`
 Generates a new Hybrid Roadmap.
 
-* **Format:** `multipart/form-data`
-* **Inputs:**
-  * `topic` (string): e.g., "Docker"
-  * `timeframe` (string): e.g., "1 week"
-  * `verbosity` (string): "concise" | "detailed"
-  * `language` (string): e.g., "English"
-  * `file` (File Blob): Optional PDF file upload.
+* **Backend Process:**
+  1. Verifies NextAuth session (User MUST be logged in).
+  2. Captures input via native `request.formData()`.
+  3. If a file exists, extracts text using `pdf-parse`.
+  4. Prompts Gemini SDK to generate the JSON structure AND a fitting `title` based on the content. (Note: Implements `export const maxDuration = 60;` and limits max nodes in prompt to prevent Vercel timeouts).
+  5. **Data Sanitization:** Passes the output through the `validateEdges()` helper.
+  6. **Auto-Save:** Immediately saves the document to MongoDB.
 
 * **Success Output (200 OK):**
 ```json
@@ -142,6 +142,12 @@ Saves manual user edits (moved wires, deleted nodes).
 
 ### `DELETE /mindmap/:id`
 * **Success Output (200 OK):** `{ "success": true, "message": "Mindmap deleted." }`
+
+### `GET /mindmap/share/:shareId` (NEW)
+* **Purpose:** Public endpoint for the Read-Only URL feature.
+* **Auth:** No session required.
+* **Backend Process:** Looks up the mindmap by `shareId` and verifies `isPublic === true`.
+* **Success Output (200 OK):** Returns the full Mindmap object.
 
 ---
 

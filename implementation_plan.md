@@ -89,16 +89,18 @@ This is the core schema. It will exactly mirror the data structure required by R
    - Handles login and session management.
 2. `POST /api/mindmap/generate`
    - **Input:** `{ topic: "...", file: [PDF Blob], timeframe: "1 week", verbosity: "detailed", language: "en" }`
-   - **Process:** Parses the PDF. Constructs the Gemini prompt to generate the JSON schema. **Crucially, the prompt now enforces that EVERY node includes a detailed `description`, and roadmap nodes include a `timeMark` (e.g., "Day 1").** Passes the output through the `validateEdges()` helper.
-   - **Output:** Returns the validated React Flow nodes and edges arrays.
-3. `POST /api/mindmap/elaborate`
+   - **Process:** Parses the PDF. Prompts Gemini to generate the schema AND a `title`. **Crucially, we now auto-save to MongoDB here** to establish the `_id` immediately for To-Do creation. We also add `export const maxDuration = 60;` and strict prompt limits (e.g. "max 15 nodes") to avoid Vercel timeouts from heavy descriptions.
+   - **Output:** Returns the newly saved MongoDB document (including the `_id`).
+3. `GET /api/mindmap/share/:shareId`
+   - **Process:** Securely fetches a mindmap for public viewing without a session, provided `isPublic` is true.
+4. `POST /api/mindmap/elaborate`
    - **Input:** `{ nodeId: "123", concept: "Mitochondria", action: "expand" }`
    - **Process:** Calls Gemini to generate new branching child nodes for a specific concept. The output is passed through the shared `validateEdges()` helper function to prevent hallucinated edges.
    - **Output:** Returns validated new nodes/edges to append to the canvas.
-4. `GET /api/mindmap` (and POST, PUT, DELETE)
+5. `GET /api/mindmap` (and POST, PUT, DELETE)
    - Standard CRUD operations to save, load, and delete mindmaps from MongoDB.
-5. `POST /api/todo` and `GET /api/cron/reminders`
-   - **To-Do:** Standard CRUD for managing user tasks tied to a mindmap.
+6. `POST /api/todo` and `GET /api/cron/reminders`
+   - **To-Do:** Generates a real `Date` by parsing the node's `timeMark` and adding that offset to the mindmap's `startDate` anchor. Standard CRUD for managing user tasks tied to a mindmap.
    - **Cron:** A secure endpoint pinged daily by Vercel Cron to check for due To-Dos and dispatch emails via Resend.
 
 
