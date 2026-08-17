@@ -12,6 +12,11 @@ import { ExportButton } from "@/components/canvas/ExportButton";
 
 export default function CanvasPage() {
   const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
+  const nodes = useCanvasStore((s) => s.nodes);
+
+  const stepNodes = nodes.filter((n) => n.type === "roadmap-step");
+  const completedSteps = stepNodes.filter((n) => n.data.isCompleted).length;
+  const progress = stepNodes.length > 0 ? Math.round((completedSteps / stepNodes.length) * 100) : 0;
 
   useEffect(() => {
     const previous = document.body.style.overflow;
@@ -38,6 +43,16 @@ export default function CanvasPage() {
               </span>
             </div>
           </div>
+
+          <div className="header-progress">
+            <div className="header-progress-bar">
+              <div className="header-progress-fill" style={{ width: `${progress}%` }} />
+            </div>
+            <span className="header-progress-label">
+              {completedSteps}/{stepNodes.length} selesai
+            </span>
+          </div>
+
           <div className="header-actions">
             <button type="button" className="sm-btn sm-btn--ghost">
               Bagikan

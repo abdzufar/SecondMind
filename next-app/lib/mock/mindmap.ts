@@ -1,4 +1,4 @@
-import type { Mindmap, MindmapEdge, MindmapNode } from "@/lib/types";
+import type { WireMindmap, WireMindmapEdge, WireMindmapNode } from "@/lib/types";
 
 const BRANCH_DETAILS: Record<string, string> = {
   seo: "Rencana optimasi pencarian buat konten yang udah dibuat — target kata kunci, backlink, dan halaman mana yang diprioritaskan dulu.",
@@ -9,16 +9,14 @@ const STEP_DESCRIPTION = "Ringkasan langkah roadmap ini akan disusun dari cabang
 
 type StageSeed = {
   id: string;
-  num: string;
   time: string;
   label: string;
-  branches: { id: string; label: string; isActive?: boolean }[];
+  branches: { id: string; label: string }[];
 };
 
 const STAGE_SEEDS: StageSeed[] = [
   {
     id: "step-1",
-    num: "01",
     time: "Minggu 1",
     label: "Riset Pasar",
     branches: [
@@ -28,7 +26,6 @@ const STAGE_SEEDS: StageSeed[] = [
   },
   {
     id: "step-2",
-    num: "02",
     time: "Minggu 2",
     label: "Strategi Konten",
     branches: [
@@ -39,26 +36,23 @@ const STAGE_SEEDS: StageSeed[] = [
   },
   {
     id: "step-3",
-    num: "03",
     time: "Minggu 3",
     label: "Distribusi & Channel",
     branches: [
       { id: "email-marketing", label: "Email Marketing" },
-      { id: "seo", label: "SEO", isActive: true },
+      { id: "seo", label: "SEO" },
       { id: "media-sosial", label: "Media Sosial" },
       { id: "partnership", label: "Partnership" },
     ],
   },
   {
     id: "step-4",
-    num: "04",
     time: "Minggu 4",
     label: "Anggaran",
     branches: [{ id: "estimasi-biaya", label: "Estimasi Biaya" }],
   },
   {
     id: "step-5",
-    num: "05",
     time: "Minggu 5",
     label: "Evaluasi & KPI",
     branches: [
@@ -69,16 +63,15 @@ const STAGE_SEEDS: StageSeed[] = [
   },
 ];
 
-function buildMindmap(): { nodes: MindmapNode[]; edges: MindmapEdge[] } {
-  const nodes: MindmapNode[] = [];
-  const edges: MindmapEdge[] = [];
+function buildMindmap(): { nodes: WireMindmapNode[]; edges: WireMindmapEdge[] } {
+  const nodes: WireMindmapNode[] = [];
+  const edges: WireMindmapEdge[] = [];
 
   STAGE_SEEDS.forEach((stage, index) => {
     nodes.push({
       id: stage.id,
       type: "roadmap-step",
-      position: { x: 0, y: 0 },
-      data: { label: stage.label, description: STEP_DESCRIPTION, timeMark: stage.time, num: stage.num },
+      data: { label: stage.label, description: STEP_DESCRIPTION, timeMark: stage.time },
     });
 
     const previous = STAGE_SEEDS[index - 1];
@@ -90,12 +83,10 @@ function buildMindmap(): { nodes: MindmapNode[]; edges: MindmapEdge[] } {
       nodes.push({
         id: branch.id,
         type: "mindmap-branch",
-        position: { x: 0, y: 0 },
         data: {
           label: branch.label,
           description: BRANCH_DETAILS[branch.id] ?? DEFAULT_BRANCH_DESCRIPTION,
           timeMark: null,
-          isActive: branch.isActive,
         },
       });
       edges.push({ id: `${stage.id}-${branch.id}`, source: stage.id, target: branch.id });
@@ -107,7 +98,9 @@ function buildMindmap(): { nodes: MindmapNode[]; edges: MindmapEdge[] } {
 
 const { nodes, edges } = buildMindmap();
 
-export const MOCK_MINDMAP: Mindmap = {
+// Bentuk WireMindmap murni — persis kontrak backend, tanpa position/num/isActive.
+// Field UI-only itu diisi lib/api.ts pas mapping wire→UI (§5 CLAUDE.md).
+export const MOCK_MINDMAP: WireMindmap = {
   _id: "strategi-growth-2026",
   title: "Strategi Growth 2026",
   topic: "Strategi growth marketing",

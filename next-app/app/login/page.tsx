@@ -49,14 +49,9 @@ export default function LoginPage() {
             </div>
 
             <div className="field">
-              <div className="field-head">
-                <label className="label" htmlFor="password">
-                  Password
-                </label>
-                <a className="link-sm" href="#">
-                  Lupa password?
-                </a>
-              </div>
+              <label className="label" htmlFor="password">
+                Password
+              </label>
               <PasswordInput id="password" name="password" placeholder="Masukkan password" autoComplete="current-password" />
             </div>
 

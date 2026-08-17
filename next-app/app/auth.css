@@ -74,21 +74,10 @@
   gap: var(--sm-space-2);
 }
 
-.page-auth .field-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
 .page-auth .label {
   font-size: var(--sm-fs-small);
   font-weight: 600;
   color: var(--sm-ink);
-}
-
-.page-auth .link-sm {
-  font-size: var(--sm-fs-small);
-  font-weight: 600;
 }
 
 .page-auth .input-wrap {

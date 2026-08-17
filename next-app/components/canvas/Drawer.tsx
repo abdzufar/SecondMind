@@ -8,6 +8,8 @@ export function Drawer() {
   const edges = useCanvasStore((s) => s.edges);
   const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
   const selectNode = useCanvasStore((s) => s.selectNode);
+  const clearSelection = useCanvasStore((s) => s.clearSelection);
+  const toggleNodeComplete = useCanvasStore((s) => s.toggleNodeComplete);
 
   const node = selectedNodeId ? nodes.find((n) => n.id === selectedNodeId) : undefined;
   if (!node) return null;
@@ -27,7 +29,7 @@ export function Drawer() {
     <aside className="drawer">
       <div className="drawer-head">
         <span className="drawer-head-title">Detail node</span>
-        <button type="button" className="icon-btn" aria-label="Tutup panel" onClick={() => selectNode(null)}>
+        <button type="button" className="icon-btn" aria-label="Tutup panel" onClick={clearSelection}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 6 6 18" />
             <path d="m6 6 12 12" />
@@ -50,6 +52,19 @@ export function Drawer() {
           <input key={node.id} className="node-title" defaultValue={node.data.label} aria-label="Judul node" />
           <span className={`node-type${isBranch ? "" : " is-step"}`}>{typeLabel}</span>
         </div>
+
+        {!isBranch && (
+          <button
+            type="button"
+            className={`complete-btn${node.data.isCompleted ? " is-complete" : ""}`}
+            onClick={() => toggleNodeComplete(node.id)}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+            {node.data.isCompleted ? "Sudah selesai" : "Tandai selesai"}
+          </button>
+        )}
 
         <div className="drawer-divider"></div>
 

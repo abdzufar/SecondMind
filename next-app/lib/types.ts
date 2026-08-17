@@ -47,6 +47,7 @@ export type WireTodo = {
 export type MindmapNodeData = WireMindmapNode["data"] & {
   num?: string;
   isActive?: boolean;
+  isCompleted?: boolean;
 };
 
 export type MindmapNode = Node<MindmapNodeData, WireNodeType>;

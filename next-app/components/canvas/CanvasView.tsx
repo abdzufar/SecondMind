@@ -30,6 +30,7 @@ export function CanvasView() {
       onNodeClick={(_event, node) => selectNode(node.id)}
       onPaneClick={() => selectNode(null)}
       nodesConnectable={false}
+      nodesDraggable={false}
       fitView
       proOptions={{ hideAttribution: true }}
       defaultEdgeOptions={{ type: "smoothstep", style: { stroke: "#e7d9c6", strokeWidth: 1.5 } }}
