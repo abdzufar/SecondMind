@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Mindmap from '@/models/Mindmap';
 import Todo from '@/models/Todo';
+import { CreateTodoSchema } from '@/lib/validations';
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,11 +12,13 @@ export async function POST(req: NextRequest) {
     if (!session || !session.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     
     const body = await req.json();
-    const { mindmapId, taskText, timeOffsetDays } = body;
+    const parsed = CreateTodoSchema.safeParse(body);
     
-    if (!mindmapId || !taskText) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
+    
+    const { mindmapId, taskText, timeOffsetDays } = parsed.data;
 
     await dbConnect();
     

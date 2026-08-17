@@ -6,6 +6,7 @@ import dbConnect from "@/lib/db";
 import Mindmap from "@/models/Mindmap";
 import { getGeneratePrompt } from "@/lib/aiPrompt";
 import { validateEdges } from "@/lib/validateEdges";
+import { GenerateMindmapSchema } from "@/lib/validations";
 
 export const maxDuration = 60; // Avoid Vercel timeout limits
 
@@ -17,18 +18,20 @@ export async function POST(req: NextRequest) {
 		}
 
 		const formData = await req.formData();
-		const topic = formData.get("topic") as string;
-		const timeframe = formData.get("timeframe") as string;
-		const language = formData.get("language") as string;
-		const verbosity = formData.get("verbosity") as string;
-		const file = formData.get("file") as File | null;
-
-		if (!topic || !timeframe || !language) {
-			return NextResponse.json(
-				{ error: "Missing required fields" },
-				{ status: 400 },
-			);
+		const rawData = {
+			topic: formData.get("topic") as string,
+			timeframe: formData.get("timeframe") as string,
+			language: formData.get("language") as string,
+			verbosity: formData.get("verbosity") as string,
+		};
+		
+		const parsed = GenerateMindmapSchema.safeParse(rawData);
+		if (!parsed.success) {
+			return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
 		}
+		
+		const { topic, timeframe, language, verbosity } = parsed.data;
+		const file = formData.get("file") as File | null;
 
 		let fileContext = "";
 		if (file) {

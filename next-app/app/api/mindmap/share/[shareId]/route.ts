@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Mindmap from '@/models/Mindmap';
 
-export async function GET(req: NextRequest, { params }: { params: { shareId: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ shareId: string }> }) {
   try {
     // Note: No session check required here! This is intentionally a public read-only route.
     
+    const { shareId } = await params;
     await dbConnect();
     
-    const mindmap = await Mindmap.findOne({ shareId: params.shareId });
+    const mindmap = await Mindmap.findOne({ shareId: shareId });
     
     if (!mindmap) {
       return NextResponse.json({ error: 'Mindmap not found' }, { status: 404 });

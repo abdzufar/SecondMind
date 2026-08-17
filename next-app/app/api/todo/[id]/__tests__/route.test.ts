@@ -46,7 +46,7 @@ describe('/api/todo/[id] CRUD Operations', () => {
       headers: { 'Content-Type': 'application/json' }
     });
     
-    const res = await PUT(req, { params: { id: mockTodoId } });
+    const res = await PUT(req, { params: Promise.resolve({ id: mockTodoId }) });
     expect(res.status).toBe(200);
     
     const check = await Todo.findById(mockTodoId);
@@ -55,7 +55,7 @@ describe('/api/todo/[id] CRUD Operations', () => {
 
   it('DELETE should completely remove the todo', async () => {
     const req = new NextRequest(`http://localhost:3000/api/todo/${mockTodoId}`, { method: 'DELETE' });
-    const res = await DELETE(req, { params: { id: mockTodoId } });
+    const res = await DELETE(req, { params: Promise.resolve({ id: mockTodoId }) });
     expect(res.status).toBe(200);
     
     const check = await Todo.findById(mockTodoId);

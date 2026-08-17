@@ -15,8 +15,9 @@ async function checkOwnership(todoId: string, userId: string) {
   return todo;
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session || !session.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     
@@ -28,7 +29,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     await dbConnect();
     
     // Security check
-    const todo = await checkOwnership(params.id, session.user.id);
+    const todo = await checkOwnership(id, session.user.id);
     if (!todo) return NextResponse.json({ error: 'Todo not found or unauthorized' }, { status: 404 });
 
     todo.isCompleted = isCompleted;
@@ -41,18 +42,19 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session || !session.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     await dbConnect();
     
     // Security check
-    const todo = await checkOwnership(params.id, session.user.id);
+    const todo = await checkOwnership(id, session.user.id);
     if (!todo) return NextResponse.json({ error: 'Todo not found or unauthorized' }, { status: 404 });
 
-    await Todo.findByIdAndDelete(params.id);
+    await Todo.findByIdAndDelete(id);
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (err) {

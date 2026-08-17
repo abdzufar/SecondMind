@@ -28,7 +28,7 @@ describe('/api/mindmap/[id] CRUD Operations', () => {
 
   it('GET should fetch a single mindmap fully populated with nodes and edges', async () => {
     const req = new NextRequest(`http://localhost:3000/api/mindmap/${mockMapId}`);
-    const res = await GET(req, { params: { id: mockMapId } });
+    const res = await GET(req, { params: Promise.resolve({ id: mockMapId }) });
     
     expect(res.status).toBe(200);
     const data = await res.json();
@@ -45,7 +45,7 @@ describe('/api/mindmap/[id] CRUD Operations', () => {
       }),
       headers: { 'Content-Type': 'application/json' }
     });
-    const res = await PUT(req, { params: { id: mockMapId } });
+    const res = await PUT(req, { params: Promise.resolve({ id: mockMapId }) });
     expect(res.status).toBe(200);
     
     // Verify changes persisted to the DB
@@ -55,7 +55,7 @@ describe('/api/mindmap/[id] CRUD Operations', () => {
 
   it('DELETE should delete the mindmap entirely', async () => {
     const req = new NextRequest(`http://localhost:3000/api/mindmap/${mockMapId}`, { method: 'DELETE' });
-    const res = await DELETE(req, { params: { id: mockMapId } });
+    const res = await DELETE(req, { params: Promise.resolve({ id: mockMapId }) });
     expect(res.status).toBe(200);
     
     const check = await Mindmap.findById(mockMapId);

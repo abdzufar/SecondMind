@@ -24,7 +24,7 @@ describe('GET /api/mindmap/share/[shareId]', () => {
 
   it('should return the mindmap if it is public and shareId matches', async () => {
     const req = new NextRequest(`http://localhost:3000/api/mindmap/share/${mockShareId}`);
-    const res = await GET(req, { params: { shareId: mockShareId } });
+    const res = await GET(req, { params: Promise.resolve({ shareId: mockShareId }) });
     
     expect(res.status).toBe(200);
     const data = await res.json();
@@ -37,14 +37,14 @@ describe('GET /api/mindmap/share/[shareId]', () => {
     await Mindmap.findByIdAndUpdate(mockMapId, { isPublic: false });
 
     const req = new NextRequest(`http://localhost:3000/api/mindmap/share/${mockShareId}`);
-    const res = await GET(req, { params: { shareId: mockShareId } });
+    const res = await GET(req, { params: Promise.resolve({ shareId: mockShareId }) });
     
     expect(res.status).toBe(403);
   });
 
   it('should return 404 if shareId does not exist', async () => {
     const req = new NextRequest(`http://localhost:3000/api/mindmap/share/invalid-id`);
-    const res = await GET(req, { params: { shareId: 'invalid-id' } });
+    const res = await GET(req, { params: Promise.resolve({ shareId: 'invalid-id' }) });
     
     expect(res.status).toBe(404);
   });
