@@ -64,17 +64,31 @@ export type GenerateMindmapInput = {
 };
 
 export async function generateMindmap(input: GenerateMindmapInput): Promise<Mindmap> {
-  const record: MindmapRecord = {
-    ...MOCK_MINDMAP,
-    _id: `mindmap-${Date.now()}`,
-    title: `Belajar ${input.topic}`,
-    topic: input.topic,
-    timeframe: input.timeframe,
-    language: input.language,
-    createdAt: new Date().toISOString(),
-  };
-  mindmapsDb.push(record);
-  return delay(toMindmap(record));
+  const formData = new FormData();
+  formData.append("topic", input.topic);
+  formData.append("timeframe", input.timeframe);
+  formData.append("verbosity", input.verbosity);
+  formData.append("language", input.language);
+  if (input.file) formData.append("file", input.file);
+
+  const res = await fetch("/api/mindmap/generate", {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error ?? `Generate gagal (status ${res.status})`);
+  }
+
+  const wire: WireMindmap = await res.json();
+
+  // Bridge sementara selama getMindmap()/getMindmaps() masih mock: taruh hasil
+  // generate asli ke "database" lokal juga, supaya alur baca abis generate tetap
+  // jalan sampai fungsi baca itu ikut dipindah ke fetch asli.
+  mindmapsDb.push({ ...wire, createdAt: wire.startDate });
+
+  return toMindmap(wire);
 }
 
 export type ElaborateNodeInput = {
