@@ -379,7 +379,7 @@
 .page-composer .history-item {
   display: flex;
   align-items: center;
-  gap: var(--sm-space-4);
+  gap: var(--sm-space-3);
   padding: var(--sm-space-4);
   background: var(--sm-surface);
   border: 1px solid var(--sm-line);
@@ -389,6 +389,45 @@
 
 .page-composer .history-item:hover {
   border-color: var(--sm-clay);
+}
+
+.page-composer .history-item-link {
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-4);
+  flex: 1;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.page-composer .history-delete {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--sm-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--sm-line);
+  background: transparent;
+  color: var(--sm-ink-45);
+  cursor: pointer;
+  transition:
+    background 150ms ease-out,
+    border-color 150ms ease-out,
+    color 150ms ease-out;
+}
+
+.page-composer .history-delete:hover {
+  background: color-mix(in oklch, var(--destructive) 12%, transparent);
+  border-color: var(--destructive);
+  color: var(--destructive);
+}
+
+.page-composer .history-delete svg {
+  width: 16px;
+  height: 16px;
 }
 
 .page-composer .history-icon {
@@ -429,6 +468,14 @@
   font-weight: 600;
   color: var(--sm-clay);
   flex-shrink: 0;
+  padding: 10px 22px;
+  border: 1px solid var(--sm-line);
+  border-radius: var(--sm-radius-pill);
+  transition: border-color 150ms ease-out;
+}
+
+.page-composer .history-item:hover .link-sm {
+  border-color: var(--sm-clay);
 }
 
 .page-composer .history-empty {

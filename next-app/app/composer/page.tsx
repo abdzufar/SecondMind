@@ -5,7 +5,16 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import "./composer.css";
-import { getMindmaps, type MindmapSummary } from "@/lib/api";
+import { deleteMindmap, getMindmaps, type MindmapSummary } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type SelectedFile = {
   name: string;
@@ -13,6 +22,18 @@ type SelectedFile = {
 };
 
 type HistoryStatus = "loading" | "ready" | "error";
+
+function TrashIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M3 6h18" />
+      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+    </svg>
+  );
+}
 
 function formatSize(bytes: number) {
   const kb = bytes / 1024;
@@ -42,6 +63,8 @@ export default function ComposerPage() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [history, setHistory] = useState<MindmapSummary[]>([]);
   const [historyStatus, setHistoryStatus] = useState<HistoryStatus>("loading");
+  const [deleteTarget, setDeleteTarget] = useState<MindmapSummary | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     getMindmaps()
@@ -51,6 +74,17 @@ export default function ComposerPage() {
       })
       .catch(() => setHistoryStatus("error"));
   }, []);
+
+  function handleDeleteConfirm() {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    deleteMindmap(deleteTarget._id)
+      .then(() => {
+        setHistory((prev) => prev.filter((item) => item._id !== deleteTarget._id));
+        setDeleteTarget(null);
+      })
+      .finally(() => setIsDeleting(false));
+  }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const picked = e.target.files?.[0];
@@ -221,26 +255,70 @@ export default function ComposerPage() {
           {historyStatus === "ready" && history.length > 0 && (
             <div className="history-list">
               {history.map((item) => (
-                <Link className="history-item" href={`/canvas/${item._id}`} key={item._id}>
-                  <div className="history-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
-                      <path d="M14 2v6h6" />
-                    </svg>
-                  </div>
-                  <div className="history-info">
-                    <strong>{item.title}</strong>
-                    <span>
-                      {item.topic} · {formatRelativeTime(item.createdAt)}
-                    </span>
-                  </div>
-                  <span className="link-sm">Lihat →</span>
-                </Link>
+                <div className="history-item" key={item._id}>
+                  <Link className="history-item-link" href={`/canvas/${item._id}`}>
+                    <div className="history-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                        <path d="M14 2v6h6" />
+                      </svg>
+                    </div>
+                    <div className="history-info">
+                      <strong>{item.title}</strong>
+                      <span>
+                        {item.topic} · {formatRelativeTime(item.createdAt)}
+                      </span>
+                    </div>
+                    <span className="link-sm">Lihat →</span>
+                  </Link>
+                  <button
+                    type="button"
+                    className="history-delete"
+                    aria-label={`Hapus ${item.title}`}
+                    onClick={() => setDeleteTarget(item)}
+                  >
+                    <TrashIcon className="size-4" />
+                  </button>
+                </div>
               ))}
             </div>
           )}
         </div>
       </main>
+
+      <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <DialogContent>
+          <DialogHeader className="items-center text-center">
+            <div className="flex size-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+              <TrashIcon className="size-5" />
+            </div>
+            <DialogTitle>Hapus &quot;{deleteTarget?.title}&quot;?</DialogTitle>
+            <DialogDescription>Mindmap dan seluruh cabangnya akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="justify-center" style={{ justifyContent: "center" }}>
+            <Button
+              variant="outline"
+              size="lg"
+              className="px-7"
+              style={{ height: 40, paddingLeft: 28, paddingRight: 28 }}
+              onClick={() => setDeleteTarget(null)}
+              disabled={isDeleting}
+            >
+              Batal
+            </Button>
+            <Button
+              variant="destructive"
+              size="lg"
+              className="px-7"
+              style={{ height: 40, paddingLeft: 28, paddingRight: 28 }}
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Menghapus…" : "Hapus"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
