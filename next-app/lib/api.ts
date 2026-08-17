@@ -27,7 +27,7 @@ function toMindmap(wire: WireMindmap): Mindmap {
 
 type MindmapRecord = WireMindmap & { createdAt: string };
 
-type MindmapSummary = Pick<WireMindmap, "_id" | "title" | "topic" | "timeframe" | "isPublic" | "shareId"> & {
+export type MindmapSummary = Pick<WireMindmap, "_id" | "title" | "topic" | "timeframe" | "isPublic" | "shareId"> & {
   createdAt: string;
 };
 

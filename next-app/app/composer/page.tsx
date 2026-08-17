@@ -2,36 +2,34 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import "./composer.css";
+import { getMindmaps, type MindmapSummary } from "@/lib/api";
 
 type SelectedFile = {
   name: string;
   sizeLabel: string;
 };
 
-const HISTORY = [
-  {
-    id: "1",
-    title: "Strategi Growth 2026",
-    meta: "riset-pasar.pdf — diproses 2 jam lalu",
-  },
-  {
-    id: "2",
-    title: "Fondasi Machine Learning",
-    meta: "catatan-kuliah.docx — diproses kemarin",
-  },
-  {
-    id: "3",
-    title: "Notulen Rapat Q1",
-    meta: "notulen-q1.txt — diproses 3 hari lalu",
-  },
-];
+type HistoryStatus = "loading" | "ready" | "error";
 
 function formatSize(bytes: number) {
   const kb = bytes / 1024;
   return kb > 1024 ? (kb / 1024).toFixed(1) + " MB" : Math.round(kb) + " KB";
+}
+
+function formatRelativeTime(iso: string) {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return "baru saja";
+  if (minutes < 60) return `${minutes} menit lalu`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} jam lalu`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "kemarin";
+  if (days < 30) return `${days} hari lalu`;
+  return new Date(iso).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
 }
 
 export default function ComposerPage() {
@@ -42,6 +40,17 @@ export default function ComposerPage() {
     sizeLabel: "2.4 MB",
   });
   const [isDragOver, setIsDragOver] = useState(false);
+  const [history, setHistory] = useState<MindmapSummary[]>([]);
+  const [historyStatus, setHistoryStatus] = useState<HistoryStatus>("loading");
+
+  useEffect(() => {
+    getMindmaps()
+      .then((mindmaps) => {
+        setHistory(mindmaps);
+        setHistoryStatus("ready");
+      })
+      .catch(() => setHistoryStatus("error"));
+  }, []);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const picked = e.target.files?.[0];
@@ -188,23 +197,48 @@ export default function ComposerPage() {
 
         <div className="history" id="riwayat">
           <h2>Riwayat</h2>
-          <div className="history-list">
-            {HISTORY.map((item) => (
-              <Link className="history-item" href="/canvas" key={item.id}>
-                <div className="history-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
-                    <path d="M14 2v6h6" />
-                  </svg>
+
+          {historyStatus === "loading" && (
+            <div className="history-list" aria-hidden="true">
+              {[0, 1, 2].map((i) => (
+                <div className="history-item history-item--skeleton" key={i}>
+                  <div className="history-icon skeleton-block" />
+                  <div className="history-info">
+                    <span className="skeleton-block skeleton-line" />
+                    <span className="skeleton-block skeleton-line skeleton-line--sm" />
+                  </div>
                 </div>
-                <div className="history-info">
-                  <strong>{item.title}</strong>
-                  <span>{item.meta}</span>
-                </div>
-                <span className="link-sm">Lihat →</span>
-              </Link>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
+
+          {historyStatus === "error" && <p className="history-empty">Gagal memuat riwayat. Coba muat ulang halaman.</p>}
+
+          {historyStatus === "ready" && history.length === 0 && (
+            <p className="history-empty">Belum ada mindmap. Bikin yang pertama lewat form di atas.</p>
+          )}
+
+          {historyStatus === "ready" && history.length > 0 && (
+            <div className="history-list">
+              {history.map((item) => (
+                <Link className="history-item" href="/canvas" key={item._id}>
+                  <div className="history-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                      <path d="M14 2v6h6" />
+                    </svg>
+                  </div>
+                  <div className="history-info">
+                    <strong>{item.title}</strong>
+                    <span>
+                      {item.topic} · {formatRelativeTime(item.createdAt)}
+                    </span>
+                  </div>
+                  <span className="link-sm">Lihat →</span>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </main>
     </div>

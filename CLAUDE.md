@@ -232,10 +232,10 @@ Status per 2026-08-17, dicek ulang terhadap working tree — bukan cuma niat.
 
 ### M11 — Halaman pendukung dan perapian
 - [~] Halaman login (Google + email/password) — `app/login/page.tsx` dan `app/register/page.tsx` sudah ada (form email/password + `PasswordInput`), tapi **belum pakai komponen next-auth partner** — `handleSubmit` cuma `router.push`, tidak ada tombol Google, tidak ada pemanggilan auth sungguhan. Begitu wiring beneran: `next-app/types/next-auth.d.ts` udah ada dari partner, `session.user.id: string` sudah ketipekan resmi — gak perlu `as any` lagi pas pakai `useSession`.
-- [~] Dashboard daftar mindmap + tombol hapus — `app/composer/page.tsx` punya seksi "Riwayat" tapi masih data statis (`HISTORY` const), tanpa tombol hapus
-- [~] Empty state dan loading skeleton — `app/loading/page.tsx` punya skeleton bar; empty state dashboard belum ada
+- [~] Dashboard daftar mindmap + tombol hapus — `app/composer/page.tsx` "Riwayat" sekarang baca `getMindmaps()` dari `lib/api.ts` (bukan `HISTORY` const statis lagi), tapi **tombol hapus masih belum ada** dan link tiap item masih hardcode ke `/canvas` (belum ada route `/canvas/[id]`, jadi belum bisa buka mindmap spesifik)
+- [x] Empty state dan loading skeleton — `app/loading/page.tsx` punya skeleton bar; dashboard "Riwayat" sekarang juga punya skeleton row + empty state (`.history-empty`) pas `getMindmaps()` kosong/gagal
 - [ ] Layar kecil: sidebar jadi bottom sheet — belum diverifikasi, drawer saat ini cuma jadi full-width di `<900px`, bukan bottom sheet
-- [ ] Ganti isi `lib/api.ts` dari mock ke fetch asli — belum relevan, `lib/api.ts` sendiri belum ada
+- [~] Ganti isi `lib/api.ts` dari mock ke fetch asli — `lib/api.ts` sendiri sudah ada (M2) dan sudah dipakai composer; tinggal isi fungsinya diganti `fetch()` beneran pas backend siap
 
 ---
 
