@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
       
       // Dispatch email via Resend
       await resend.emails.send({
-        from: 'SecondMind <reminders@secondmind.app>',
+        from: process.env.RESEND_FROM_EMAIL || 'SecondMind <reminders@secondmind.app>',
         to: userEmail,
         subject: `Reminder: Your task "${todo.taskText}" is due today!`,
         html: `<p>Hello!</p>
