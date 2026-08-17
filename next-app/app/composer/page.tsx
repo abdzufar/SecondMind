@@ -56,10 +56,7 @@ function formatRelativeTime(iso: string) {
 export default function ComposerPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<SelectedFile | null>({
-    name: "riset-pasar.pdf",
-    sizeLabel: "2.4 MB",
-  });
+  const [file, setFile] = useState<SelectedFile | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [history, setHistory] = useState<MindmapSummary[]>([]);
   const [historyStatus, setHistoryStatus] = useState<HistoryStatus>("loading");
@@ -155,6 +152,28 @@ export default function ComposerPage() {
                 <option value="1-month">1 bulan</option>
                 <option value="3-month">3 bulan</option>
                 <option value="flexible">Santai, gak buru-buru</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="field-row">
+            <div className="field field--grow">
+              <label className="label" htmlFor="verbosity">
+                Tingkat detail
+              </label>
+              <select className="select" id="verbosity" name="verbosity" defaultValue="seimbang">
+                <option value="ringkas">Ringkas — poin-poin inti aja</option>
+                <option value="seimbang">Seimbang</option>
+                <option value="detail">Detail — penjelasan lengkap tiap langkah</option>
+              </select>
+            </div>
+            <div className="field field--grow">
+              <label className="label" htmlFor="language">
+                Bahasa
+              </label>
+              <select className="select" id="language" name="language" defaultValue="id">
+                <option value="id">Indonesia</option>
+                <option value="en">English</option>
               </select>
             </div>
           </div>
