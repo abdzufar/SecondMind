@@ -6,8 +6,6 @@ import dbConnect from "@/lib/db";
 import Mindmap from "@/models/Mindmap";
 import { getGeneratePrompt } from "@/lib/aiPrompt";
 import { validateEdges } from "@/lib/validateEdges";
-// @ts-expect-error - pdf-parse has no default export in types
-import pdfParse from "pdf-parse";
 
 export const maxDuration = 60; // Avoid Vercel timeout limits
 
@@ -39,6 +37,8 @@ export async function POST(req: NextRequest) {
 				const buffer = Buffer.from(arrayBuffer);
 				
 				if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+					// Using require to bypass ESM default export crash reported by frontend team
+					const pdfParse = require('pdf-parse');
 					const pdfData = await pdfParse(buffer);
 					fileContext = pdfData.text;
 				} else {
