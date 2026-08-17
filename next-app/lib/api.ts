@@ -8,8 +8,17 @@ function delay<T>(value: T, ms = MOCK_LATENCY_MS): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(value), ms));
 }
 
-// Mapping WireMindmap → Mindmap: ngisi `num` (index roadmap-step + 1) dan
-// `position` placeholder — posisi final baru diisi lib/canvas/layout.ts (§5 CLAUDE.md).
+// Gemini balikin integer offset hari mentah (§5 CLAUDE.md) — frontend yang format jadi
+// "Hari X"/"Minggu Y" sendiri, gak pernah disimpan sebagai string di wire type.
+function formatTimeOffset(days: number | null): string | null {
+  if (days === null) return null;
+  if (days > 0 && days % 7 === 0) return `Minggu ${days / 7}`;
+  return `Hari ${days}`;
+}
+
+// Mapping WireMindmap → Mindmap: ngisi `num` (index roadmap-step + 1), `timeMark`
+// (format tampilan dari timeOffsetDays), dan `position` placeholder — posisi final
+// baru diisi lib/canvas/layout.ts (§5 CLAUDE.md).
 function toMindmap(wire: WireMindmap): Mindmap {
   let stepCount = 0;
   const nodes: MindmapNode[] = wire.nodes.map((node) => ({
@@ -19,6 +28,7 @@ function toMindmap(wire: WireMindmap): Mindmap {
     data: {
       ...node.data,
       num: node.type === "roadmap-step" ? String(++stepCount).padStart(2, "0") : undefined,
+      timeMark: formatTimeOffset(node.data.timeOffsetDays),
     },
   }));
 
@@ -86,6 +96,7 @@ export async function elaborateNode(
       data: {
         label: input.concept,
         description: `Penjelasan tambahan soal "${input.concept}" akan muncul di sini.`,
+        timeOffsetDays: null,
         timeMark: null,
       },
     },
@@ -122,7 +133,7 @@ export async function saveMindmap(id: string, input: SaveMindmapInput): Promise<
   mindmap.nodes = input.nodes.map((node) => ({
     id: node.id,
     type: node.type,
-    data: { label: node.data.label, description: node.data.description, timeMark: node.data.timeMark },
+    data: { label: node.data.label, description: node.data.description, timeOffsetDays: node.data.timeOffsetDays },
   }));
   mindmap.edges = input.edges.map((edge) => ({ id: edge.id, source: edge.source, target: edge.target }));
   await delay(undefined);

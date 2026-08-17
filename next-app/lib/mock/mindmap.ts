@@ -9,7 +9,7 @@ const STEP_DESCRIPTION = "Ringkasan langkah roadmap ini akan disusun dari cabang
 
 type StageSeed = {
   id: string;
-  time: string;
+  timeOffsetDays: number;
   label: string;
   branches: { id: string; label: string }[];
 };
@@ -17,7 +17,7 @@ type StageSeed = {
 const STAGE_SEEDS: StageSeed[] = [
   {
     id: "step-1",
-    time: "Minggu 1",
+    timeOffsetDays: 7,
     label: "Riset Pasar",
     branches: [
       { id: "analisis-kompetitor", label: "Analisis Kompetitor" },
@@ -26,7 +26,7 @@ const STAGE_SEEDS: StageSeed[] = [
   },
   {
     id: "step-2",
-    time: "Minggu 2",
+    timeOffsetDays: 14,
     label: "Strategi Konten",
     branches: [
       { id: "kalender-konten-q1", label: "Kalender Konten Q1" },
@@ -36,7 +36,7 @@ const STAGE_SEEDS: StageSeed[] = [
   },
   {
     id: "step-3",
-    time: "Minggu 3",
+    timeOffsetDays: 21,
     label: "Distribusi & Channel",
     branches: [
       { id: "email-marketing", label: "Email Marketing" },
@@ -47,13 +47,13 @@ const STAGE_SEEDS: StageSeed[] = [
   },
   {
     id: "step-4",
-    time: "Minggu 4",
+    timeOffsetDays: 28,
     label: "Anggaran",
     branches: [{ id: "estimasi-biaya", label: "Estimasi Biaya" }],
   },
   {
     id: "step-5",
-    time: "Minggu 5",
+    timeOffsetDays: 35,
     label: "Evaluasi & KPI",
     branches: [
       { id: "kpi-engagement", label: "KPI Engagement" },
@@ -71,7 +71,7 @@ function buildMindmap(): { nodes: WireMindmapNode[]; edges: WireMindmapEdge[] } 
     nodes.push({
       id: stage.id,
       type: "roadmap-step",
-      data: { label: stage.label, description: STEP_DESCRIPTION, timeMark: stage.time },
+      data: { label: stage.label, description: STEP_DESCRIPTION, timeOffsetDays: stage.timeOffsetDays },
     });
 
     const previous = STAGE_SEEDS[index - 1];
@@ -86,7 +86,7 @@ function buildMindmap(): { nodes: WireMindmapNode[]; edges: WireMindmapEdge[] } 
         data: {
           label: branch.label,
           description: BRANCH_DETAILS[branch.id] ?? DEFAULT_BRANCH_DESCRIPTION,
-          timeMark: null,
+          timeOffsetDays: null,
         },
       });
       edges.push({ id: `${stage.id}-${branch.id}`, source: stage.id, target: branch.id });

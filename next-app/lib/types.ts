@@ -10,7 +10,7 @@ export type WireMindmapNode = {
   data: {
     label: string;
     description: string;
-    timeMark: string | null;
+    timeOffsetDays: number | null;
   };
 };
 
@@ -48,6 +48,7 @@ export type MindmapNodeData = WireMindmapNode["data"] & {
   num?: string;
   isActive?: boolean;
   isCompleted?: boolean;
+  timeMark?: string | null; // "Hari X" / "Minggu Y", diformat dari timeOffsetDays — bukan dari backend
 };
 
 export type MindmapNode = Node<MindmapNodeData, WireNodeType>;

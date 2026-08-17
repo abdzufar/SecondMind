@@ -66,7 +66,7 @@ export type WireMindmapNode = {
   data: {
     label: string;
     description: string;
-    timeMark: string | null;
+    timeOffsetDays: number | null; // integer mentah dari Gemini, frontend format jadi "Hari X"/"Minggu Y"
   };
 };
 
@@ -103,6 +103,7 @@ export type MindmapNodeData = WireMindmapNode["data"] & {
   num?: string; // nomor urut roadmap-step, dihitung dari index — bukan dari backend
   isActive?: boolean; // state highlight lokal (mis. cabang lagi di-elaborate) — bukan dari backend
   isCompleted?: boolean; // toggle "tandai selesai" lokal, cuma dipakai roadmap-step — bukan dari backend
+  timeMark?: string | null; // "Hari X"/"Minggu Y", diformat dari timeOffsetDays — bukan dari backend
 };
 
 export type MindmapNode = Node<MindmapNodeData, WireNodeType>; // Node<> mewajibkan `position`
@@ -116,10 +117,10 @@ export type Mindmap = Omit<WireMindmap, "nodes" | "edges"> & {
 
 **Penting:** node dari backend **tidak** punya field `position`. Koordinat dihitung di frontend pakai dagre setiap kali graph di-load atau bertambah, lewat `lib/canvas/layout.ts`. Kalau backend mengirim `position`, abaikan.
 
-**⚠️ Kontrak `timeMark` sudah basi.** `database_schema.md` (root, ditulis partner) sekarang mendefinisikan `data.timeOffsetDays: Number` di skema Mongoose node, bukan `timeMark: string` lagi. Ini keputusan sadar — `implementation_plan.md` §"Partner Revisions" bilang Gemini balikin integer offset hari mentah karena parsing string `timeMark` rapuh; frontend yang wajib format jadi "Day X"/"Week Y" sendiri. **Belum dimigrasikan di kode**: `lib/types.ts`, `lib/mock/mindmap.ts`, `RoadmapStepNode.tsx`, `MindmapBranchNode.tsx`, `Drawer.tsx` masih pakai `timeMark` string lama. Ini ubah bentuk wire type — tanya dulu sebelum migrasi (§8). *(Catatan: `api_documentation.md` contoh response `generate` masih nunjukin `timeMark: "Day 1"`, gak sinkron sama `database_schema.md` — kemungkinan dokumen itu belum di-update pas field-nya diganti, worth dikonfirmasi ke partner.)*
+**Migrasi `timeMark` → `timeOffsetDays` sudah kelar** (matching `database_schema.md`, ditulis partner). Wire type sekarang `timeOffsetDays: number | null`; `lib/api.ts`'s `toMindmap()` yang format jadi tampilan "Hari X"/"Minggu Y" (disimpan balik ke `timeMark` — tapi sekarang field UI-only hasil hitungan, bukan lagi field wire). Komponen (`RoadmapStepNode.tsx`, `MindmapBranchNode.tsx`, `Drawer.tsx`) gak berubah sama sekali karena masih baca `data.timeMark` yang sama, cuma sumbernya sekarang dihitung bukan dikirim mentah. *(Catatan lama yang masih relevan: `api_documentation.md` contoh response `generate` masih nunjukin `timeMark: "Day 1"`, gak sinkron sama `database_schema.md` — kemungkinan dokumen itu belum di-update, worth dikonfirmasi ke partner.)*
 
 **Konversi wire→UI** ditaruh di dua tempat, bukan di komponen:
-- `lib/api.ts` (`toMindmap()`): memetakan `WireMindmap` → `Mindmap`, mengisi `num` (index roadmap-step + 1) dan `position` placeholder awal.
+- `lib/api.ts` (`toMindmap()`): memetakan `WireMindmap` → `Mindmap`, mengisi `num` (index roadmap-step + 1), `timeMark` (format tampilan dari `timeOffsetDays`), dan `position` placeholder awal.
 - `lib/canvas/layout.ts`: mengisi `position` final dari hasil dagre.
 
 ## 6. Endpoint backend
@@ -179,11 +180,11 @@ Status per 2026-08-17, dicek ulang terhadap working tree — bukan cuma niat.
 **Gotcha React Flow + data async** (kena pas M11 wiring `/canvas/[id]`): `<ReactFlow fitView>` cuma nge-fit sekali pas mount. Kalau `<CanvasView />` di-mount duluan sebelum `getMindmap()` selesai (nodes masih `[]`), canvas kejebak di state kosong/rusak biarpun data numpang masuk belakangan — `fitView` gak pernah re-run. Fix-nya: `app/canvas/[id]/page.tsx` sekarang nahan render `<CanvasView />` sampai `mindmap` state kepenuhin (`{mindmap ? <CanvasView /> : <div className="canvas-loading">...</div>}`). **Berlaku juga nanti buat M7**: begitu `appendNodes`/`applyLayout` dibikin, node baru yang nambah ke canvas yang udah ke-mount duluan gak akan otomatis ke-fit — butuh `useReactFlow().fitView()` manual, bukan cuma andelin prop `fitView`.
 
 ### M2 — Lapisan data
-- [x] Mock mindmap di `lib/mock/mindmap.ts` — sekarang bentuk `WireMindmap` murni (bukan `Mindmap`), 5 roadmap-step + 13 branch, `timeMark` terisi, tanpa `position`/`num`/`isActive`
+- [x] Mock mindmap di `lib/mock/mindmap.ts` — bentuk `WireMindmap` murni (bukan `Mindmap`), 5 roadmap-step + 13 branch, `timeOffsetDays` terisi (7/14/21/28/35), tanpa `position`/`num`/`isActive`
 - [x] Mock todo di `lib/mock/todo.ts` — 3 `WireTodo` seed, terkait ke mindmap mock
-- [x] `lib/api.ts`: `generateMindmap`, `elaborateNode`, `getMindmaps`, `getMindmap`, `saveMindmap`, `deleteMindmap`, `getTodos`, `createTodo`, `updateTodo` — semua ada, return mock lewat "database" in-memory + delay 300ms simulasi network. `getMindmaps`/`saveMindmap` belum dipanggil komponen manapun (wajar, itu M8/M11), tapi sudah lengkap & ke-type-check
-- [x] Komponen tidak boleh fetch langsung — `store/canvasStore.ts` sekarang panggil `getMindmap()` dari `lib/api.ts`, bukan import `MOCK_MINDMAP` langsung (lihat §7 poin 1 buat gap yang tersisa: metadata mindmap di halaman lain)
-- [ ] Migrasi `timeMark: string` → `timeOffsetDays: number` di `lib/types.ts` + format "Day X"/"Week Y" pas mapping wire→UI di `lib/api.ts` (lihat §5) — **sengaja ditunda**, sesi ini fokus M2 doang, nunggu konfirmasi karena ubah bentuk wire type
+- [x] `lib/api.ts`: `generateMindmap`, `elaborateNode`, `getMindmaps`, `getMindmap`, `saveMindmap`, `deleteMindmap`, `getTodos`, `createTodo`, `updateTodo` — semua ada, return mock lewat "database" in-memory + delay 300ms simulasi network. `getMindmaps` dipakai composer, `saveMindmap` belum dipanggil komponen manapun (wajar, itu M11)
+- [x] Komponen tidak boleh fetch langsung — `store/canvasStore.ts` panggil `getMindmap()` dari `lib/api.ts`, bukan import `MOCK_MINDMAP` langsung (lihat §7 poin 1 buat gap yang tersisa: metadata mindmap di halaman lain)
+- [x] Migrasi `timeMark: string` → `timeOffsetDays: number` di `lib/types.ts` + format "Hari X"/"Minggu Y" pas mapping wire→UI di `lib/api.ts` (lihat §5) — kelar, `lib/mock/mindmap.ts` dan komponen node/drawer udah konsisten
 
 ### M3 — Store zustand
 - [~] State dan actions sesuai bagian 7 — `clearSelection`, `toggleNodeComplete`, `setGraph` sudah ada; `status`, `isOnline`, `appendNodes`, `applyLayout` sengaja ditunda ke M7/M10 (lihat §7)
@@ -243,19 +244,15 @@ Status per 2026-08-17, dicek ulang terhadap working tree — bukan cuma niat.
 
 ## 10. Rencana sesi berikutnya
 
-M1, M4, dan M5 sekarang lengkap lewat fitur "tandai selesai" (toggle per node roadmap-step, warna node berubah, progress bar header) — murni frontend pakai mock data. Bug `nodesDraggable` juga sudah beres.
+Sejak M2 kelar, beberapa hal udah nyusul: routing `/canvas/[id]` (M11), tombol hapus + wiring `getMindmaps()` di dashboard "Riwayat" (M11), input verbosity+bahasa di composer (M6), fix bug fitView-vs-async-load di canvas (lihat catatan gotcha di §9 M1), dan migrasi `timeMark` → `timeOffsetDays` (§5, §9 M2) — semua kelar dan ke-verifikasi di browser.
 
-**M2 sekarang lengkap.** `lib/api.ts` punya 9 fungsi mock, `lib/mock/mindmap.ts` dirapikan jadi `WireMindmap` murni, `lib/mock/todo.ts` baru dibikin, dan `store/canvasStore.ts` load lewat `getMindmap()` + action `setGraph` baru (bukan import mock langsung lagi). Diverifikasi jalan di browser — 5 step + 13 branch ke-load, progress bar & tandai selesai masih normal, nol console error.
+**Satu keputusan yang masih menunggu:** nasib "tandai selesai" per-node (§9 M4) — tetap visual lokal, atau digeser ke status To-Do (M8) yang persisted. Belum ada urgensi mendesak buat mutusin ini.
 
-Dua keputusan yang masih menunggu (sengaja *tidak* dieksekusi sesi ini biar tetap satu milestone per sesi, lihat §8):
-1. **Migrasi `timeMark` → `timeOffsetDays`** (lihat §5, §9 M2) — sekarang lokasinya jelas: `lib/types.ts` (bentuk wire type), `lib/mock/mindmap.ts` (data seed), `toMindmap()` di `lib/api.ts` (format "Day X"/"Week Y"), plus komponen yang nampilin (`RoadmapStepNode.tsx`, `MindmapBranchNode.tsx`, `Drawer.tsx`).
-2. **Nasib "tandai selesai" per-node** (lihat §9 M4) — tetap visual lokal, atau digeser ke status To-Do (M8) yang persisted.
+Gap kecil yang tersisa dari §7 poin 1: `Drawer.tsx` baris "Topik: {MOCK_MINDMAP.topic}" masih baca mock statis langsung, bukan dari mindmap yang lagi dimuat — satu-satunya sisa metadata yang belum ikut migrasi ke `/canvas/[id]` (header & filename export udah bener).
 
-Gap kecil yang ketinggalan dari M2 (dicatat di §7 poin 1): halaman/komponen di luar canvas (`app/canvas/page.tsx`, `Drawer.tsx`, `ExportButton`) masih baca `MOCK_MINDMAP` langsung buat metadata (`title`/`topic`/`timeframe`), karena store cuma nyimpen `nodes`/`edges`. Belum masalah besar (masih 1 sumber data yang sama), tapi bakal jadi masalah begitu ada >1 mindmap beneran (M11).
-
-Kandidat milestone berikutnya (belum diputuskan urutan, tanya user dulu pas mulai sesi baru):
-- **M3 sisa**: `status`, `isOnline`, `appendNodes`, `applyLayout` — tapi ini paling masuk akal digabung barengan M7 (elaborate) atau M10 (offline), bukan berdiri sendiri, karena baru punya konsumen nyata di situ.
-- **Migrasi `timeOffsetDays`** (keputusan #1 di atas) kalau user mau ambil sekarang.
-- **M6/M11 kecil-kecil**: input verbosity+bahasa di composer, atau dashboard "Riwayat" pakai `getMindmaps()` yang udah ada.
+Kandidat milestone berikutnya:
+- **Wiring tombol "Buat Mindmap"** — baca form (topik/timeframe/verbosity/bahasa/file), panggil `generateMindmap()`, redirect ke `/canvas/[id]` hasilnya. Ini yang nyambungin M6 loading state ke alur nyata.
+- **M3 sisa**: `status`, `isOnline`, `appendNodes`, `applyLayout` — paling masuk akal digabung barengan M7 (elaborate) atau M10 (offline).
+- **Nasib "tandai selesai"** (keputusan di atas) kalau user mau ambil sekarang.
 
 **Kalau waktu mepet, yang boleh dipotong:** M10 seluruhnya, dan upload PDF di M6 — sisakan input topik saja.
