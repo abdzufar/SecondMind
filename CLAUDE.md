@@ -205,10 +205,11 @@ Status per 2026-08-17, dicek ulang terhadap working tree — bukan cuma niat.
 - [x] Tutup sidebar → seleksi hilang (`clearSelection`)
 
 ### M6 — Alur generate
-- [~] Form: topik ✓ (controlled + validasi wajib isi), upload PDF ✓ (`File` asli sekarang ke-simpen, bukan cuma nama/ukuran), timeframe/verbosity/bahasa ✓ (dibaca lewat ref pas submit) — `handleGenerateClick` di `app/composer/page.tsx` udah ngerakit `GenerateMindmapInput` lengkap & valid, tapi **belum manggil `generateMindmap()` beneran** — masih `console.log` placeholder + `router.push("/loading")` kosong, nunggu langkah 2 (oper payload ke `/loading` lewat sessionStorage, baru panggil API di sana)
-- [~] Loading state — `app/loading/page.tsx` sudah ada teks progres bertahap (bukan spinner polos) ✓, tapi masih `setTimeout` 4 detik, belum terhubung ke pemanggilan `generateMindmap` yang sungguhan
-- [ ] Error state + tombol coba lagi untuk 400 dan 413 — belum ada
-- [ ] Banner `feasibilityWarning` di atas canvas — belum ada
+- [x] Form: topik ✓ (controlled + validasi wajib isi), upload PDF ✓ (`File` asli ke-simpen), timeframe/verbosity/bahasa ✓ (dibaca lewat ref pas submit). `handleGenerateClick` di `app/composer/page.tsx` ngerakit `GenerateMindmapInput`, taruh ke `lib/pendingGenerate.ts` (module singleton `setPendingGenerateInput`/`takePendingGenerateInput` — bukan `sessionStorage`, karena `input.file` adalah objek `File` asli yang gak bisa diserialisasi ke string; client-side nav Next.js gak reload JS runtime jadi module state cukup), lalu `router.push("/loading")`.
+- [x] Loading state — `app/loading/page.tsx` sekarang manggil `generateMindmap()` sungguhan (dari `lib/pendingGenerate`'s payload) sambil teks progres bertahap tetap jalan; sukses → `router.replace(\`/canvas/${mindmap._id}\`)` (bukan `/canvas` statis lagi).
+- [x] Error state + tombol coba lagi — kalau `generateMindmap()` reject, tampil pesan gagal + tombol "Coba Lagi" (retry pakai payload yang sama, disimpan di `useRef`) dan link "Kembali ke form". *(Belum spesifik nge-parse status 400/413 dari response — mock gak pernah reject dengan kode itu; penanganan pesan per-status baru masuk akal pas `lib/api.ts` beneran fetch ke backend, M11.)*
+- [ ] Banner `feasibilityWarning` di atas canvas — belum ada, item terpisah dari alur generate ini
+- **Gotcha yang kena pas implementasi** (dicatat buat referensi M7, polanya bakal muncul lagi): React Strict Mode di dev **double-invoke** `useEffect` — efek mount `app/loading/page.tsx` yang manggil `takePendingGenerateInput()` (queue "ambil sekali abis itu kosong") kena panggil dua kali, panggilan kedua dapat `null` dan langsung `router.replace("/composer")`, balapan sama hasil generate yang asli. Fix: guard `useRef` (`hasStartedRef`) di dalam efek supaya badan efek cuma bener-bener jalan sekali walau React manggil fungsinya dua kali.
 
 ### M7 — Alur elaborate
 - [ ] Input chat mengirim node yang sedang dipilih (chip konteks) — command bar ada tapi belum kirim konteks node

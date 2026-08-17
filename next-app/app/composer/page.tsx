@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import "./composer.css";
 import { deleteMindmap, getMindmaps, type GenerateMindmapInput, type MindmapSummary } from "@/lib/api";
+import { setPendingGenerateInput } from "@/lib/pendingGenerate";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -118,8 +119,7 @@ export default function ComposerPage() {
       language: languageRef.current?.value ?? "id",
     };
 
-    // TODO (langkah 2): oper `payload` ke /loading (sessionStorage) alih-alih cuma navigasi kosong.
-    console.log("[composer] payload siap:", payload);
+    setPendingGenerateInput(payload);
     router.push("/loading");
   }
 

@@ -48,6 +48,16 @@
   color: var(--sm-ink-45);
 }
 
+.page-loading .status--error {
+  color: var(--destructive);
+}
+
+.page-loading .loading-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-4);
+}
+
 .page-loading .skeleton-list {
   display: flex;
   flex-direction: column;
