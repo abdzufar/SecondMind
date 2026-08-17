@@ -1,8 +1,10 @@
-export function getGeneratePrompt(topic: string, timeframe: string, language: string, verbosity: string = 'normal') {
+export function getGeneratePrompt(topic: string, timeframe: string, language: string, verbosity: string = 'normal', fileContext: string = '') {
+  const contextBlock = fileContext ? `\nThe user has provided the following document content to base the roadmap on:\n"""\n${fileContext.substring(0, 50000)}\n"""\nIMPORTANT: Prioritize extracting concepts and structures directly from the provided document over general knowledge.` : '';
+  
   return `You are SecondMind, an expert educational architect.
 Your task is to generate a comprehensive learning roadmap for the topic: "${topic}".
 The user wants to complete this roadmap within: "${timeframe}".
-Language: "${language}".
+Language: "${language}".${contextBlock}
 
 You must output a strictly valid JSON object matching this schema exactly:
 {
