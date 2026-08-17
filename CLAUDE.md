@@ -102,6 +102,7 @@ export type WireTodo = {
 export type MindmapNodeData = WireMindmapNode["data"] & {
   num?: string; // nomor urut roadmap-step, dihitung dari index — bukan dari backend
   isActive?: boolean; // state highlight lokal (mis. cabang lagi di-elaborate) — bukan dari backend
+  isCompleted?: boolean; // toggle "tandai selesai" lokal, cuma dipakai roadmap-step — bukan dari backend
 };
 
 export type MindmapNode = Node<MindmapNodeData, WireNodeType>; // Node<> mewajibkan `position`
@@ -115,8 +116,10 @@ export type Mindmap = Omit<WireMindmap, "nodes" | "edges"> & {
 
 **Penting:** node dari backend **tidak** punya field `position`. Koordinat dihitung di frontend pakai dagre setiap kali graph di-load atau bertambah, lewat `lib/canvas/layout.ts`. Kalau backend mengirim `position`, abaikan.
 
+**⚠️ Kontrak `timeMark` sudah basi.** `database_schema.md` (root, ditulis partner) sekarang mendefinisikan `data.timeOffsetDays: Number` di skema Mongoose node, bukan `timeMark: string` lagi. Ini keputusan sadar — `implementation_plan.md` §"Partner Revisions" bilang Gemini balikin integer offset hari mentah karena parsing string `timeMark` rapuh; frontend yang wajib format jadi "Day X"/"Week Y" sendiri. **Belum dimigrasikan di kode**: `lib/types.ts`, `lib/mock/mindmap.ts`, `RoadmapStepNode.tsx`, `MindmapBranchNode.tsx`, `Drawer.tsx` masih pakai `timeMark` string lama. Ini ubah bentuk wire type — tanya dulu sebelum migrasi (§8). *(Catatan: `api_documentation.md` contoh response `generate` masih nunjukin `timeMark: "Day 1"`, gak sinkron sama `database_schema.md` — kemungkinan dokumen itu belum di-update pas field-nya diganti, worth dikonfirmasi ke partner.)*
+
 **Konversi wire→UI** ditaruh di dua tempat, bukan di komponen:
-- `lib/api.ts` (belum ada, lihat backlog M2): memetakan `WireMindmap` → `Mindmap`, mengisi `num` (index roadmap-step + 1) dan `position` placeholder awal.
+- `lib/api.ts` (`toMindmap()`): memetakan `WireMindmap` → `Mindmap`, mengisi `num` (index roadmap-step + 1) dan `position` placeholder awal.
 - `lib/canvas/layout.ts`: mengisi `position` final dari hasil dagre.
 
 ## 6. Endpoint backend
@@ -125,26 +128,26 @@ Semua dipanggil hanya lewat `lib/api.ts`, tidak pernah langsung dari komponen.
 
 | Endpoint | Kegunaan |
 |---|---|
-| `POST /api/mindmap/generate` | Kirim `FormData` (topik, PDF, timeframe, verbosity, language). Bisa makan waktu sampai 60 detik. |
+| `POST /api/mindmap/generate` | Kirim `FormData` (topik, PDF, timeframe, verbosity, language). Bisa makan waktu sampai 60 detik. Backend langsung auto-save ke MongoDB — response-nya sudah dokumen lengkap dengan `_id`, bukan preview yang perlu di-save terpisah. |
 | `POST /api/mindmap/elaborate` | JSON `{ nodeId, concept, action, language }` → balik `{ newNodes, newEdges }` |
-| `GET /api/mindmap` | Daftar ringkas untuk dashboard |
+| `GET /api/mindmap` | Daftar ringkas untuk dashboard — cuma `_id, title, topic, timeframe, createdAt, isPublic, shareId` (bukan `nodes`/`edges` penuh, hemat bandwidth) |
 | `GET /api/mindmap/:id` | Mindmap lengkap |
-| `PUT /api/mindmap/:id` | Simpan `{ nodes, edges }` hasil edit manual |
-| `DELETE /api/mindmap/:id` | Hapus |
-| `GET /api/mindmap/share/:shareId` | Publik, tanpa session — untuk halaman read-only |
+| `PUT /api/mindmap/:id` | Simpan `{ nodes, edges }` hasil edit manual. Juga nerima `isPublic: boolean` — kalau `true` dan mindmap belum punya `shareId`, backend auto-generate `shareId` baru sendiri (jangan bikin di frontend). |
+| `DELETE /api/mindmap/:id` | Hapus. Backend cascade-delete semua `Todo` terkait juga, biar cron gak ngirim reminder buat mindmap yang udah gak ada. |
+| `GET /api/mindmap/share/:shareId` | Publik, tanpa session — untuk halaman read-only. `403` kalau mindmap-nya gak `isPublic`. |
 | `POST /api/todo`, `GET /api/todo?mindmapId=`, `PUT /api/todo/:id` | CRUD to-do |
 
-Error yang perlu ditangani di UI: `400` (format file salah), `413` (PDF terlalu besar), `404` (mindmap tidak ditemukan).
+Error yang perlu ditangani di UI: `400` (format file salah), `413` (PDF terlalu besar), `401` (session habis/belum login — semua endpoint `/mindmap/*` dan `/todo/*` butuh session), `403` (share link private), `404` (mindmap/todo tidak ditemukan).
 
 ## 7. Aturan arsitektur
 
-1. **Semua akses data lewat `lib/api.ts`.** Selama backend belum siap, isinya mengembalikan mock dari `lib/mock/`. Integrasi nanti cukup mengganti isi file ini, bukan menyisir komponen. *(Belum ditegakkan sekarang — `store/canvasStore.ts` masih import `MOCK_MINDMAP` langsung karena `lib/api.ts` belum dibuat.)*
+1. **Semua akses data lewat `lib/api.ts`.** Selama backend belum siap, isinya mengembalikan mock dari `lib/mock/`. Integrasi nanti cukup mengganti isi file ini, bukan menyisir komponen. *(Berlaku untuk `nodes`/`edges` — `store/canvasStore.ts` sekarang load lewat `getMindmap()`. Belum berlaku untuk metadata mindmap: `app/canvas/page.tsx`, `Drawer.tsx`, `ExportButton` masih import `MOCK_MINDMAP` langsung buat `title`/`topic`/`timeframe`, karena store cuma nyimpen `nodes`/`edges`/`selectedNodeId` — belum ada tempat buat metadata level-mindmap. Perlu diputuskan nanti: tambah field ke store, atau state terpisah.)*
 2. **Logika dagre diisolasi di `lib/canvas/layout.ts`**, tidak boleh ada di dalam komponen.
 3. **Store zustand dikonsumsi dengan selector spesifik** (`useStore(s => s.nodes)`), bukan mengambil seluruh store. Kalau tidak, canvas re-render tiap klik satu node.
-4. **Drag node dimatikan.** Pan, zoom, dan fit view tetap aktif. *(Belum ditegakkan sekarang — `CanvasView.tsx` tidak set `nodesDraggable={false}`, jadi node masih bisa di-drag.)*
+4. **Drag node dimatikan.** Pan, zoom, dan fit view tetap aktif.
 5. **Status online/offline dipegang satu listener di root** dan disimpan di store. Jangan menaruh `navigator.onLine` di tiap komponen.
 
-Bentuk store yang disepakati — state: `nodes`, `edges`, `selectedNodeId`, `status`, `isOnline`. Actions: `setGraph`, `selectNode`, `clearSelection`, `toggleNodeComplete`, `appendNodes`, `applyLayout`. *(Store nyata sekarang cuma punya `nodes, edges, selectedNodeId` + `onNodesChange, onEdgesChange, selectNode` — lihat backlog M3.)*
+Bentuk store yang disepakati — state: `nodes`, `edges`, `selectedNodeId`, `status`, `isOnline`. Actions: `setGraph`, `selectNode`, `clearSelection`, `toggleNodeComplete`, `appendNodes`, `applyLayout`. *(Store nyata sekarang punya `nodes, edges, selectedNodeId` + `onNodesChange, onEdgesChange, selectNode, clearSelection, toggleNodeComplete, setGraph`. `setGraph(nodes, edges)` motong lewat `getLayoutedElements` sekalian — dipanggil sekali pas modul store di-load, dari `getMindmap()` di `lib/api.ts`. Masih kurang `status`, `isOnline`, `appendNodes`, `applyLayout` — ditunda ke M7/M10 karena baru kepake pas ada alur elaborate/offline beneran.)*
 
 ## 8. Cara kerja yang aku harapkan
 
@@ -158,7 +161,7 @@ Bentuk store yang disepakati — state: `nodes`, `edges`, `selectedNodeId`, `sta
 
 ## 9. Backlog
 
-Status per 2026-08-16, dicek ulang terhadap working tree — bukan cuma niat.
+Status per 2026-08-17, dicek ulang terhadap working tree — bukan cuma niat.
 
 ### M0 — Setup
 - [x] Init Next.js App Router + Tailwind
@@ -168,31 +171,35 @@ Status per 2026-08-16, dicek ulang terhadap working tree — bukan cuma niat.
 - [x] Masukkan design token bagian 4 ke `app/globals.css` — sudah ada lewat `@theme inline`, §4 sudah dikoreksi supaya dokumen ikut kode
 
 ### M1 — Kerangka halaman
-- [~] Header: tombol kembali ✓, judul ✓, tombol aksi ✓ — **progress bar belum ada**
-- [~] Canvas reactflow kosong — pan/zoom/fit view aktif ✓ — **drag node belum dimatikan** (lihat §7 poin 4)
+- [x] Header: tombol kembali ✓, judul ✓, tombol aksi ✓, progress bar ✓ (`header-progress` di `app/canvas/page.tsx`, dihitung dari node `roadmap-step`)
+- [x] Canvas reactflow kosong — pan/zoom/fit view aktif ✓, `nodesDraggable={false}` sudah di-set di `CanvasView.tsx`
 - [x] Sidebar kanan (bisa buka-tutup) — `components/canvas/Drawer.tsx`
 - [x] Input chat di bawah canvas — ada di `CanvasView.tsx`, belum wired ke aksi (wajar, itu M7)
 
 ### M2 — Lapisan data
-- [x] Mock mindmap di `lib/mock/` — 5 roadmap-step + 13 branch, `timeMark` terisi
-- [ ] `lib/api.ts`: `generateMindmap`, `elaborateNode`, `getMindmaps`, `getMindmap`, `saveMindmap`, `deleteMindmap`, `getTodos`, `createTodo`, `updateTodo` — **belum dibuat sama sekali**
-- [ ] Komponen tidak boleh fetch langsung — saat ini `store/canvasStore.ts` import mock langsung, bukan lewat `lib/api.ts`
+- [x] Mock mindmap di `lib/mock/mindmap.ts` — sekarang bentuk `WireMindmap` murni (bukan `Mindmap`), 5 roadmap-step + 13 branch, `timeMark` terisi, tanpa `position`/`num`/`isActive`
+- [x] Mock todo di `lib/mock/todo.ts` — 3 `WireTodo` seed, terkait ke mindmap mock
+- [x] `lib/api.ts`: `generateMindmap`, `elaborateNode`, `getMindmaps`, `getMindmap`, `saveMindmap`, `deleteMindmap`, `getTodos`, `createTodo`, `updateTodo` — semua ada, return mock lewat "database" in-memory + delay 300ms simulasi network. `getMindmaps`/`saveMindmap` belum dipanggil komponen manapun (wajar, itu M8/M11), tapi sudah lengkap & ke-type-check
+- [x] Komponen tidak boleh fetch langsung — `store/canvasStore.ts` sekarang panggil `getMindmap()` dari `lib/api.ts`, bukan import `MOCK_MINDMAP` langsung (lihat §7 poin 1 buat gap yang tersisa: metadata mindmap di halaman lain)
+- [ ] Migrasi `timeMark: string` → `timeOffsetDays: number` di `lib/types.ts` + format "Day X"/"Week Y" pas mapping wire→UI di `lib/api.ts` (lihat §5) — **sengaja ditunda**, sesi ini fokus M2 doang, nunggu konfirmasi karena ubah bentuk wire type
 
 ### M3 — Store zustand
-- [ ] State dan actions sesuai bagian 7 — store nyata belum sesuai (lihat §7)
+- [~] State dan actions sesuai bagian 7 — `clearSelection`, `toggleNodeComplete`, `setGraph` sudah ada; `status`, `isOnline`, `appendNodes`, `applyLayout` sengaja ditunda ke M7/M10 (lihat §7)
 - [x] Konsumsi pakai selector spesifik — semua pemakaian sudah `useCanvasStore(s => s.x)`
 
 ### M4 — Node dan layout
-- [~] Komponen `roadmap-step`: bernomor ✓, lebih besar ✓, tampil `timeMark` ✓ — **warna berubah kalau selesai: belum ada**
+- [x] Komponen `roadmap-step`: bernomor ✓, lebih besar ✓, tampil `timeMark` ✓, warna berubah + ikon centang kalau selesai ✓ (`.xf-step.is-complete`)
 - [x] Komponen `mindmap-branch`: lebih kecil, tanpa nomor
 - [x] `lib/canvas/layout.ts`: spine vertikal (dagre TB, step-only) + cabang tiap step di-fan manual ke kiri/kanan gantian per step, sesuai hero illustration di `app/page.tsx`
 - [x] Daftarkan keduanya ke `nodeTypes`
 
+**⚠️ "Tandai selesai" (`isCompleted` di node) gak ada di spec resmi.** Dicek ulang ke `user_flow.md` dan `database_schema.md` (root, punya partner): skema node Mindmap cuma punya `label`, `description`, `timeOffsetDays` — gak ada field completion. `isCompleted` di spec cuma ada di skema `Todo` (M8). Konsekuensinya: state "selesai" di node sekarang **cuma di zustand lokal**, bakal ke-drop diam-diam kalau `PUT /api/mindmap/:id` beneran dipanggil (backend gak punya kolom buat nyimpennya). Belum diputuskan: biarin sebagai visual lokal-saja, atau ganti jadi ngikutin status To-Do (M8) yang emang persisted.
+
 ### M5 — Interaksi
 - [x] Klik node → sidebar tampilkan label, description, timeMark
-- [ ] Tombol tandai selesai — belum ada (butuh `toggleNodeComplete` di store dulu, M3)
-- [ ] Progress bar dihitung dari node `roadmap-step` saja — belum ada
-- [x] Tutup sidebar → seleksi hilang
+- [x] Tombol tandai selesai — `Drawer.tsx`, cuma tampil untuk `roadmap-step`, manggil `toggleNodeComplete` (lihat catatan di M4 soal persistensi)
+- [x] Progress bar dihitung dari node `roadmap-step` saja — header `app/canvas/page.tsx`
+- [x] Tutup sidebar → seleksi hilang (`clearSelection`)
 
 ### M6 — Alur generate
 - [~] Form: topik ✓, upload PDF ✓ (drag-drop + file preview), timeframe ✓ — **verbosity dan bahasa belum ada input-nya**
@@ -213,8 +220,8 @@ Status per 2026-08-16, dicek ulang terhadap working tree — bukan cuma niat.
 
 ### M9 — Share dan export
 - [x] Export PNG (`toPng` + `getNodesBounds` dari reactflow) — `components/canvas/ExportButton.tsx`, tombol Export di header
-- [ ] Toggle publik → tampilkan URL share + tombol copy — belum ada
-- [ ] Halaman `/share/[shareId]` — belum ada
+- [ ] Toggle publik → tampilkan URL share + tombol copy — belum ada di frontend, tapi **backend-nya udah siap**: `PUT /api/mindmap/:id` dengan `{ isPublic: true }` auto-generate `shareId` sendiri, tinggal wiring lewat `lib/api.ts` (M2)
+- [ ] Halaman `/share/[shareId]` — belum ada, konsumsi `GET /api/mindmap/share/:shareId` (publik, balik `403` kalau private)
 
 ### M10 — PWA dan offline
 - [ ] Konfigurasi `next-pwa`, manifest, ikon, tombol install — belum ada (`next-pwa` belum terpasang)
@@ -224,7 +231,7 @@ Status per 2026-08-16, dicek ulang terhadap working tree — bukan cuma niat.
 - [ ] Wipe cache sebelum `signOut()`, cek `userId` cocok saat boot — belum ada
 
 ### M11 — Halaman pendukung dan perapian
-- [~] Halaman login (Google + email/password) — `app/login/page.tsx` dan `app/register/page.tsx` sudah ada (form email/password + `PasswordInput`), tapi **belum pakai komponen next-auth partner** — `handleSubmit` cuma `router.push`, tidak ada tombol Google, tidak ada pemanggilan auth sungguhan
+- [~] Halaman login (Google + email/password) — `app/login/page.tsx` dan `app/register/page.tsx` sudah ada (form email/password + `PasswordInput`), tapi **belum pakai komponen next-auth partner** — `handleSubmit` cuma `router.push`, tidak ada tombol Google, tidak ada pemanggilan auth sungguhan. Begitu wiring beneran: `next-app/types/next-auth.d.ts` udah ada dari partner, `session.user.id: string` sudah ketipekan resmi — gak perlu `as any` lagi pas pakai `useSession`.
 - [~] Dashboard daftar mindmap + tombol hapus — `app/composer/page.tsx` punya seksi "Riwayat" tapi masih data statis (`HISTORY` const), tanpa tombol hapus
 - [~] Empty state dan loading skeleton — `app/loading/page.tsx` punya skeleton bar; empty state dashboard belum ada
 - [ ] Layar kecil: sidebar jadi bottom sheet — belum diverifikasi, drawer saat ini cuma jadi full-width di `<900px`, bukan bottom sheet
@@ -234,18 +241,19 @@ Status per 2026-08-16, dicek ulang terhadap working tree — bukan cuma niat.
 
 ## 10. Rencana sesi berikutnya
 
-**Milestone pertama yang benar-benar belum dikerjakan: M2 — `lib/api.ts`.** Beda dengan M0/M1/M3/M4/M6/M11 yang masing-masing sudah punya kode nyata dengan gap parsial, M2 punya nol baris kode untuk deliverable utamanya, dan ini blocker struktural: aturan arsitektur §7 poin 1 saat ini dilanggar by construction karena store import mock langsung. M6 (generate), M7 (elaborate), M8 (todo), dan M11 (swap mock→fetch asli) semua butuh file ini ada duluan.
+M1, M4, dan M5 sekarang lengkap lewat fitur "tandai selesai" (toggle per node roadmap-step, warna node berubah, progress bar header) — murni frontend pakai mock data. Bug `nodesDraggable` juga sudah beres.
 
-Urutan kerja yang disarankan:
+**M2 sekarang lengkap.** `lib/api.ts` punya 9 fungsi mock, `lib/mock/mindmap.ts` dirapikan jadi `WireMindmap` murni, `lib/mock/todo.ts` baru dibikin, dan `store/canvasStore.ts` load lewat `getMindmap()` + action `setGraph` baru (bukan import mock langsung lagi). Diverifikasi jalan di browser — 5 step + 13 branch ke-load, progress bar & tandai selesai masih normal, nol console error.
 
-1. **M2 — `lib/api.ts`** (prioritas pertama)
-   - Buat `lib/api.ts` dengan 9 fungsi mock: `generateMindmap`, `elaborateNode`, `getMindmaps`, `getMindmap`, `saveMindmap`, `deleteMindmap`, `getTodos`, `createTodo`, `updateTodo`
-   - Refactor `store/canvasStore.ts` supaya baca lewat `lib/api.ts`, bukan import `MOCK_MINDMAP` langsung dari `lib/mock/`
-2. **M3 — Benahi bentuk store**, begitu M2 selesai (beberapa action baru masuk akal setelah `lib/api.ts` ada):
-   - Tambah state `status`, `isOnline`
-   - Tambah actions `setGraph`, `clearSelection`, `toggleNodeComplete`, `appendNodes`, `applyLayout`
+Dua keputusan yang masih menunggu (sengaja *tidak* dieksekusi sesi ini biar tetap satu milestone per sesi, lihat §8):
+1. **Migrasi `timeMark` → `timeOffsetDays`** (lihat §5, §9 M2) — sekarang lokasinya jelas: `lib/types.ts` (bentuk wire type), `lib/mock/mindmap.ts` (data seed), `toMindmap()` di `lib/api.ts` (format "Day X"/"Week Y"), plus komponen yang nampilin (`RoadmapStepNode.tsx`, `MindmapBranchNode.tsx`, `Drawer.tsx`).
+2. **Nasib "tandai selesai" per-node** (lihat §9 M4) — tetap visual lokal, atau digeser ke status To-Do (M8) yang persisted.
 
-**Satu bug kecil yang sudah ketahuan tapi belum diperbaiki:**
-- `CanvasView.tsx` — `nodesDraggable` belum di-set `false`, jadi node masih bisa di-drag padahal §7 poin 4 bilang harus mati
+Gap kecil yang ketinggalan dari M2 (dicatat di §7 poin 1): halaman/komponen di luar canvas (`app/canvas/page.tsx`, `Drawer.tsx`, `ExportButton`) masih baca `MOCK_MINDMAP` langsung buat metadata (`title`/`topic`/`timeframe`), karena store cuma nyimpen `nodes`/`edges`. Belum masalah besar (masih 1 sumber data yang sama), tapi bakal jadi masalah begitu ada >1 mindmap beneran (M11).
 
-**Kalau waktu mepet, yang boleh dipotong:** M10 seluruhnya, export PNG di M9, dan upload PDF di M6 — sisakan input topik saja.
+Kandidat milestone berikutnya (belum diputuskan urutan, tanya user dulu pas mulai sesi baru):
+- **M3 sisa**: `status`, `isOnline`, `appendNodes`, `applyLayout` — tapi ini paling masuk akal digabung barengan M7 (elaborate) atau M10 (offline), bukan berdiri sendiri, karena baru punya konsumen nyata di situ.
+- **Migrasi `timeOffsetDays`** (keputusan #1 di atas) kalau user mau ambil sekarang.
+- **M6/M11 kecil-kecil**: input verbosity+bahasa di composer, atau dashboard "Riwayat" pakai `getMindmaps()` yang udah ada.
+
+**Kalau waktu mepet, yang boleh dipotong:** M10 seluruhnya, dan upload PDF di M6 — sisakan input topik saja.

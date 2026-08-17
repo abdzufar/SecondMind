@@ -56,6 +56,7 @@ export function ExportButton({ filename }: { filename: string }) {
       backgroundColor: "#F7F1E9",
       width,
       height,
+      pixelRatio: 2,
       style: {
         width: `${width}px`,
         height: `${height}px`,
