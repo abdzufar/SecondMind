@@ -163,6 +163,23 @@
   color: var(--sm-ink-45);
 }
 
+.page-auth .auth-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-3);
+  margin: var(--sm-space-5) 0;
+  color: var(--sm-ink-45);
+  font-size: 12px;
+}
+
+.page-auth .auth-divider::before,
+.page-auth .auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--sm-line);
+}
+
 .page-auth .form-error {
   padding: var(--sm-space-3) var(--sm-space-4);
   border-radius: var(--sm-radius-sm);
