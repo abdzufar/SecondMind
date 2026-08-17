@@ -25,6 +25,6 @@ describe('validateEdges', () => {
   it('should handle empty arrays gracefully', () => {
     expect(validateEdges([], [])).toEqual([]);
     expect(validateEdges([{id: '1'}], [])).toEqual([]);
-    expect(validateEdges([], [{source: '1', target: '2'}])).toEqual([]);
+    expect(validateEdges([], [{id: 'e1', source: '1', target: '2'}])).toEqual([]);
   });
 });

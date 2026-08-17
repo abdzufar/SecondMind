@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Todo from '@/models/Todo';
 import Mindmap from '@/models/Mindmap';
@@ -16,7 +17,7 @@ async function checkOwnership(todoId: string, userId: string) {
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session || !session.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     
     const { isCompleted } = await req.json();
@@ -42,7 +43,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session || !session.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     await dbConnect();

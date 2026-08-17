@@ -10,7 +10,13 @@ Architecture: Next.js App Router (Route Handlers)
 
 ## 1. Authentication
 ### `POST /auth/[...nextauth]`
-Handles OAuth and Credentials authentication flows. Managed internally by `next-auth`.
+Handles Google OAuth and Custom Credentials flows. Managed internally by `next-auth`.
+
+### `POST /auth/register`
+Creates a new user account with a hashed password using `bcryptjs`.
+* **Format:** `application/json`
+* **Inputs:** `{ "name": "John Doe", "email": "john@example.com", "password": "secure123" }`
+* **Success Output (201 Created):** Returns user object (without password).
 
 ---
 
@@ -19,10 +25,10 @@ Handles OAuth and Credentials authentication flows. Managed internally by `next-
 Generates a new Hybrid Roadmap.
 
 * **Backend Process:**
-  1. Verifies NextAuth session (User MUST be logged in).
-  2. Captures input via native `request.formData()`.
-  3. If a file exists, extracts text using `pdf-parse`.
-  4. Prompts Gemini SDK to generate the JSON structure AND a fitting `title` based on the content. (Note: Implements `export const maxDuration = 60;` and limits max nodes in prompt to prevent Vercel timeouts).
+  1. Verifies NextAuth session via `getServerSession(authOptions)`.
+  2. Captures input (`topic`, `timeframe`, `language`, `verbosity`, and `file`) via native `request.formData()`.
+  3. **Context Extraction:** If a `.pdf` or `.txt` file is attached, extracts the text using `pdf-parse` or string buffer.
+  4. Prompts Gemini SDK to generate the JSON structure, forcefully injecting the extracted document text into the AI context window.
   5. **Data Sanitization:** Passes the output through the `validateEdges()` helper.
   6. **Auto-Save:** Immediately saves the document to MongoDB.
 

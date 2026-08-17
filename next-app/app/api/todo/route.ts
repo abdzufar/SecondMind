@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Mindmap from '@/models/Mindmap';
 import Todo from '@/models/Todo';
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session || !session.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     
     const body = await req.json();
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session || !session.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { searchParams } = new URL(req.url);
