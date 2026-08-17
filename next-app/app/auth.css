@@ -1,12 +1,7 @@
 /* Shared login/register layout — scoped under .page-auth */
 
-.page-auth {
-  min-height: 100vh;
-  display: flex;
-}
-
 .page-auth .auth-main {
-  flex: 1;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -244,9 +239,16 @@
 }
 
 .page-auth .footnote {
-  margin: var(--sm-space-8) 0 0;
+  margin: var(--sm-space-7) 0 0;
+  padding: var(--sm-space-5) 0;
+  border-top: 1px solid var(--sm-line);
   font-size: 12px;
+  line-height: 18px;
   color: var(--sm-ink-45);
+}
+
+.page-auth .footnote a {
+  font-weight: 600;
 }
 
 @media (max-width: 420px) {

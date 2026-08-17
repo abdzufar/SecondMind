@@ -134,7 +134,9 @@ export default function RegisterPage() {
           <p className="switch">
             Sudah punya akun? <Link href="/login">Masuk di sini</Link>
           </p>
-          <p className="footnote">© 2026 Second Mind</p>
+          <p className="footnote">
+            © 2026 Second Mind · <a href="#">Bantuan</a> · <a href="#">Privasi</a>
+          </p>
         </div>
       </main>
     </div>
