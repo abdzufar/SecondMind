@@ -3,15 +3,50 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { PasswordInput } from "@/components/PasswordInput";
 import "../auth.css";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    router.push("/composer");
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirm-password") as string;
+
+    if (password !== confirmPassword) {
+      setError("Password dan konfirmasi password tidak sama");
+      return;
+    }
+
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.error === "User already exists" ? "Email sudah terdaftar" : "Gagal membuat akun. Coba lagi.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      router.push("/login");
+    } catch {
+      setError("Gagal terhubung ke server. Coba lagi.");
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -85,8 +120,10 @@ export default function RegisterPage() {
               </label>
             </div>
 
-            <button type="submit" className="sm-btn sm-btn--primary sm-btn--block">
-              Buat akun
+            {error && <p className="form-error">{error}</p>}
+
+            <button type="submit" className="sm-btn sm-btn--primary sm-btn--block" disabled={isSubmitting}>
+              {isSubmitting ? "Membuat akun…" : "Buat akun"}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14" />
                 <path d="m12 5 7 7-7 7" />
