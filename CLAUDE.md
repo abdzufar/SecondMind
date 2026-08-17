@@ -205,7 +205,7 @@ Status per 2026-08-17, dicek ulang terhadap working tree — bukan cuma niat.
 - [x] Tutup sidebar → seleksi hilang (`clearSelection`)
 
 ### M6 — Alur generate
-- [~] Form: topik ✓, upload PDF ✓ (drag-drop + file preview), timeframe ✓, verbosity ✓, bahasa ✓ — semua input ada di `app/composer/page.tsx`, tapi form-nya masih uncontrolled/gak dibaca kemanapun (tombol "Buat Mindmap" masih cuma `router.push("/loading")`, belum manggil `generateMindmap()`)
+- [~] Form: topik ✓ (controlled + validasi wajib isi), upload PDF ✓ (`File` asli sekarang ke-simpen, bukan cuma nama/ukuran), timeframe/verbosity/bahasa ✓ (dibaca lewat ref pas submit) — `handleGenerateClick` di `app/composer/page.tsx` udah ngerakit `GenerateMindmapInput` lengkap & valid, tapi **belum manggil `generateMindmap()` beneran** — masih `console.log` placeholder + `router.push("/loading")` kosong, nunggu langkah 2 (oper payload ke `/loading` lewat sessionStorage, baru panggil API di sana)
 - [~] Loading state — `app/loading/page.tsx` sudah ada teks progres bertahap (bukan spinner polos) ✓, tapi masih `setTimeout` 4 detik, belum terhubung ke pemanggilan `generateMindmap` yang sungguhan
 - [ ] Error state + tombol coba lagi untuk 400 dan 413 — belum ada
 - [ ] Banner `feasibilityWarning` di atas canvas — belum ada

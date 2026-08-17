@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import "./composer.css";
-import { deleteMindmap, getMindmaps, type MindmapSummary } from "@/lib/api";
+import { deleteMindmap, getMindmaps, type GenerateMindmapInput, type MindmapSummary } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,6 +19,7 @@ import {
 type SelectedFile = {
   name: string;
   sizeLabel: string;
+  file: File;
 };
 
 type HistoryStatus = "loading" | "ready" | "error";
@@ -56,8 +57,13 @@ function formatRelativeTime(iso: string) {
 export default function ComposerPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const timeframeRef = useRef<HTMLSelectElement>(null);
+  const verbosityRef = useRef<HTMLSelectElement>(null);
+  const languageRef = useRef<HTMLSelectElement>(null);
   const [file, setFile] = useState<SelectedFile | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [topic, setTopic] = useState("");
+  const [topicError, setTopicError] = useState(false);
   const [history, setHistory] = useState<MindmapSummary[]>([]);
   const [historyStatus, setHistoryStatus] = useState<HistoryStatus>("loading");
   const [deleteTarget, setDeleteTarget] = useState<MindmapSummary | null>(null);
@@ -86,7 +92,7 @@ export default function ComposerPage() {
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const picked = e.target.files?.[0];
     if (!picked) return;
-    setFile({ name: picked.name, sizeLabel: formatSize(picked.size) });
+    setFile({ name: picked.name, sizeLabel: formatSize(picked.size), file: picked });
   }
 
   function handleDrop(e: React.DragEvent<HTMLLabelElement>) {
@@ -94,7 +100,27 @@ export default function ComposerPage() {
     setIsDragOver(false);
     const dropped = e.dataTransfer.files?.[0];
     if (!dropped) return;
-    setFile({ name: dropped.name, sizeLabel: formatSize(dropped.size) });
+    setFile({ name: dropped.name, sizeLabel: formatSize(dropped.size), file: dropped });
+  }
+
+  function handleGenerateClick() {
+    if (!topic.trim()) {
+      setTopicError(true);
+      return;
+    }
+    setTopicError(false);
+
+    const payload: GenerateMindmapInput = {
+      topic: topic.trim(),
+      file: file?.file ?? null,
+      timeframe: timeframeRef.current?.value ?? "1-month",
+      verbosity: verbosityRef.current?.value ?? "seimbang",
+      language: languageRef.current?.value ?? "id",
+    };
+
+    // TODO (langkah 2): oper `payload` ke /loading (sessionStorage) alih-alih cuma navigasi kosong.
+    console.log("[composer] payload siap:", payload);
+    router.push("/loading");
   }
 
   return (
@@ -125,7 +151,7 @@ export default function ComposerPage() {
               <label className="label" htmlFor="learning-goal">
                 Mau belajar apa?
               </label>
-              <div className="input-wrap">
+              <div className={`input-wrap${topicError ? " has-error" : ""}`}>
                 <span className="input-icon">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M15 14c.2-1 .7-1.7 1.5-2.5A5.5 5.5 0 1 0 7 8c0 2 1 3 1.5 3.5.8.8 1.3 1.5 1.5 2.5" />
@@ -139,14 +165,20 @@ export default function ComposerPage() {
                   id="learning-goal"
                   name="learning-goal"
                   placeholder="Contoh: strategi growth marketing, dasar machine learning"
+                  value={topic}
+                  onChange={(e) => {
+                    setTopic(e.target.value);
+                    if (topicError) setTopicError(false);
+                  }}
                 />
               </div>
+              {topicError && <span className="field-error">Isi dulu mau belajar apa</span>}
             </div>
             <div className="field field--timeframe">
               <label className="label" htmlFor="timeframe">
                 Target waktu
               </label>
-              <select className="select" id="timeframe" name="timeframe" defaultValue="1-month">
+              <select className="select" id="timeframe" name="timeframe" defaultValue="1-month" ref={timeframeRef}>
                 <option value="1-week">1 minggu (kilat)</option>
                 <option value="2-week">2 minggu</option>
                 <option value="1-month">1 bulan</option>
@@ -161,7 +193,7 @@ export default function ComposerPage() {
               <label className="label" htmlFor="verbosity">
                 Tingkat detail
               </label>
-              <select className="select" id="verbosity" name="verbosity" defaultValue="seimbang">
+              <select className="select" id="verbosity" name="verbosity" defaultValue="seimbang" ref={verbosityRef}>
                 <option value="ringkas">Ringkas — poin-poin inti aja</option>
                 <option value="seimbang">Seimbang</option>
                 <option value="detail">Detail — penjelasan lengkap tiap langkah</option>
@@ -171,7 +203,7 @@ export default function ComposerPage() {
               <label className="label" htmlFor="language">
                 Bahasa
               </label>
-              <select className="select" id="language" name="language" defaultValue="id">
+              <select className="select" id="language" name="language" defaultValue="id" ref={languageRef}>
                 <option value="id">Indonesia</option>
                 <option value="en">English</option>
               </select>
@@ -238,7 +270,7 @@ export default function ComposerPage() {
             <button type="button" className="sm-btn sm-btn--ghost" onClick={() => fileInputRef.current?.click()}>
               Unggah File
             </button>
-            <button type="button" className="sm-btn sm-btn--primary" onClick={() => router.push("/loading")}>
+            <button type="button" className="sm-btn sm-btn--primary" onClick={handleGenerateClick}>
               Buat Mindmap
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14" />
