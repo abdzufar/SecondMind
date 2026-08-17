@@ -143,6 +143,16 @@
   font-size: 13px;
 }
 
+.page-canvas .canvas-loading--error {
+  flex-direction: column;
+  gap: var(--sm-space-3);
+}
+
+.page-canvas .canvas-loading--error p {
+  color: var(--destructive);
+  margin: 0;
+}
+
 .page-canvas .react-flow {
   background-color: var(--sm-paper);
 }

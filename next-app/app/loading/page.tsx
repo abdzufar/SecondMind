@@ -8,7 +8,14 @@ import "./loading-page.css";
 import { generateMindmap, type GenerateMindmapInput } from "@/lib/api";
 import { takePendingGenerateInput } from "@/lib/pendingGenerate";
 
-const MESSAGES = ["Membaca dokumen…", "Menyusun topik utama…", "Menghubungkan cabang…", "Merapikan mindmap…"];
+const MESSAGES = [
+  "Membaca dokumen…",
+  "Memahami topik dan konteks…",
+  "Menyusun struktur roadmap…",
+  "Menghubungkan antar konsep…",
+  "Merapikan tata letak…",
+  "Menyelesaikan sentuhan akhir…",
+];
 
 export default function LoadingPage() {
   const router = useRouter();
@@ -19,7 +26,7 @@ export default function LoadingPage() {
   useEffect(() => {
     if (status !== "loading") return;
     const interval = setInterval(() => {
-      setMessageIndex((i) => (i + 1) % MESSAGES.length);
+      setMessageIndex((i) => Math.min(i + 1, MESSAGES.length - 1));
     }, 1100);
     return () => clearInterval(interval);
   }, [status]);
@@ -55,6 +62,7 @@ export default function LoadingPage() {
   function handleRetry() {
     if (!payloadRef.current) return;
     setStatus("loading");
+    setMessageIndex(0);
     performGenerate(payloadRef.current);
   }
 
@@ -73,11 +81,14 @@ export default function LoadingPage() {
           <>
             <div className="spinner" role="status" aria-label="Memproses"></div>
             <p className="status">{MESSAGES[messageIndex]}</p>
-            <div className="skeleton-list" aria-hidden="true">
-              <div className="skeleton-bar"></div>
-              <div className="skeleton-bar"></div>
-              <div className="skeleton-bar"></div>
-              <div className="skeleton-bar"></div>
+            <div className="build-track" aria-hidden="true">
+              <span className="build-node"></span>
+              <span className="build-line"></span>
+              <span className="build-node"></span>
+              <span className="build-line"></span>
+              <span className="build-node"></span>
+              <span className="build-line"></span>
+              <span className="build-node"></span>
             </div>
           </>
         ) : (

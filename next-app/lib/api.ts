@@ -83,9 +83,10 @@ export async function generateMindmap(input: GenerateMindmapInput): Promise<Mind
 
   const wire: WireMindmap = await res.json();
 
-  // Bridge sementara selama getMindmap()/getMindmaps() masih mock: taruh hasil
-  // generate asli ke "database" lokal juga, supaya alur baca abis generate tetap
-  // jalan sampai fungsi baca itu ikut dipindah ke fetch asli.
+  // Bridge sementara selama getMindmaps() masih mock (getMindmap() sendiri
+  // sudah fetch asli): taruh hasil generate ke "database" lokal juga, supaya
+  // dashboard "Riwayat" tetap nemuin record ini sampai getMindmaps() ikut
+  // dipindah ke fetch asli.
   mindmapsDb.push({ ...wire, createdAt: wire.startDate });
 
   return toMindmap(wire);
@@ -134,7 +135,15 @@ export async function getMindmaps(): Promise<MindmapSummary[]> {
 }
 
 export async function getMindmap(id: string): Promise<Mindmap> {
-  return delay(toMindmap(findMindmapOrThrow(id)));
+  const res = await fetch(`/api/mindmap/${id}`);
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error ?? `Gagal memuat mindmap (status ${res.status})`);
+  }
+
+  const wire: WireMindmap = await res.json();
+  return toMindmap(wire);
 }
 
 export type SaveMindmapInput = {

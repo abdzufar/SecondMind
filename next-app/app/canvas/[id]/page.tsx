@@ -18,6 +18,7 @@ export default function CanvasPage() {
   const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
   const nodes = useCanvasStore((s) => s.nodes);
   const [mindmap, setMindmap] = useState<Mindmap | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const stepNodes = nodes.filter((n) => n.type === "roadmap-step");
   const completedSteps = stepNodes.filter((n) => n.data.isCompleted).length;
@@ -29,7 +30,10 @@ export default function CanvasPage() {
         setMindmap(loaded);
         setGraph(loaded.nodes, loaded.edges);
       })
-      .catch((err) => console.error("[CANVAS] gagal load mindmap:", err));
+      .catch((err) => {
+        console.error("[CANVAS] gagal load mindmap:", err);
+        setLoadError("Mindmap tidak ditemukan atau gagal dimuat.");
+      });
   }, [id, setGraph]);
 
   useEffect(() => {
@@ -51,7 +55,7 @@ export default function CanvasPage() {
               </svg>
             </Link>
             <div className="doc-info">
-              <strong>{mindmap?.title ?? "Memuat…"}</strong>
+              <strong>{mindmap?.title ?? (loadError ? "Gagal memuat" : "Memuat…")}</strong>
               <span>{mindmap ? `Roadmap ${mindmap.timeframe} · ${mindmap.nodes.length} node` : ""}</span>
             </div>
           </div>
@@ -75,7 +79,16 @@ export default function CanvasPage() {
 
         <div className={`canvas-body${selectedNodeId ? " has-drawer" : ""}`}>
           <div className="canvas-area">
-            {mindmap ? <CanvasView /> : <div className="canvas-loading">Memuat canvas…</div>}
+            {mindmap ? (
+              <CanvasView />
+            ) : loadError ? (
+              <div className="canvas-loading canvas-loading--error">
+                <p>{loadError}</p>
+                <Link href="/composer">Kembali ke composer</Link>
+              </div>
+            ) : (
+              <div className="canvas-loading">Memuat canvas…</div>
+            )}
           </div>
 
           {selectedNodeId && <Drawer />}

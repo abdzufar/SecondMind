@@ -58,45 +58,61 @@
   gap: var(--sm-space-4);
 }
 
-.page-loading .skeleton-list {
+.page-loading .build-track {
   display: flex;
-  flex-direction: column;
-  gap: var(--sm-space-3);
-  width: 340px;
-  max-width: 80vw;
+  align-items: center;
+  width: 260px;
+  max-width: 70vw;
 }
 
-.page-loading .skeleton-bar {
-  height: 14px;
-  border-radius: var(--sm-radius-sm);
-  background: var(--sm-line);
-  animation: loading-pulse 1400ms ease-in-out infinite;
+.page-loading .build-node {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--sm-clay);
+  flex-shrink: 0;
+  animation: build-glow 2100ms ease-in-out infinite;
 }
 
-.page-loading .skeleton-bar:nth-child(1) {
-  width: 100%;
+.page-loading .build-line {
+  flex: 1;
+  height: 2px;
+  background: var(--sm-clay);
+  animation: build-glow 2100ms ease-in-out infinite;
+}
+
+.page-loading .build-node:nth-child(1) {
   animation-delay: 0ms;
 }
-.page-loading .skeleton-bar:nth-child(2) {
-  width: 88%;
-  animation-delay: 120ms;
+.page-loading .build-line:nth-child(2) {
+  animation-delay: 300ms;
 }
-.page-loading .skeleton-bar:nth-child(3) {
-  width: 94%;
-  animation-delay: 240ms;
+.page-loading .build-node:nth-child(3) {
+  animation-delay: 600ms;
 }
-.page-loading .skeleton-bar:nth-child(4) {
-  width: 70%;
-  animation-delay: 360ms;
+.page-loading .build-line:nth-child(4) {
+  animation-delay: 900ms;
+}
+.page-loading .build-node:nth-child(5) {
+  animation-delay: 1200ms;
+}
+.page-loading .build-line:nth-child(6) {
+  animation-delay: 1500ms;
+}
+.page-loading .build-node:nth-child(7) {
+  animation-delay: 1800ms;
 }
 
-@keyframes loading-pulse {
+@keyframes build-glow {
   0%,
   100% {
-    opacity: 0.5;
+    opacity: 0.25;
   }
-  50% {
+  10% {
     opacity: 1;
+  }
+  25% {
+    opacity: 0.25;
   }
 }
 
@@ -104,8 +120,9 @@
   .page-loading .spinner {
     animation: none;
   }
-  .page-loading .skeleton-bar {
+  .page-loading .build-node,
+  .page-loading .build-line {
     animation: none;
-    opacity: 0.7;
+    opacity: 0.6;
   }
 }
