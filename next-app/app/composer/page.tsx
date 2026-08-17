@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import "./composer.css";
 import { deleteMindmap, getMindmaps, type GenerateMindmapInput, type MindmapSummary } from "@/lib/api";
 import { setPendingGenerateInput } from "@/lib/pendingGenerate";
@@ -16,6 +17,25 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+function getInitials(name?: string | null, email?: string | null): string {
+  if (name) {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+  if (email) return email.slice(0, 2).toUpperCase();
+  return "?";
+}
 
 type SelectedFile = {
   name: string;
@@ -57,6 +77,7 @@ function formatRelativeTime(iso: string) {
 
 export default function ComposerPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const timeframeRef = useRef<HTMLSelectElement>(null);
   const verbosityRef = useRef<HTMLSelectElement>(null);
@@ -135,7 +156,20 @@ export default function ComposerPage() {
         </Link>
         <div className="account-chip">
           <a href="#riwayat">Riwayat</a>
-          <div className="avatar">AP</div>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="avatar" aria-label="Menu akun">
+              {getInitials(session?.user?.name, session?.user?.email)}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>{session?.user?.name ?? session?.user?.email ?? "Akun"}</DropdownMenuLabel>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive" onClick={() => signOut({ callbackUrl: "/login" })}>
+                Keluar
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 

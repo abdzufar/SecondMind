@@ -58,61 +58,36 @@
   gap: var(--sm-space-4);
 }
 
-.page-loading .build-track {
-  display: flex;
-  align-items: center;
+.page-loading .build-progress {
   width: 260px;
   max-width: 70vw;
+  height: 6px;
+  border-radius: var(--sm-radius-pill);
+  background: var(--sm-line);
+  overflow: hidden;
 }
 
-.page-loading .build-node {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+.page-loading .build-progress-fill {
+  position: relative;
+  height: 100%;
+  border-radius: var(--sm-radius-pill);
   background: var(--sm-clay);
-  flex-shrink: 0;
-  animation: build-glow 2100ms ease-in-out infinite;
+  overflow: hidden;
+  transition: width 600ms ease-out;
 }
 
-.page-loading .build-line {
-  flex: 1;
-  height: 2px;
-  background: var(--sm-clay);
-  animation: build-glow 2100ms ease-in-out infinite;
+.page-loading .build-progress-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: translateX(-100%);
+  animation: build-shimmer 1600ms ease-in-out infinite;
 }
 
-.page-loading .build-node:nth-child(1) {
-  animation-delay: 0ms;
-}
-.page-loading .build-line:nth-child(2) {
-  animation-delay: 300ms;
-}
-.page-loading .build-node:nth-child(3) {
-  animation-delay: 600ms;
-}
-.page-loading .build-line:nth-child(4) {
-  animation-delay: 900ms;
-}
-.page-loading .build-node:nth-child(5) {
-  animation-delay: 1200ms;
-}
-.page-loading .build-line:nth-child(6) {
-  animation-delay: 1500ms;
-}
-.page-loading .build-node:nth-child(7) {
-  animation-delay: 1800ms;
-}
-
-@keyframes build-glow {
-  0%,
+@keyframes build-shimmer {
   100% {
-    opacity: 0.25;
-  }
-  10% {
-    opacity: 1;
-  }
-  25% {
-    opacity: 0.25;
+    transform: translateX(100%);
   }
 }
 
@@ -120,9 +95,11 @@
   .page-loading .spinner {
     animation: none;
   }
-  .page-loading .build-node,
-  .page-loading .build-line {
+  .page-loading .build-progress-fill {
+    transition: none;
+  }
+  .page-loading .build-progress-fill::after {
     animation: none;
-    opacity: 0.6;
+    display: none;
   }
 }

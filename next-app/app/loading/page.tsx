@@ -81,14 +81,11 @@ export default function LoadingPage() {
           <>
             <div className="spinner" role="status" aria-label="Memproses"></div>
             <p className="status">{MESSAGES[messageIndex]}</p>
-            <div className="build-track" aria-hidden="true">
-              <span className="build-node"></span>
-              <span className="build-line"></span>
-              <span className="build-node"></span>
-              <span className="build-line"></span>
-              <span className="build-node"></span>
-              <span className="build-line"></span>
-              <span className="build-node"></span>
+            <div className="build-progress" aria-hidden="true">
+              <div
+                className="build-progress-fill"
+                style={{ width: `${Math.round(((messageIndex + 1) / MESSAGES.length) * 90)}%` }}
+              />
             </div>
           </>
         ) : (

@@ -66,6 +66,14 @@
   justify-content: center;
   font: 700 13px/1 var(--sm-font);
   flex-shrink: 0;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 150ms ease-out;
+}
+
+.page-composer .avatar:hover {
+  opacity: 0.85;
 }
 
 /* page */
