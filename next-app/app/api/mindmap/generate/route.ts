@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import dbConnect from "@/lib/db";
 import Mindmap from "@/models/Mindmap";
@@ -10,7 +11,7 @@ export const maxDuration = 60; // Avoid Vercel timeout limits
 
 export async function POST(req: NextRequest) {
 	try {
-		const session = await getServerSession();
+		const session = await getServerSession(authOptions);
 		if (!session || !session.user) {
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 		}
