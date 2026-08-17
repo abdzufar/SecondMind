@@ -17,17 +17,20 @@ export async function POST(req: NextRequest) {
 
 		const body = await req.json();
 		const parsed = ElaborateMindmapSchema.safeParse(body);
-		
+
 		if (!parsed.success) {
-			return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
+			return NextResponse.json(
+				{ error: parsed.error.issues[0].message },
+				{ status: 400 },
+			);
 		}
-		
+
 		const { concept, action, language, nodeId } = parsed.data;
 
 		const genAI = new GoogleGenerativeAI(
 			process.env.GEMINI_API_KEY || "fake-api-key",
 		);
-		const model = genAI.getGenerativeModel({ model: "gemini-3.7-flash" });
+		const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash-lite" });
 
 		const prompt = getElaboratePrompt(concept, action, language, nodeId);
 

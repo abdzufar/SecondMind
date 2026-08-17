@@ -14,8 +14,15 @@ Handles Google OAuth and Custom Credentials flows. Managed internally by `next-a
 
 ### `POST /auth/register`
 Creates a new user account with a hashed password using `bcryptjs`.
-* **Format:** `application/json`
-* **Inputs:** `{ "name": "John Doe", "email": "john@example.com", "password": "secure123" }`
+* **Content-Type:** `application/json`
+* **Request Body (Required):**
+```json
+{ 
+  "name": "John Doe", 
+  "email": "john@example.com", 
+  "password": "secure123" 
+}
+```
 * **Success Output (201 Created):** Returns user object (without password).
 
 ---
@@ -23,6 +30,14 @@ Creates a new user account with a hashed password using `bcryptjs`.
 ## 2. Core AI Generation
 ### `POST /mindmap/generate`
 Generates a new Hybrid Roadmap.
+
+* **Content-Type:** `multipart/form-data` (Important: Do not send as raw JSON)
+* **Request Body (Form Data):**
+  * `topic` (string, required) - e.g., "Docker"
+  * `timeframe` (string, required) - e.g., "1 week"
+  * `language` (string, required) - e.g., "English"
+  * `verbosity` (string, optional) - e.g., "detailed" or "summary"
+  * `file` (File, optional) - A `.pdf` or `.txt` file to extract context from
 
 * **Backend Process:**
   1. Verifies NextAuth session via `getServerSession(authOptions)`.
@@ -60,8 +75,8 @@ Generates a new Hybrid Roadmap.
 ### `POST /mindmap/elaborate`
 Generates new AI branches for a specific concept (Expand).
 
-* **Format:** `application/json`
-* **Inputs:**
+* **Content-Type:** `application/json`
+* **Request Body (Required):**
 ```json
 {
   "nodeId": "node-1",
@@ -137,8 +152,8 @@ Fetches the full Mindmap object (used for loading the canvas or read-only links)
 
 ### `PUT /mindmap/:id`
 Saves manual user edits (moved wires, deleted nodes).
-* **Format:** `application/json`
-* **Inputs:**
+* **Content-Type:** `application/json`
+* **Request Body:**
 ```json
 {
   "nodes": [ ... ],
@@ -164,8 +179,8 @@ Saves manual user edits (moved wires, deleted nodes).
 
 ### `POST /todo`
 Creates a new task linked to a mindmap.
-* **Format:** `application/json`
-* **Inputs:**
+* **Content-Type:** `application/json`
+* **Request Body (Required):**
 ```json
 {
   "mindmapId": "64b5f8...",
@@ -190,8 +205,8 @@ Fetches all tasks for a specific mindmap.
 
 ### `PUT /todo/:id`
 Marks a task as complete.
-* **Format:** `application/json`
-* **Inputs:** `{ "isCompleted": true }`
+* **Content-Type:** `application/json`
+* **Request Body:** `{ "isCompleted": true }`
 * **Success Output (200 OK):** `{ "success": true, "message": "Task updated." }`
 
 ### `GET /cron/reminders`

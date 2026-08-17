@@ -24,12 +24,15 @@ export async function POST(req: NextRequest) {
 			language: formData.get("language") as string,
 			verbosity: formData.get("verbosity") as string,
 		};
-		
+
 		const parsed = GenerateMindmapSchema.safeParse(rawData);
 		if (!parsed.success) {
-			return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
+			return NextResponse.json(
+				{ error: parsed.error.issues[0].message },
+				{ status: 400 },
+			);
 		}
-		
+
 		const { topic, timeframe, language, verbosity } = parsed.data;
 		const file = formData.get("file") as File | null;
 
@@ -38,14 +41,14 @@ export async function POST(req: NextRequest) {
 			try {
 				const arrayBuffer = await file.arrayBuffer();
 				const buffer = Buffer.from(arrayBuffer);
-				
-				if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+
+				if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
 					// Using require to bypass ESM default export crash reported by frontend team
-					const pdfParse = require('pdf-parse');
+					const pdfParse = require("pdf-parse");
 					const pdfData = await pdfParse(buffer);
 					fileContext = pdfData.text;
 				} else {
-					fileContext = buffer.toString('utf-8');
+					fileContext = buffer.toString("utf-8");
 				}
 			} catch (e) {
 				console.error("[FILE_PARSE_ERROR]:", e);
@@ -55,9 +58,15 @@ export async function POST(req: NextRequest) {
 		const genAI = new GoogleGenerativeAI(
 			process.env.GEMINI_API_KEY || "fake-api-key",
 		);
-		const model = genAI.getGenerativeModel({ model: "gemini-3.7-flash" });
+		const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash-lite" });
 
-		const prompt = getGeneratePrompt(topic, timeframe, language, verbosity, fileContext);
+		const prompt = getGeneratePrompt(
+			topic,
+			timeframe,
+			language,
+			verbosity,
+			fileContext,
+		);
 
 		const result = await model.generateContent(prompt);
 		const responseText = result.response.text();
