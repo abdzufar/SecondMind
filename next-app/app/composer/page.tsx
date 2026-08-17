@@ -162,7 +162,14 @@ export default function ComposerPage() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuGroup>
-                <DropdownMenuLabel>{session?.user?.name ?? session?.user?.email ?? "Akun"}</DropdownMenuLabel>
+                <DropdownMenuLabel>
+                  <div className="flex min-w-0 flex-col gap-0.5">
+                    <span className="truncate font-semibold text-foreground">{session?.user?.name ?? "Akun"}</span>
+                    {session?.user?.email && (
+                      <span className="truncate font-normal text-xs">{session.user.email}</span>
+                    )}
+                  </div>
+                </DropdownMenuLabel>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive" onClick={() => signOut({ callbackUrl: "/login" })}>
