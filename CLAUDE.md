@@ -171,10 +171,12 @@ Status per 2026-08-17, dicek ulang terhadap working tree — bukan cuma niat.
 - [x] Masukkan design token bagian 4 ke `app/globals.css` — sudah ada lewat `@theme inline`, §4 sudah dikoreksi supaya dokumen ikut kode
 
 ### M1 — Kerangka halaman
-- [x] Header: tombol kembali ✓, judul ✓, tombol aksi ✓, progress bar ✓ (`header-progress` di `app/canvas/page.tsx`, dihitung dari node `roadmap-step`)
+- [x] Header: tombol kembali ✓, judul ✓, tombol aksi ✓, progress bar ✓ (`header-progress` di `app/canvas/[id]/page.tsx`, dihitung dari node `roadmap-step`)
 - [x] Canvas reactflow kosong — pan/zoom/fit view aktif ✓, `nodesDraggable={false}` sudah di-set di `CanvasView.tsx`
 - [x] Sidebar kanan (bisa buka-tutup) — `components/canvas/Drawer.tsx`
 - [x] Input chat di bawah canvas — ada di `CanvasView.tsx`, belum wired ke aksi (wajar, itu M7)
+
+**Gotcha React Flow + data async** (kena pas M11 wiring `/canvas/[id]`): `<ReactFlow fitView>` cuma nge-fit sekali pas mount. Kalau `<CanvasView />` di-mount duluan sebelum `getMindmap()` selesai (nodes masih `[]`), canvas kejebak di state kosong/rusak biarpun data numpang masuk belakangan — `fitView` gak pernah re-run. Fix-nya: `app/canvas/[id]/page.tsx` sekarang nahan render `<CanvasView />` sampai `mindmap` state kepenuhin (`{mindmap ? <CanvasView /> : <div className="canvas-loading">...</div>}`). **Berlaku juga nanti buat M7**: begitu `appendNodes`/`applyLayout` dibikin, node baru yang nambah ke canvas yang udah ke-mount duluan gak akan otomatis ke-fit — butuh `useReactFlow().fitView()` manual, bukan cuma andelin prop `fitView`.
 
 ### M2 — Lapisan data
 - [x] Mock mindmap di `lib/mock/mindmap.ts` — sekarang bentuk `WireMindmap` murni (bukan `Mindmap`), 5 roadmap-step + 13 branch, `timeMark` terisi, tanpa `position`/`num`/`isActive`
@@ -232,7 +234,7 @@ Status per 2026-08-17, dicek ulang terhadap working tree — bukan cuma niat.
 
 ### M11 — Halaman pendukung dan perapian
 - [~] Halaman login (Google + email/password) — `app/login/page.tsx` dan `app/register/page.tsx` sudah ada (form email/password + `PasswordInput`), tapi **belum pakai komponen next-auth partner** — `handleSubmit` cuma `router.push`, tidak ada tombol Google, tidak ada pemanggilan auth sungguhan. Begitu wiring beneran: `next-app/types/next-auth.d.ts` udah ada dari partner, `session.user.id: string` sudah ketipekan resmi — gak perlu `as any` lagi pas pakai `useSession`.
-- [~] Dashboard daftar mindmap + tombol hapus — `app/composer/page.tsx` "Riwayat" sekarang baca `getMindmaps()` dari `lib/api.ts` (bukan `HISTORY` const statis lagi), tapi **tombol hapus masih belum ada** dan link tiap item masih hardcode ke `/canvas` (belum ada route `/canvas/[id]`, jadi belum bisa buka mindmap spesifik)
+- [~] Dashboard daftar mindmap + tombol hapus — `app/composer/page.tsx` "Riwayat" baca `getMindmaps()`, link tiap item sekarang ke `/canvas/${item._id}` (route `app/canvas/[id]/page.tsx` baru, `getMindmap(id)` dipanggil per-id lewat `useParams`). `app/canvas/page.tsx` (tanpa id) jadi redirect ke `DEFAULT_MINDMAP_ID`, dipakai landing page & `loading/page.tsx` yang belum tau id spesifik. **Tombol hapus masih belum ada.**
 - [x] Empty state dan loading skeleton — `app/loading/page.tsx` punya skeleton bar; dashboard "Riwayat" sekarang juga punya skeleton row + empty state (`.history-empty`) pas `getMindmaps()` kosong/gagal
 - [ ] Layar kecil: sidebar jadi bottom sheet — belum diverifikasi, drawer saat ini cuma jadi full-width di `<900px`, bukan bottom sheet
 - [~] Ganti isi `lib/api.ts` dari mock ke fetch asli — `lib/api.ts` sendiri sudah ada (M2) dan sudah dipakai composer; tinggal isi fungsinya diganti `fetch()` beneran pas backend siap

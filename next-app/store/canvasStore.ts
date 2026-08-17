@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { applyEdgeChanges, applyNodeChanges, type EdgeChange, type NodeChange } from "@xyflow/react";
 import type { MindmapEdge, MindmapNode } from "@/lib/types";
-import { DEFAULT_MINDMAP_ID, getMindmap } from "@/lib/api";
 import { getLayoutedElements } from "@/lib/canvas/layout";
 
 type CanvasState = {
@@ -32,7 +31,3 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     }),
   setGraph: (nodes, edges) => set(getLayoutedElements(nodes, edges)),
 }));
-
-getMindmap(DEFAULT_MINDMAP_ID).then((mindmap) => {
-  useCanvasStore.getState().setGraph(mindmap.nodes, mindmap.edges);
-});
