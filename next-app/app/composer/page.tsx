@@ -406,7 +406,18 @@ export default function ComposerPage() {
             <div className="flex size-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
               <TrashIcon className="size-5" />
             </div>
-            <DialogTitle>Hapus &quot;{deleteTarget?.title}&quot;?</DialogTitle>
+            <DialogTitle>Hapus mindmap ini?</DialogTitle>
+            <p
+              style={{
+                marginTop: -4,
+                marginBottom: 8,
+                fontSize: 14,
+                fontWeight: 600,
+                color: "var(--sm-ink-70)",
+              }}
+            >
+              &quot;{deleteTarget?.title}&quot;
+            </p>
             <DialogDescription>Mindmap dan seluruh cabangnya akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.</DialogDescription>
             {deleteError && <p className="field-error">{deleteError}</p>}
           </DialogHeader>
