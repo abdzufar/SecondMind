@@ -30,6 +30,7 @@ export type WireMindmap = {
   isPublic: boolean;
   shareId: string | null;
   startDate: string;
+  createdAt: string; // dipakai buat konversi due-date todo (absolut) <-> timeOffsetDays (relatif)
   nodes: WireMindmapNode[];
   edges: WireMindmapEdge[];
 };

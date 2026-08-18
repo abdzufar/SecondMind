@@ -932,6 +932,15 @@
   background: var(--sm-surface);
 }
 
+.page-canvas .expand-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.page-canvas .expand-btn:disabled:hover {
+  background: transparent;
+}
+
 .page-canvas .expand-btn svg {
   width: 15px;
   height: 15px;
