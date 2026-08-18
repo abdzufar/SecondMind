@@ -44,9 +44,11 @@ export async function POST(req: NextRequest) {
 
 				if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
 					// Using require to bypass ESM default export crash reported by frontend team
-					const pdfParse = require("pdf-parse");
-					const pdfData = await pdfParse(buffer);
+					const { PDFParse } = require("pdf-parse");
+					const parser = new PDFParse({ data: buffer });
+					const pdfData = await parser.getText();
 					fileContext = pdfData.text;
+					await parser.destroy();
 				} else {
 					fileContext = buffer.toString("utf-8");
 				}
