@@ -78,3 +78,22 @@ const TodoSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 ```
+
+---
+
+## 4. `Message` Schema (NEW)
+Stores the short-term conversational history for the Context-Aware AI Chat feature.
+
+```javascript
+const MessageSchema = new mongoose.Schema({
+  mindmapId: { type: mongoose.Schema.Types.ObjectId, ref: 'Mindmap', required: true },
+  
+  role: { type: String, enum: ['user', 'assistant'], required: true },
+  content: { type: String, required: true },
+  
+  // Optional context about which node the user was looking at when sending the message
+  nodeId: { type: String, default: null },
+  
+  createdAt: { type: Date, default: Date.now }
+});
+```
