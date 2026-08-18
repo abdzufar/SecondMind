@@ -37,9 +37,34 @@ export async function GET(req: NextRequest) {
         from: process.env.RESEND_FROM_EMAIL || 'SecondMind <reminders@secondmind.app>',
         to: userEmail,
         subject: `Reminder: Your task "${todo.taskText}" is due today!`,
-        html: `<p>Hello!</p>
-               <p>This is a friendly reminder that your task <strong>"${todo.taskText}"</strong> is due today or overdue.</p>
-               <p>Log in to SecondMind to check it off your roadmap!</p>`
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; border: 1px solid #eaeaea; border-radius: 8px;">
+            <div style="text-align: center; margin-bottom: 24px;">
+              <h1 style="color: #1a1a1a; font-size: 24px; margin: 0;">SecondMind</h1>
+            </div>
+            
+            <div style="color: #4a4a4a; font-size: 16px; line-height: 24px;">
+              <p>Hello,</p>
+              <p>This is a friendly reminder that you have a task due today on your learning roadmap!</p>
+              
+              <div style="background-color: #f6f8fa; border-left: 4px solid #0070f3; padding: 16px; margin: 24px 0; border-radius: 4px;">
+                <h3 style="margin: 0 0 8px 0; color: #1a1a1a; font-size: 18px;">Task Details</h3>
+                <p style="margin: 0; color: #4a4a4a; font-weight: 500;">${todo.taskText}</p>
+              </div>
+
+              <div style="text-align: center; margin: 32px 0;">
+                <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/dashboard" style="background-color: #000000; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 500; display: inline-block;">
+                  View Roadmap
+                </a>
+              </div>
+            </div>
+            
+            <div style="border-top: 1px solid #eaeaea; margin-top: 32px; padding-top: 24px; text-align: center; color: #888888; font-size: 12px;">
+              <p style="margin: 0 0 8px 0;">You are receiving this email because you have active tasks in SecondMind.</p>
+              <p style="margin: 0;"><a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/dashboard" style="color: #888888; text-decoration: underline;">Manage Notification Preferences</a></p>
+            </div>
+          </div>
+        `
       });
 
       // Mark as sent to prevent duplicate emails tomorrow
