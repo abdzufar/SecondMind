@@ -4,11 +4,12 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { ReactFlowProvider } from "@xyflow/react";
-import { ListChecks, Share2 } from "lucide-react";
+import { ListChecks, Share2, WifiOff } from "lucide-react";
 import "../canvas.css";
 import { getMindmap, sendChatMessage, type ChatMessage } from "@/lib/api";
 import type { Mindmap } from "@/lib/types";
 import { useCanvasStore } from "@/store/canvasStore";
+import { useHistoryStore } from "@/store/historyStore";
 import { CanvasView } from "@/components/canvas/CanvasView";
 import { Drawer, type DrawerTab } from "@/components/canvas/Drawer";
 import { ExportButton } from "@/components/canvas/ExportButton";
@@ -21,8 +22,10 @@ export default function CanvasPage() {
   const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
   const clearSelection = useCanvasStore((s) => s.clearSelection);
   const nodes = useCanvasStore((s) => s.nodes);
+  const isOnline = useCanvasStore((s) => s.isOnline);
   const [mindmap, setMindmap] = useState<Mindmap | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [isOfflineCache, setIsOfflineCache] = useState(false);
   const [showFeasibilityWarning, setShowFeasibilityWarning] = useState(true);
   const [sidebarTab, setSidebarTab] = useState<DrawerTab>("detail");
   const [todoPanelOpen, setTodoPanelOpen] = useState(false);
@@ -42,14 +45,45 @@ export default function CanvasPage() {
   const isSidebarOpen = !!selectedNodeId || todoPanelOpen;
 
   useEffect(() => {
+    // Fallback ke cache lokal (zustand `persist`, lihat canvasStore.ts) cuma
+    // kalau BENERAN offline dan cache-nya emang buat mindmap yang sama (`mindmapId`
+    // yang ke-persist harus cocok sama `id` route ini) — gagal fetch karena alasan
+    // lain (404, sesi habis, dll) pas online tetap jatuh ke error biasa, gak nyoba
+    // nampilin data lama yang bisa aja udah gak akurat.
+    function loadFromCache(): boolean {
+      const cached = useCanvasStore.getState();
+      if (cached.mindmapId !== id || cached.nodes.length === 0) return false;
+
+      const summary = useHistoryStore.getState().history.find((h) => h._id === id);
+      setMindmap({
+        _id: id,
+        title: summary?.title ?? "Mindmap (tersimpan offline)",
+        topic: summary?.topic ?? "",
+        timeframe: summary?.timeframe ?? "",
+        language: "id",
+        feasibilityWarning: null,
+        isPublic: summary?.isPublic ?? false,
+        shareId: summary?.shareId ?? null,
+        startDate: "",
+        createdAt: summary?.createdAt ?? new Date().toISOString(),
+        nodes: cached.nodes,
+        edges: cached.edges,
+      });
+      setIsOfflineCache(true);
+      fetchTodos(id);
+      return true;
+    }
+
     getMindmap(id)
       .then((loaded) => {
         setMindmap(loaded);
-        setGraph(loaded.nodes, loaded.edges);
+        setIsOfflineCache(false);
+        setGraph(loaded.nodes, loaded.edges, id);
         fetchTodos(id);
       })
       .catch((err) => {
         console.error("[CANVAS] gagal load mindmap:", err);
+        if (!useCanvasStore.getState().isOnline && loadFromCache()) return;
         setLoadError("Mindmap tidak ditemukan atau gagal dimuat.");
       });
   }, [id, setGraph, fetchTodos]);
@@ -63,7 +97,7 @@ export default function CanvasPage() {
   }, []);
 
   function handleSendChat(message: string, nodeId?: string, nodeLabel?: string) {
-    if (!mindmap) return;
+    if (!mindmap || !isOnline) return;
 
     setChatMessages((prev) => [...prev, { role: "user", content: message, nodeLabel }]);
     setIsChatSending(true);
@@ -129,6 +163,17 @@ export default function CanvasPage() {
             <ExportButton filename={mindmap?.title ?? "canvas"} />
           </div>
         </header>
+
+        {!isOnline && (
+          <div className="offline-banner">
+            <WifiOff />
+            <p>
+              {isOfflineCache
+                ? "Mode offline — nampilin versi tersimpan terakhir. Ubah/simpan/hapus dinonaktifkan sampai online lagi."
+                : "Mode offline — aksi yang butuh koneksi (AI, simpan, hapus) dinonaktifkan sementara."}
+            </p>
+          </div>
+        )}
 
         {mindmap?.feasibilityWarning && showFeasibilityWarning && (
           <div className="feasibility-banner">

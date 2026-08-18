@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Share2, Check, Copy } from "lucide-react";
 import { saveMindmap, getMindmap } from "@/lib/api";
+import { useCanvasStore } from "@/store/canvasStore";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -23,6 +24,7 @@ type ShareButtonProps = {
 };
 
 export function ShareButton({ mindmapId, isPublic, shareId, onUpdate }: ShareButtonProps) {
+  const isOnline = useCanvasStore((s) => s.isOnline);
   const [open, setOpen] = useState(false);
   const [isOpening, setIsOpening] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -40,6 +42,7 @@ export function ShareButton({ mindmapId, isPublic, shareId, onUpdate }: ShareBut
   }
 
   function handleToggle(checked: boolean) {
+    if (!isOnline) return;
     setIsSaving(true);
     setError(null);
     saveMindmap(mindmapId, { isPublic: checked })
@@ -82,11 +85,12 @@ export function ShareButton({ mindmapId, isPublic, shareId, onUpdate }: ShareBut
             <DialogDescription>
               Aktifkan supaya siapa pun dengan link ini bisa lihat mindmap kamu (read-only), tanpa perlu login.
             </DialogDescription>
+            {!isOnline && <p className="field-error">Mode offline — ubah status berbagi butuh koneksi internet.</p>}
           </DialogHeader>
 
           <div className="share-toggle-row">
             <span>Publik</span>
-            <Switch checked={isPublic} onCheckedChange={handleToggle} disabled={isSaving} />
+            <Switch checked={isPublic} onCheckedChange={handleToggle} disabled={isSaving || !isOnline} />
           </div>
 
           {error && <p className="field-error">{error}</p>}

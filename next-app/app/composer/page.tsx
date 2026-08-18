@@ -6,9 +6,13 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import "./composer.css";
+import { WifiOff } from "lucide-react";
 import { deleteMindmap, getMindmaps, type GenerateMindmapInput, type MindmapSummary } from "@/lib/api";
 import { setPendingGenerateInput } from "@/lib/pendingGenerate";
 import { getInitials } from "@/lib/utils";
+import { clearOfflineCache } from "@/lib/offlineCache";
+import { useCanvasStore } from "@/store/canvasStore";
+import { useHistoryStore } from "@/store/historyStore";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -33,8 +37,6 @@ type SelectedFile = {
   sizeLabel: string;
   file: File;
 };
-
-type HistoryStatus = "loading" | "ready" | "error";
 
 function TrashIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -78,20 +80,25 @@ export default function ComposerPage() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [topic, setTopic] = useState("");
   const [topicError, setTopicError] = useState(false);
-  const [history, setHistory] = useState<MindmapSummary[]>([]);
-  const [historyStatus, setHistoryStatus] = useState<HistoryStatus>("loading");
+  const history = useHistoryStore((s) => s.history);
+  const historyStatus = useHistoryStore((s) => s.status);
+  const setHistory = useHistoryStore((s) => s.setHistory);
+  const applyCachedHistoryFallback = useHistoryStore((s) => s.applyCachedFallback);
+  const removeFromHistory = useHistoryStore((s) => s.removeFromHistory);
+  const isOnline = useCanvasStore((s) => s.isOnline);
   const [deleteTarget, setDeleteTarget] = useState<MindmapSummary | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     function loadHistory() {
+      if (!useCanvasStore.getState().isOnline) {
+        applyCachedHistoryFallback();
+        return;
+      }
       getMindmaps()
-        .then((mindmaps) => {
-          setHistory(mindmaps);
-          setHistoryStatus("ready");
-        })
-        .catch(() => setHistoryStatus("error"));
+        .then((mindmaps) => setHistory(mindmaps))
+        .catch(() => applyCachedHistoryFallback());
     }
 
     loadHistory();
@@ -106,15 +113,15 @@ export default function ComposerPage() {
 
     window.addEventListener("pageshow", handlePageShow);
     return () => window.removeEventListener("pageshow", handlePageShow);
-  }, []);
+  }, [setHistory, applyCachedHistoryFallback]);
 
   function handleDeleteConfirm() {
-    if (!deleteTarget) return;
+    if (!deleteTarget || !isOnline) return;
     setIsDeleting(true);
     setDeleteError(null);
     deleteMindmap(deleteTarget._id)
       .then(() => {
-        setHistory((prev) => prev.filter((item) => item._id !== deleteTarget._id));
+        removeFromHistory(deleteTarget._id);
         setDeleteTarget(null);
       })
       .catch(() => setDeleteError("Gagal menghapus mindmap. Coba lagi."))
@@ -157,6 +164,7 @@ export default function ComposerPage() {
   }
 
   function handleGenerateClick() {
+    if (!isOnline) return;
     if (!topic.trim()) {
       setTopicError(true);
       return;
@@ -203,13 +211,26 @@ export default function ComposerPage() {
                 </DropdownMenuLabel>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive" onClick={() => signOut({ callbackUrl: "/login" })}>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => {
+                  clearOfflineCache();
+                  signOut({ callbackUrl: "/login" });
+                }}
+              >
                 Keluar
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </header>
+
+      {!isOnline && (
+        <div className="offline-banner">
+          <WifiOff />
+          <p>Mode offline — bikin mindmap baru dan hapus riwayat dinonaktifkan sampai online lagi.</p>
+        </div>
+      )}
 
       <main className="page">
         <div className="page-head">
@@ -337,7 +358,7 @@ export default function ComposerPage() {
             <button type="button" className="sm-btn sm-btn--ghost" onClick={() => fileInputRef.current?.click()}>
               Unggah File
             </button>
-            <button type="button" className="sm-btn sm-btn--primary" onClick={handleGenerateClick}>
+            <button type="button" className="sm-btn sm-btn--primary" onClick={handleGenerateClick} disabled={!isOnline}>
               Buat Mindmap
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14" />
@@ -366,12 +387,15 @@ export default function ComposerPage() {
 
           {historyStatus === "error" && <p className="history-empty">Gagal memuat riwayat. Coba muat ulang halaman.</p>}
 
-          {historyStatus === "ready" && history.length === 0 && (
+          {(historyStatus === "ready" || historyStatus === "cached") && history.length === 0 && (
             <p className="history-empty">Belum ada mindmap. Bikin yang pertama lewat form di atas.</p>
           )}
 
-          {historyStatus === "ready" && history.length > 0 && (
+          {(historyStatus === "ready" || historyStatus === "cached") && history.length > 0 && (
             <div className="history-list">
+              {historyStatus === "cached" && (
+                <p className="history-cached-note">Gak bisa nyambung ke server — nampilin riwayat tersimpan terakhir.</p>
+              )}
               {history.map((item) => (
                 <div className="history-item" key={item._id}>
                   <Link className="history-item-link" href={`/canvas/${item._id}`}>
@@ -393,6 +417,7 @@ export default function ComposerPage() {
                     type="button"
                     className="history-delete"
                     aria-label={`Hapus ${item.title}`}
+                    disabled={!isOnline}
                     onClick={() => {
                       setDeleteError(null);
                       setDeleteTarget(item);
@@ -456,7 +481,7 @@ export default function ComposerPage() {
               className="px-7"
               style={{ height: 40, paddingLeft: 28, paddingRight: 28 }}
               onClick={handleDeleteConfirm}
-              disabled={isDeleting}
+              disabled={isDeleting || !isOnline}
             >
               {isDeleting ? "Menghapus…" : "Hapus"}
             </Button>

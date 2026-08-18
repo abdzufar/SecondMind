@@ -66,6 +66,7 @@ export function Drawer({
   const appendNodes = useCanvasStore((s) => s.appendNodes);
   const applyLayout = useCanvasStore((s) => s.applyLayout);
   const updateNodeNotes = useCanvasStore((s) => s.updateNodeNotes);
+  const isOnline = useCanvasStore((s) => s.isOnline);
 
   const [isExpanding, setIsExpanding] = useState(false);
   const [expandError, setExpandError] = useState<string | null>(null);
@@ -132,7 +133,7 @@ export function Drawer({
   }
 
   function handleSaveTitle() {
-    if (!node) return;
+    if (!node || !isOnline) return;
     const trimmed = titleDraft.trim();
     if (!trimmed) {
       setRenameError("Judul gak boleh kosong.");
@@ -158,7 +159,7 @@ export function Drawer({
   }
 
   function handleToggleComplete() {
-    if (!node) return;
+    if (!node || !isOnline) return;
 
     setIsTogglingComplete(true);
     setCompleteError(null);
@@ -173,7 +174,7 @@ export function Drawer({
   }
 
   function handleSaveNotes() {
-    if (!node) return;
+    if (!node || !isOnline) return;
     const previousNotes = node.data.userNotes ?? "";
     if (notesDraft === previousNotes) return; // gak ada perubahan, gak usah call API
 
@@ -191,7 +192,7 @@ export function Drawer({
   }
 
   function handleConfirmDelete() {
-    if (!node) return;
+    if (!node || !isOnline) return;
 
     setIsDeleting(true);
     setDeleteError(null);
@@ -208,7 +209,7 @@ export function Drawer({
 
   function handleSubmitChat(e: React.FormEvent) {
     e.preventDefault();
-    if (!node) return;
+    if (!node || !isOnline) return;
     const trimmed = chatDraft.trim();
     if (!trimmed) return;
     onSendChat(trimmed, node.id, node.data.label);
@@ -216,7 +217,7 @@ export function Drawer({
   }
 
   function handleExpand() {
-    if (!node) return;
+    if (!node || !isOnline) return;
 
     setIsExpanding(true);
     setExpandError(null);
@@ -312,7 +313,7 @@ export function Drawer({
                       className="icon-btn"
                       aria-label="Simpan judul"
                       onClick={handleSaveTitle}
-                      disabled={isSavingTitle}
+                      disabled={isSavingTitle || !isOnline}
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M20 6 9 17l-5-5" />
@@ -330,7 +331,13 @@ export function Drawer({
                     <button type="button" className="icon-btn" aria-label="Edit judul" onClick={handleStartEdit}>
                       <PencilIcon />
                     </button>
-                    <button type="button" className="icon-btn" aria-label="Hapus node" onClick={() => setDeleteDialogOpen(true)}>
+                    <button
+                      type="button"
+                      className="icon-btn"
+                      aria-label="Hapus node"
+                      onClick={() => setDeleteDialogOpen(true)}
+                      disabled={!isOnline}
+                    >
                       <TrashIcon />
                     </button>
                   </>
@@ -347,7 +354,7 @@ export function Drawer({
                 type="button"
                 className={`complete-btn${node.data.isCompleted ? " is-complete" : ""}`}
                 onClick={handleToggleComplete}
-                disabled={isTogglingComplete}
+                disabled={isTogglingComplete || !isOnline}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 6 9 17l-5-5" />
@@ -373,7 +380,7 @@ export function Drawer({
                 value={notesDraft}
                 onChange={(e) => setNotesDraft(e.target.value)}
                 onBlur={handleSaveNotes}
-                disabled={isSavingNotes}
+                disabled={isSavingNotes || !isOnline}
                 placeholder="Tambahkan catatan buat cabang ini…"
                 style={{ width: "100%", minHeight: "100px", padding: "8px", resize: "vertical", fontFamily: "var(--sm-font)", fontSize: "13px", borderRadius: "var(--sm-radius-sm)", border: "1px solid var(--sm-line)", background: "var(--sm-paper)", color: "var(--sm-ink)" }}
               />
@@ -415,14 +422,14 @@ export function Drawer({
                 onChange={(e) => setChatDraft(e.target.value)}
                 placeholder="Tanya soal cabang ini…"
               />
-              <button type="submit" aria-label="Kirim">
+              <button type="submit" aria-label="Kirim" disabled={!isOnline}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="m22 2-7 20-4-9-9-4Z" />
                   <path d="M22 2 11 13" />
                 </svg>
               </button>
             </form>
-            <button type="button" className="expand-btn" onClick={handleExpand} disabled={isExpanding}>
+            <button type="button" className="expand-btn" onClick={handleExpand} disabled={isExpanding || !isOnline}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 5v14" />
                 <path d="M5 12h14" />
@@ -470,7 +477,7 @@ export function Drawer({
               className="px-7"
               style={{ height: 40, paddingLeft: 28, paddingRight: 28 }}
               onClick={handleConfirmDelete}
-              disabled={isDeleting}
+              disabled={isDeleting || !isOnline}
             >
               {isDeleting ? "Menghapus…" : "Hapus"}
             </Button>

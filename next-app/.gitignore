@@ -17,6 +17,13 @@
 /.next/
 /out/
 
+# next-pwa build output — regenerated tiap `next build --webpack` (lihat
+# next.config.ts), bukan source file yang perlu di-commit
+/public/sw.js
+/public/workbox-*.js
+/public/worker-*.js
+/public/fallback-*.js
+
 # production
 /build
 

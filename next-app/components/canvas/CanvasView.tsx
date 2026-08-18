@@ -42,6 +42,7 @@ export function CanvasView({
   const connectEdge = useCanvasStore((s) => s.connectEdge);
   const reconnectEdge = useCanvasStore((s) => s.reconnectEdge);
   const deleteEdge = useCanvasStore((s) => s.deleteEdge);
+  const isOnline = useCanvasStore((s) => s.isOnline);
 
   const [chatDraft, setChatDraft] = useState("");
   const [isChatMinimized, setIsChatMinimized] = useState(false);
@@ -61,12 +62,13 @@ export function CanvasView({
   function handleSubmitChat(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = chatDraft.trim();
-    if (!trimmed || !onSendChat) return;
+    if (!trimmed || !onSendChat || !isOnline) return;
     onSendChat(trimmed);
     setChatDraft("");
   }
 
   function handleConnect(connection: Connection) {
+    if (!isOnline) return;
     if (connection.source === connection.target) return; // Prevent self-loops
     connectEdge(connection);
     if (mindmapId) {
@@ -79,6 +81,7 @@ export function CanvasView({
   }
 
   function handleEdgesDelete() {
+    if (!isOnline) return;
     if (mindmapId) {
       setTimeout(() => {
         const { edges: currentEdges } = useCanvasStore.getState();
@@ -88,6 +91,7 @@ export function CanvasView({
   }
 
   function handleReconnect(oldEdge: Edge, newConnection: Connection) {
+    if (!isOnline) return;
     if (newConnection.source === newConnection.target) return; // Prevent self-loops
     reconnectEdge(oldEdge, newConnection);
     if (mindmapId) {
@@ -99,6 +103,7 @@ export function CanvasView({
   }
 
   function handleEdgeDoubleClick(_event: React.MouseEvent, edge: Edge) {
+    if (!isOnline) return;
     deleteEdge(edge.id);
     if (mindmapId) {
       setTimeout(() => {
@@ -156,8 +161,8 @@ export function CanvasView({
       onReconnect={handleReconnect}
       onEdgeDoubleClick={handleEdgeDoubleClick}
       onEdgesDelete={handleEdgesDelete}
-      nodesConnectable={true}
-      edgesReconnectable={true}
+      nodesConnectable={isOnline}
+      edgesReconnectable={isOnline}
       elementsSelectable={true}
       edgesFocusable={true}
       nodesDraggable={false}
@@ -228,10 +233,10 @@ export function CanvasView({
                   type="text"
                   value={chatDraft}
                   onChange={(e) => setChatDraft(e.target.value)}
-                  placeholder="Tanya atau perintahkan sesuatu tentang roadmap ini…"
-                  disabled={isChatSending}
+                  placeholder={isOnline ? "Tanya atau perintahkan sesuatu tentang roadmap ini…" : "Mode offline — chat AI dinonaktifkan"}
+                  disabled={isChatSending || !isOnline}
                 />
-                <button type="submit" aria-label="Kirim" disabled={isChatSending}>
+                <button type="submit" aria-label="Kirim" disabled={isChatSending || !isOnline}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="m22 2-7 20-4-9-9-4Z" />
                     <path d="M22 2 11 13" />

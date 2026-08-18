@@ -34,6 +34,7 @@ export function TodoPanel({ mindmapId, mindmapCreatedAt, selectedNodeLabel }: To
   const setTodos = useCanvasStore((s) => s.setTodos);
   const addTodo = useCanvasStore((s) => s.addTodo);
   const updateTodoInStore = useCanvasStore((s) => s.updateTodoInStore);
+  const isOnline = useCanvasStore((s) => s.isOnline);
 
   const [taskText, setTaskText] = useState("");
   const [dueDate, setDueDate] = useState("");
@@ -42,6 +43,7 @@ export function TodoPanel({ mindmapId, mindmapCreatedAt, selectedNodeLabel }: To
   const [formError, setFormError] = useState<string | null>(null);
 
   function handleToggle(todo: WireTodo) {
+    if (!isOnline) return;
     const nextCompleted = !todo.isCompleted;
     updateTodoInStore(todo._id, { isCompleted: nextCompleted });
     updateTodo(todo._id, { isCompleted: nextCompleted }).catch(() => {
@@ -51,6 +53,10 @@ export function TodoPanel({ mindmapId, mindmapCreatedAt, selectedNodeLabel }: To
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!isOnline) {
+      setFormError("Mode offline — nambah to-do butuh koneksi internet.");
+      return;
+    }
     if (!taskText.trim()) {
       setFormError("Isi dulu nama tasknya.");
       return;
@@ -81,7 +87,7 @@ export function TodoPanel({ mindmapId, mindmapCreatedAt, selectedNodeLabel }: To
   const autogenCandidates = roadmapSteps.filter((n) => !existingLabels.has(n.data.label));
 
   async function handleAutoGenerate() {
-    if (autogenCandidates.length === 0) return;
+    if (autogenCandidates.length === 0 || !isOnline) return;
 
     setIsAutoGenerating(true);
     setFormError(null);
@@ -115,6 +121,7 @@ export function TodoPanel({ mindmapId, mindmapCreatedAt, selectedNodeLabel }: To
           type="checkbox"
           checked={todo.isCompleted}
           onChange={() => handleToggle(todo)}
+          disabled={!isOnline}
           className="todo-checkbox"
           aria-label={`Tandai "${todo.taskText}" selesai`}
         />
@@ -133,7 +140,7 @@ export function TodoPanel({ mindmapId, mindmapCreatedAt, selectedNodeLabel }: To
           type="button"
           className="expand-btn"
           onClick={handleAutoGenerate}
-          disabled={isAutoGenerating || autogenCandidates.length === 0}
+          disabled={isAutoGenerating || autogenCandidates.length === 0 || !isOnline}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 6h11" />
@@ -202,7 +209,7 @@ export function TodoPanel({ mindmapId, mindmapCreatedAt, selectedNodeLabel }: To
           className="todo-form-date"
           aria-label="Due date"
         />
-        <button type="submit" className="todo-form-submit" disabled={isSubmitting}>
+        <button type="submit" className="todo-form-submit" disabled={isSubmitting || !isOnline}>
           {isSubmitting ? "Menambah…" : "Tambah"}
         </button>
       </form>

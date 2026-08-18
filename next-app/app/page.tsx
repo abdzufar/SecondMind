@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { Menu, X } from "lucide-react";
+import { clearOfflineCache } from "@/lib/offlineCache";
 import { getInitials } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -112,7 +113,13 @@ export default function LandingPage() {
                       </DropdownMenuLabel>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive" onClick={() => signOut({ callbackUrl: "/" })}>
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={() => {
+                        clearOfflineCache();
+                        signOut({ callbackUrl: "/" });
+                      }}
+                    >
                       Keluar
                     </DropdownMenuItem>
                   </DropdownMenuContent>

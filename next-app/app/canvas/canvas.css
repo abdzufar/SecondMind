@@ -74,6 +74,34 @@
   color: var(--sm-ink);
 }
 
+/* Beda palet dari .feasibility-banner (clay-tint, "heads up soal konten") — ini
+   status koneksi, dipakai warna netral (paper+ink-45) biar gak ketuker sama
+   warning konten pas dua-duanya kebetulan tampil bareng. */
+.page-canvas .offline-banner {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-3);
+  padding: var(--sm-space-3) var(--sm-space-5);
+  background: var(--sm-paper);
+  border-bottom: 1px solid var(--sm-line);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--sm-ink-70);
+}
+
+.page-canvas .offline-banner svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--sm-ink-45);
+}
+
+.page-canvas .offline-banner p {
+  margin: 0;
+}
+
 /* Dialog konten (ShareButton) di-portal ke luar .page-canvas oleh Base UI,
    jadi rule di bawah ini SENGAJA gak diprefix .page-canvas — kalau diprefix,
    gak akan pernah match sama sekali. */
@@ -1368,6 +1396,32 @@
 .page-canvas .todo-form-submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Tombol/field yang ke-disable pas mode offline (§M10) — dulu gak ada satu pun
+   dari elemen ini yang punya visual `:disabled`, jadi diklik kelihatan gak
+   ngapa-ngapain tanpa penjelasan. Disatuin di sini biar konsisten. */
+.page-canvas .icon-btn:disabled,
+.page-canvas .complete-btn:disabled,
+.page-canvas .command-bar button:disabled,
+.page-canvas .ask-ai button:disabled,
+.page-canvas .history-delete:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.page-canvas .command-bar input:disabled,
+.page-canvas .ask-ai input:disabled,
+.page-canvas .todo-form-text:disabled,
+.page-canvas .todo-form-date:disabled,
+.page-canvas textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.page-canvas .todo-checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .page-canvas .todo-form-error,

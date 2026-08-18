@@ -40,6 +40,39 @@
   border-bottom: 1px solid var(--sm-line);
 }
 
+.page-composer .offline-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-3);
+  padding: var(--sm-space-3) var(--sm-space-7);
+  background: var(--sm-surface);
+  border-bottom: 1px solid var(--sm-line);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--sm-ink-70);
+}
+
+.page-composer .offline-banner svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--sm-ink-45);
+}
+
+.page-composer .offline-banner p {
+  margin: 0;
+}
+
+.page-composer .history-cached-note {
+  margin: 0 0 var(--sm-space-3);
+  padding: var(--sm-space-3);
+  background: var(--sm-paper);
+  border: 1px dashed var(--sm-line);
+  border-radius: var(--sm-radius-md);
+  color: var(--sm-ink-45);
+  font-size: 12.5px;
+}
+
 .page-composer .account-chip {
   display: flex;
   align-items: center;
@@ -417,6 +450,17 @@
   background: color-mix(in oklch, var(--destructive) 12%, transparent);
   border-color: var(--destructive);
   color: var(--destructive);
+}
+
+.page-composer .history-delete:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.page-composer .history-delete:disabled:hover {
+  background: transparent;
+  border-color: var(--sm-line);
+  color: var(--sm-ink-45);
 }
 
 .page-composer .history-delete svg {
