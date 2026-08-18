@@ -77,6 +77,7 @@ export function Drawer({
 
   const [notesDraft, setNotesDraft] = useState("");
   const [isSavingNotes, setIsSavingNotes] = useState(false);
+  const [notesError, setNotesError] = useState<string | null>(null);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -87,7 +88,12 @@ export function Drawer({
   const [isTogglingComplete, setIsTogglingComplete] = useState(false);
   const [completeError, setCompleteError] = useState<string | null>(null);
 
-  const [prevNodeId, setPrevNodeId] = useState(selectedNodeId);
+  // Sengaja diinisialisasi `null` (bukan `selectedNodeId`) — Drawer cuma di-mount
+  // pas UDAH ada node yang dipilih (lihat isSidebarOpen di page.tsx), jadi kalau
+  // di-seed dari selectedNodeId, `prevNodeId` bakal langsung sama kayak selectedNodeId
+  // pas mount pertama dan block reset di bawah gak akan pernah jalan buat node
+  // pertama yang diklik — notesDraft ketinggalan kosong walau node-nya punya catatan.
+  const [prevNodeId, setPrevNodeId] = useState<string | null>(null);
   const node = selectedNodeId ? nodes.find((n) => n.id === selectedNodeId) : undefined;
 
   if (selectedNodeId !== prevNodeId) {
@@ -98,6 +104,7 @@ export function Drawer({
     setDeleteError(null);
     setChatDraft("");
     setNotesDraft(node?.data.userNotes ?? "");
+    setNotesError(null);
     setCompleteError(null);
   }
 
@@ -163,6 +170,24 @@ export function Drawer({
         setCompleteError("Gagal menyimpan status selesai.");
       })
       .finally(() => setIsTogglingComplete(false));
+  }
+
+  function handleSaveNotes() {
+    if (!node) return;
+    const previousNotes = node.data.userNotes ?? "";
+    if (notesDraft === previousNotes) return; // gak ada perubahan, gak usah call API
+
+    setIsSavingNotes(true);
+    setNotesError(null);
+    updateNodeNotes(node.id, notesDraft);
+    const { nodes: updatedNodes } = useCanvasStore.getState();
+    saveMindmap(mindmapId, { nodes: updatedNodes })
+      .catch(() => {
+        updateNodeNotes(node.id, previousNotes);
+        setNotesDraft(previousNotes);
+        setNotesError("Gagal menyimpan catatan.");
+      })
+      .finally(() => setIsSavingNotes(false));
   }
 
   function handleConfirmDelete() {
@@ -342,10 +367,13 @@ export function Drawer({
                 key={node.id}
                 value={notesDraft}
                 onChange={(e) => setNotesDraft(e.target.value)}
+                onBlur={handleSaveNotes}
+                disabled={isSavingNotes}
                 placeholder="Tambahkan catatan buat cabang ini…"
                 style={{ width: "100%", minHeight: "100px", padding: "8px", resize: "vertical", fontFamily: "var(--sm-font)", fontSize: "13px", borderRadius: "var(--sm-radius-sm)", border: "1px solid var(--sm-line)", background: "var(--sm-paper)", color: "var(--sm-ink)" }}
               />
             </div>
+            {notesError && <p className="field-error">{notesError}</p>}
           </div>
 
           <div className="drawer-divider"></div>
