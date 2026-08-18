@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createTodo, getTodos, updateTodo } from "@/lib/api";
+import { useState } from "react";
+import { createTodo, updateTodo } from "@/lib/api";
 import type { WireTodo } from "@/lib/types";
 import { useCanvasStore } from "@/store/canvasStore";
 
@@ -29,28 +29,23 @@ function dateToOffsetDays(pickedDate: string, mindmapCreatedAt: string): number 
 
 export function TodoPanel({ mindmapId, mindmapCreatedAt, selectedNodeLabel }: TodoPanelProps) {
   const nodes = useCanvasStore((s) => s.nodes);
-  const [todos, setTodos] = useState<WireTodo[]>([]);
-  const [status, setStatus] = useState<Status>("loading");
+  const todos = useCanvasStore((s) => s.todos);
+  const status = useCanvasStore((s) => s.todosStatus);
+  const setTodos = useCanvasStore((s) => s.setTodos);
+  const addTodo = useCanvasStore((s) => s.addTodo);
+  const updateTodoInStore = useCanvasStore((s) => s.updateTodoInStore);
+
   const [taskText, setTaskText] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAutoGenerating, setIsAutoGenerating] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  useEffect(() => {
-    getTodos(mindmapId)
-      .then((loaded) => {
-        setTodos(loaded);
-        setStatus("ready");
-      })
-      .catch(() => setStatus("error"));
-  }, [mindmapId]);
-
   function handleToggle(todo: WireTodo) {
     const nextCompleted = !todo.isCompleted;
-    setTodos((prev) => prev.map((t) => (t._id === todo._id ? { ...t, isCompleted: nextCompleted } : t)));
+    updateTodoInStore(todo._id, { isCompleted: nextCompleted });
     updateTodo(todo._id, { isCompleted: nextCompleted }).catch(() => {
-      setTodos((prev) => prev.map((t) => (t._id === todo._id ? { ...t, isCompleted: todo.isCompleted } : t)));
+      updateTodoInStore(todo._id, { isCompleted: todo.isCompleted });
     });
   }
 
@@ -73,7 +68,7 @@ export function TodoPanel({ mindmapId, mindmapCreatedAt, selectedNodeLabel }: To
       timeOffsetDays: dateToOffsetDays(dueDate, mindmapCreatedAt),
     })
       .then((created) => {
-        setTodos((prev) => [...prev, created]);
+        addTodo(created);
         setTaskText("");
         setDueDate("");
       })
@@ -102,7 +97,7 @@ export function TodoPanel({ mindmapId, mindmapCreatedAt, selectedNodeLabel }: To
       .map((r) => r.value);
     const failedCount = results.length - created.length;
 
-    if (created.length > 0) setTodos((prev) => [...prev, ...created]);
+    if (created.length > 0) setTodos([...todos, ...created]);
     if (failedCount > 0) setFormError(`${failedCount} to-do gagal dibuat. Coba lagi.`);
 
     setIsAutoGenerating(false);

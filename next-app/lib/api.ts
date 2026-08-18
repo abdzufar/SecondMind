@@ -16,6 +16,15 @@ function formatTimeOffset(days: number | null): string | null {
   return `Hari ${days}`;
 }
 
+export class ApiError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
 // Mapping WireMindmap → Mindmap: ngisi `num` (index roadmap-step + 1), `timeMark`
 // (format tampilan dari timeOffsetDays), dan `position` placeholder — posisi final
 // baru diisi lib/canvas/layout.ts (§5 CLAUDE.md).
@@ -63,7 +72,7 @@ export async function generateMindmap(input: GenerateMindmapInput): Promise<Mind
 
   if (!res.ok) {
     const data = await res.json().catch(() => null);
-    throw new Error(data?.error ?? `Generate gagal (status ${res.status})`);
+    throw new ApiError(data?.error ?? `Generate gagal (status ${res.status})`, res.status);
   }
 
   const wire: WireMindmap = await res.json();
@@ -137,7 +146,7 @@ export async function sendChatMessage(input: SendChatMessageInput): Promise<stri
 }
 
 export async function getMindmaps(): Promise<MindmapSummary[]> {
-  const res = await fetch("/api/mindmap");
+  const res = await fetch("/api/mindmap", { cache: "no-store" });
 
   if (!res.ok) {
     const data = await res.json().catch(() => null);
@@ -148,7 +157,7 @@ export async function getMindmaps(): Promise<MindmapSummary[]> {
 }
 
 export async function getMindmap(id: string): Promise<Mindmap> {
-  const res = await fetch(`/api/mindmap/${id}`);
+  const res = await fetch(`/api/mindmap/${id}`, { cache: "no-store" });
 
   if (!res.ok) {
     const data = await res.json().catch(() => null);
@@ -171,7 +180,13 @@ export async function saveMindmap(id: string, input: SaveMindmapInput): Promise<
     body.nodes = input.nodes.map((node) => ({
       id: node.id,
       type: node.type,
-      data: { label: node.data.label, description: node.data.description, timeOffsetDays: node.data.timeOffsetDays },
+      data: { 
+        label: node.data.label, 
+        description: node.data.description, 
+        timeOffsetDays: node.data.timeOffsetDays,
+        userNotes: node.data.userNotes,
+        isCompleted: node.data.isCompleted
+      },
     }));
   }
   if (input.edges) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { elaborateNode, saveMindmap } from "@/lib/api";
 import { removeNodeCascade } from "@/lib/canvas/layout";
 import { useCanvasStore } from "@/store/canvasStore";
@@ -65,6 +65,7 @@ export function Drawer({
   const deleteNode = useCanvasStore((s) => s.deleteNode);
   const appendNodes = useCanvasStore((s) => s.appendNodes);
   const applyLayout = useCanvasStore((s) => s.applyLayout);
+  const updateNodeNotes = useCanvasStore((s) => s.updateNodeNotes);
 
   const [isExpanding, setIsExpanding] = useState(false);
   const [expandError, setExpandError] = useState<string | null>(null);
@@ -74,6 +75,9 @@ export function Drawer({
   const [isSavingTitle, setIsSavingTitle] = useState(false);
   const [renameError, setRenameError] = useState<string | null>(null);
 
+  const [notesDraft, setNotesDraft] = useState("");
+  const [isSavingNotes, setIsSavingNotes] = useState(false);
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -81,6 +85,8 @@ export function Drawer({
   const [chatDraft, setChatDraft] = useState("");
 
   const [prevNodeId, setPrevNodeId] = useState(selectedNodeId);
+  const node = selectedNodeId ? nodes.find((n) => n.id === selectedNodeId) : undefined;
+
   if (selectedNodeId !== prevNodeId) {
     setPrevNodeId(selectedNodeId);
     setIsEditingTitle(false);
@@ -88,9 +94,8 @@ export function Drawer({
     setDeleteDialogOpen(false);
     setDeleteError(null);
     setChatDraft("");
+    setNotesDraft(node?.data.userNotes ?? "");
   }
-
-  const node = selectedNodeId ? nodes.find((n) => n.id === selectedNodeId) : undefined;
 
   const isBranch = node?.type === "mindmap-branch";
   const parentEdge = isBranch ? edges.find((e) => e.target === node?.id) : undefined;
@@ -291,7 +296,13 @@ export function Drawer({
             <button
               type="button"
               className={`complete-btn${node.data.isCompleted ? " is-complete" : ""}`}
-              onClick={() => toggleNodeComplete(node.id)}
+              onClick={() => {
+                toggleNodeComplete(node.id);
+                const { nodes: updatedNodes } = useCanvasStore.getState();
+                saveMindmap(mindmapId, { nodes: updatedNodes }).catch(() => {
+                  toggleNodeComplete(node.id); // rollback
+                });
+              }}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 6 9 17l-5-5" />
@@ -309,7 +320,15 @@ export function Drawer({
 
           <div className="drawer-section">
             <h4>Catatan</h4>
-            <textarea key={node.id} placeholder="Tambahkan catatan buat cabang ini…"></textarea>
+            <div style={{ position: "relative" }}>
+              <textarea
+                key={node.id}
+                value={notesDraft}
+                onChange={(e) => setNotesDraft(e.target.value)}
+                placeholder="Tambahkan catatan buat cabang ini…"
+                style={{ width: "100%", minHeight: "100px", padding: "8px", resize: "vertical", fontFamily: "var(--sm-font)", fontSize: "13px", borderRadius: "var(--sm-radius-sm)", border: "1px solid var(--sm-line)", background: "var(--sm-paper)", color: "var(--sm-ink)" }}
+              />
+            </div>
           </div>
 
           <div className="drawer-divider"></div>
