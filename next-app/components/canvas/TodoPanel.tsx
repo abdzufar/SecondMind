@@ -109,6 +109,27 @@ export function TodoPanel({ mindmapId, mindmapCreatedAt, selectedNodeLabel }: To
   }
 
   const sorted = [...todos].sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+  const now = new Date();
+  const overdueItems = sorted.filter((t) => new Date(t.dueDate) < now);
+  const upcomingItems = sorted.filter((t) => new Date(t.dueDate) >= now);
+
+  function renderTodoItem(todo: WireTodo) {
+    return (
+      <li key={todo._id} className={`todo-item${todo.isCompleted ? " is-done" : ""}`}>
+        <input
+          type="checkbox"
+          checked={todo.isCompleted}
+          onChange={() => handleToggle(todo)}
+          className="todo-checkbox"
+          aria-label={`Tandai "${todo.taskText}" selesai`}
+        />
+        <div className="todo-item-body">
+          <span className="todo-item-text">{todo.taskText}</span>
+          <span className="todo-item-due">{formatDueDate(todo.dueDate)}</span>
+        </div>
+      </li>
+    );
+  }
 
   return (
     <div className="drawer-body todo-panel">
@@ -149,21 +170,18 @@ export function TodoPanel({ mindmapId, mindmapCreatedAt, selectedNodeLabel }: To
 
       {status === "ready" && sorted.length > 0 && (
         <ul className="todo-list">
-          {sorted.map((todo) => (
-            <li key={todo._id} className={`todo-item${todo.isCompleted ? " is-done" : ""}`}>
-              <input
-                type="checkbox"
-                checked={todo.isCompleted}
-                onChange={() => handleToggle(todo)}
-                className="todo-checkbox"
-                aria-label={`Tandai "${todo.taskText}" selesai`}
-              />
-              <div className="todo-item-body">
-                <span className="todo-item-text">{todo.taskText}</span>
-                <span className="todo-item-due">{formatDueDate(todo.dueDate)}</span>
-              </div>
+          {overdueItems.length > 0 && (
+            <li className="todo-divider" aria-hidden="true">
+              <span>Sudah lewat tenggat</span>
             </li>
-          ))}
+          )}
+          {overdueItems.map(renderTodoItem)}
+          {overdueItems.length > 0 && upcomingItems.length > 0 && (
+            <li className="todo-divider" aria-hidden="true">
+              <span>Akan datang</span>
+            </li>
+          )}
+          {upcomingItems.map(renderTodoItem)}
         </ul>
       )}
 

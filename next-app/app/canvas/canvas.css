@@ -980,6 +980,28 @@
   gap: var(--sm-space-2);
 }
 
+.page-canvas .todo-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-2);
+  padding: 2px 0;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sm-ink-45);
+  white-space: nowrap;
+}
+
+.page-canvas .todo-divider::before,
+.page-canvas .todo-divider::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  background: var(--sm-ink-45);
+  border-radius: var(--sm-radius-pill);
+}
+
 .page-canvas .todo-item {
   display: flex;
   align-items: flex-start;
