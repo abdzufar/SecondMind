@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import "./loading-page.css";
-import { generateMindmap, type GenerateMindmapInput } from "@/lib/api";
+import { generateMindmap, ApiError, type GenerateMindmapInput } from "@/lib/api";
 import { takePendingGenerateInput } from "@/lib/pendingGenerate";
 
 const MESSAGES = [
@@ -20,7 +20,7 @@ const MESSAGES = [
 export default function LoadingPage() {
   const router = useRouter();
   const [messageIndex, setMessageIndex] = useState(0);
-  const [status, setStatus] = useState<"loading" | "error">("loading");
+  const [status, setStatus] = useState<"loading" | "error" | "rejected">("loading");
   const payloadRef = useRef<GenerateMindmapInput | null>(null);
 
   useEffect(() => {
@@ -37,8 +37,12 @@ export default function LoadingPage() {
         .then((mindmap) => {
           router.replace(`/canvas/${mindmap._id}`);
         })
-        .catch(() => {
-          setStatus("error");
+        .catch((err) => {
+          if (err instanceof ApiError && err.status === 400) {
+            setStatus("rejected");
+          } else {
+            setStatus("error");
+          }
         });
     },
     [router]
@@ -88,9 +92,16 @@ export default function LoadingPage() {
               />
             </div>
           </>
+        ) : status === "rejected" ? (
+          <>
+            <p className="status status--error">Topik atau dokumen ditolak karena tidak relevan atau melanggar panduan keamanan.</p>
+            <div className="loading-actions">
+              <Link href="/composer" className="sm-btn sm-btn--primary">Perbaiki Input</Link>
+            </div>
+          </>
         ) : (
           <>
-            <p className="status status--error">Gagal membuat mindmap. Coba lagi?</p>
+            <p className="status status--error">Sistem sedang sibuk atau terjadi gangguan sementara. Coba lagi?</p>
             <div className="loading-actions">
               <button type="button" className="sm-btn sm-btn--primary" onClick={handleRetry}>
                 Coba Lagi

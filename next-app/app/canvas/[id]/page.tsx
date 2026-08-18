@@ -16,6 +16,7 @@ import { ShareButton } from "@/components/canvas/ShareButton";
 export default function CanvasPage() {
   const { id } = useParams<{ id: string }>();
   const setGraph = useCanvasStore((s) => s.setGraph);
+  const fetchTodos = useCanvasStore((s) => s.fetchTodos);
   const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
   const clearSelection = useCanvasStore((s) => s.clearSelection);
   const nodes = useCanvasStore((s) => s.nodes);
@@ -44,12 +45,13 @@ export default function CanvasPage() {
       .then((loaded) => {
         setMindmap(loaded);
         setGraph(loaded.nodes, loaded.edges);
+        fetchTodos(id);
       })
       .catch((err) => {
         console.error("[CANVAS] gagal load mindmap:", err);
         setLoadError("Mindmap tidak ditemukan atau gagal dimuat.");
       });
-  }, [id, setGraph]);
+  }, [id, setGraph, fetchTodos]);
 
   useEffect(() => {
     const previous = document.body.style.overflow;

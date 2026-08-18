@@ -317,7 +317,9 @@
   cursor: pointer;
   transition:
     transform 150ms ease-out,
-    box-shadow 150ms ease-out;
+    box-shadow 150ms ease-out,
+    border-color 150ms ease-out;
+  position: relative;
 }
 
 .page-canvas .xf-step:hover {
@@ -391,6 +393,27 @@
   line-height: 19px;
 }
 
+.page-canvas .xf-pending-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--sm-clay-bright);
+  border: 2px solid var(--sm-surface);
+  box-shadow: var(--sm-shadow-sm);
+  z-index: 10;
+}
+
+.page-canvas .xf-step.has-pending-tasks {
+  border-color: var(--sm-clay-bright);
+}
+
+.page-canvas .xf-branch.has-pending-tasks {
+  border-color: var(--sm-clay-bright);
+}
+
 /* ===== node: cabang mindmap (mindmap-branch) ===== */
 
 .page-canvas .xf-branch {
@@ -409,6 +432,7 @@
   transition:
     border-color 150ms ease-out,
     transform 150ms ease-out;
+  position: relative;
 }
 
 .page-canvas .xf-branch:hover {

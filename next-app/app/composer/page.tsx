@@ -74,6 +74,7 @@ export default function ComposerPage() {
   const verbosityRef = useRef<HTMLSelectElement>(null);
   const languageRef = useRef<HTMLSelectElement>(null);
   const [file, setFile] = useState<SelectedFile | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [topic, setTopic] = useState("");
   const [topicError, setTopicError] = useState(false);
@@ -120,10 +121,29 @@ export default function ComposerPage() {
       .finally(() => setIsDeleting(false));
   }
 
+  function validateFile(file: File): boolean {
+    setFileError(null);
+    if (file.size > 10 * 1024 * 1024) {
+      setFileError("Ukuran file maksimal 10MB");
+      return false;
+    }
+    const allowedExtensions = [".pdf", ".docx", ".txt"];
+    const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+    if (!allowedExtensions.includes(ext)) {
+      setFileError("Tipe file tidak didukung (.pdf, .docx, .txt saja)");
+      return false;
+    }
+    return true;
+  }
+
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const picked = e.target.files?.[0];
     if (!picked) return;
-    setFile({ name: picked.name, sizeLabel: formatSize(picked.size), file: picked });
+    if (validateFile(picked)) {
+      setFile({ name: picked.name, sizeLabel: formatSize(picked.size), file: picked });
+    } else {
+      e.target.value = "";
+    }
   }
 
   function handleDrop(e: React.DragEvent<HTMLLabelElement>) {
@@ -131,7 +151,9 @@ export default function ComposerPage() {
     setIsDragOver(false);
     const dropped = e.dataTransfer.files?.[0];
     if (!dropped) return;
-    setFile({ name: dropped.name, sizeLabel: formatSize(dropped.size), file: dropped });
+    if (validateFile(dropped)) {
+      setFile({ name: dropped.name, sizeLabel: formatSize(dropped.size), file: dropped });
+    }
   }
 
   function handleGenerateClick() {
@@ -305,9 +327,11 @@ export default function ComposerPage() {
               </svg>
               <strong>Tarik &amp; lepas file di sini</strong>
               <span>atau klik untuk pilih file — .pdf, .docx, .txt, maks 10MB</span>
-              <input ref={fileInputRef} type="file" id="file-input" onChange={handleFileChange} />
+              <input ref={fileInputRef} type="file" id="file-input" accept=".pdf,.docx,.txt" onChange={handleFileChange} />
             </label>
           )}
+          
+          {fileError && <span className="field-error" style={{ display: "block", marginTop: 8 }}>{fileError}</span>}
 
           <div className="upload-actions">
             <button type="button" className="sm-btn sm-btn--ghost" onClick={() => fileInputRef.current?.click()}>
