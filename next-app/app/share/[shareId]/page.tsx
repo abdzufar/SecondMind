@@ -11,10 +11,12 @@ import { getSharedMindmap } from "@/lib/api";
 import type { Mindmap } from "@/lib/types";
 import { useCanvasStore } from "@/store/canvasStore";
 import { CanvasView } from "@/components/canvas/CanvasView";
+import { PublicNodePanel } from "@/components/canvas/PublicNodePanel";
 
 export default function SharePage() {
   const { shareId } = useParams<{ shareId: string }>();
   const setGraph = useCanvasStore((s) => s.setGraph);
+  const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
   const [mindmap, setMindmap] = useState<Mindmap | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -58,7 +60,7 @@ export default function SharePage() {
           </div>
         </header>
 
-        <div className="canvas-body">
+        <div className={`canvas-body${selectedNodeId ? " has-drawer" : ""}`}>
           <div className="canvas-area">
             {mindmap ? (
               <CanvasView showCommandBar={false} />
@@ -71,6 +73,8 @@ export default function SharePage() {
               <div className="canvas-loading">Memuat mindmap…</div>
             )}
           </div>
+
+          {selectedNodeId && <PublicNodePanel />}
         </div>
       </div>
     </ReactFlowProvider>

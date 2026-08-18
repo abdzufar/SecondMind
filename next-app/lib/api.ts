@@ -1,6 +1,5 @@
 import type { Mindmap, MindmapEdge, MindmapNode, WireMindmap, WireTodo } from "@/lib/types";
 import { MOCK_MINDMAP } from "@/lib/mock/mindmap";
-import { MOCK_TODOS } from "@/lib/mock/todo";
 
 const MOCK_LATENCY_MS = 300;
 
@@ -35,11 +34,10 @@ function toMindmap(wire: WireMindmap): Mindmap {
   return { ...wire, nodes, edges: wire.edges.map((edge) => ({ ...edge })) };
 }
 
-export type MindmapSummary = Pick<WireMindmap, "_id" | "title" | "topic" | "timeframe" | "isPublic" | "shareId"> & {
-  createdAt: string;
-};
-
-const todosDb: WireTodo[] = [...MOCK_TODOS];
+export type MindmapSummary = Pick<
+  WireMindmap,
+  "_id" | "title" | "topic" | "timeframe" | "isPublic" | "shareId" | "createdAt"
+>;
 
 // Dev-only default: dipakai app/canvas/page.tsx (tanpa id) buat redirect.
 export const DEFAULT_MINDMAP_ID = MOCK_MINDMAP._id;
@@ -181,29 +179,46 @@ export async function deleteMindmap(id: string): Promise<void> {
 }
 
 export async function getTodos(mindmapId: string): Promise<WireTodo[]> {
-  return delay(todosDb.filter((todo) => todo.mindmapId === mindmapId));
+  const res = await fetch(`/api/todo?mindmapId=${mindmapId}`);
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error ?? `Gagal memuat to-do (status ${res.status})`);
+  }
+
+  return res.json();
 }
 
 export type CreateTodoInput = {
   mindmapId: string;
   taskText: string;
-  dueDate: string;
+  timeOffsetDays: number | null;
 };
 
 export async function createTodo(input: CreateTodoInput): Promise<WireTodo> {
-  const todo: WireTodo = {
-    _id: `todo-${Date.now()}`,
-    mindmapId: input.mindmapId,
-    taskText: input.taskText,
-    dueDate: input.dueDate,
-    isCompleted: false,
-  };
-  todosDb.push(todo);
-  return delay(todo);
+  const res = await fetch("/api/todo", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error ?? `Gagal menambah task (status ${res.status})`);
+  }
+
+  return res.json();
 }
 
 export async function updateTodo(id: string, input: { isCompleted: boolean }): Promise<void> {
-  const todo = todosDb.find((t) => t._id === id);
-  if (todo) todo.isCompleted = input.isCompleted;
-  await delay(undefined);
+  const res = await fetch(`/api/todo/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error ?? `Gagal update to-do (status ${res.status})`);
+  }
 }

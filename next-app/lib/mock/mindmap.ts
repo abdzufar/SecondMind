@@ -110,6 +110,7 @@ export const MOCK_MINDMAP: WireMindmap = {
   isPublic: false,
   shareId: null,
   startDate: "2026-07-13",
+  createdAt: "2026-07-13T00:00:00.000Z",
   nodes,
   edges,
 };

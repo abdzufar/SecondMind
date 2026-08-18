@@ -8,12 +8,13 @@ export type DrawerTab = "detail" | "todo";
 
 type DrawerProps = {
   mindmapId: string;
+  mindmapCreatedAt: string;
   activeTab: DrawerTab;
   onTabChange: (tab: DrawerTab) => void;
   onClose: () => void;
 };
 
-export function Drawer({ mindmapId, activeTab, onTabChange, onClose }: DrawerProps) {
+export function Drawer({ mindmapId, mindmapCreatedAt, activeTab, onTabChange, onClose }: DrawerProps) {
   const nodes = useCanvasStore((s) => s.nodes);
   const edges = useCanvasStore((s) => s.edges);
   const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
@@ -61,7 +62,7 @@ export function Drawer({ mindmapId, activeTab, onTabChange, onClose }: DrawerPro
       </div>
 
       {activeTab === "todo" ? (
-        <TodoPanel mindmapId={mindmapId} selectedNodeLabel={node?.data.label} />
+        <TodoPanel mindmapId={mindmapId} mindmapCreatedAt={mindmapCreatedAt} selectedNodeLabel={node?.data.label} />
       ) : !node ? (
         <div className="drawer-body">
           <p className="drawer-empty">Pilih node di canvas buat lihat detailnya.</p>
