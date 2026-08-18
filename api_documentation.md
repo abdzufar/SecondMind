@@ -68,7 +68,8 @@ Generates a new Hybrid Roadmap.
       "data": {
         "label": "Understand Containers",
         "description": "Containers are isolated environments that package your code...",
-        "timeMark": "Day 1"
+        "timeMark": "Day 1",
+        "isCompleted": false
       }
     }
   ],
@@ -110,7 +111,8 @@ Generates new AI branches for a specific concept (Expand).
 			"data": {
 				"label": "Images vs Containers",
 				"description": "An image is a read-only template, a container is a running instance.",
-				"timeMark": null
+				"timeMark": null,
+				"isCompleted": false
 			}
 		}
 	],

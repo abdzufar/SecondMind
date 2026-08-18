@@ -20,6 +20,7 @@ export interface IMindmap extends Document {
       description: string;
       timeOffsetDays?: number;
       userNotes?: string;
+      isCompleted?: boolean;
     }
   }[];
   edges: {
@@ -52,7 +53,8 @@ const MindmapSchema: Schema = new Schema({
       label: { type: String, required: true },
       description: { type: String, required: true },
       timeOffsetDays: { type: Number, default: null },
-      userNotes: { type: String, default: "" }
+      userNotes: { type: String, default: "" },
+      isCompleted: { type: Boolean, default: false }
     }
   }],
   

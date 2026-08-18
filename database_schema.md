@@ -46,7 +46,9 @@ const MindmapSchema = new mongoose.Schema({
     data: { 
       label: { type: String, required: true },
       description: { type: String, required: true }, // ENFORCED: AI must pre-generate details
-      timeOffsetDays: { type: Number, default: null } // Gemini returns an integer. Frontend maps this to "Day X".
+      timeOffsetDays: { type: Number, default: null },
+      userNotes: { type: String, default: "" },
+      isCompleted: { type: Boolean, default: false }
     }
   }],
   
