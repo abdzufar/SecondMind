@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
               </div>
 
               <div style="text-align: center; margin: 32px 0;">
-                <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/dashboard" style="background-color: #000000; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 500; display: inline-block;">
+                <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/canvas/${todo.mindmapId}" style="background-color: #000000; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 500; display: inline-block;">
                   View Roadmap
                 </a>
               </div>
@@ -61,7 +61,6 @@ export async function GET(req: NextRequest) {
             
             <div style="border-top: 1px solid #eaeaea; margin-top: 32px; padding-top: 24px; text-align: center; color: #888888; font-size: 12px;">
               <p style="margin: 0 0 8px 0;">You are receiving this email because you have active tasks in SecondMind.</p>
-              <p style="margin: 0;"><a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/dashboard" style="color: #888888; text-decoration: underline;">Manage Notification Preferences</a></p>
             </div>
           </div>
         `
