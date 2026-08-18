@@ -13,11 +13,20 @@ You must output a strictly valid JSON object matching this schema exactly:
   "nodes": [
     {
       "id": "node-1", // Must be unique strings
-      "type": "roadmap-step", // Must be EXACTLY this string
+      "type": "roadmap-step", // The primary sequential steps
       "data": {
         "label": "Short Actionable Step Name",
         "description": "Detailed explanation of what to learn here.",
         "timeOffsetDays": 1 // An integer representing what day this should be completed. E.g., 1 means day 1. If the timeframe is months, convert to days (e.g., month 1 = 30).
+      }
+    },
+    {
+      "id": "branch-1", // Must be unique strings
+      "type": "mindmap-branch", // Sub-concepts that branch off from roadmap-steps
+      "data": {
+        "label": "Sub-concept",
+        "description": "More specific detail about the parent step.",
+        "timeOffsetDays": null // Branches do not need a time offset
       }
     }
   ],
@@ -25,7 +34,7 @@ You must output a strictly valid JSON object matching this schema exactly:
     {
       "id": "edge-1",
       "source": "node-1", // Must strictly match an existing node id
-      "target": "node-2"  // Must strictly match an existing node id
+      "target": "node-2"  // Link roadmap-step to roadmap-step, or roadmap-step to mindmap-branch
     }
   ]
 }
@@ -33,7 +42,8 @@ You must output a strictly valid JSON object matching this schema exactly:
 CRITICAL RULES:
 - The output MUST be strictly valid JSON. Do not include markdown \`\`\`json blocks. Do not include any trailing commas.
 - Ensure every edge source and target exists in the nodes array.
-- Detail level should be: ${verbosity} (if 'detailed', add many sub-nodes and branches).
+- Generate BOTH 'roadmap-step' nodes (the main timeline) and 'mindmap-branch' nodes (detailed sub-topics connected to the main steps).
+- Detail level should be: ${verbosity} (if 'detailed', generate many mindmap-branch nodes).
 - The roadmap should be a directed acyclic graph (DAG), progressing logically.`;
 }
 
