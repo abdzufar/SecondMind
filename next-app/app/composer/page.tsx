@@ -8,6 +8,7 @@ import { useSession, signOut } from "next-auth/react";
 import "./composer.css";
 import { deleteMindmap, getMindmaps, type GenerateMindmapInput, type MindmapSummary } from "@/lib/api";
 import { setPendingGenerateInput } from "@/lib/pendingGenerate";
+import { getInitials } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,16 +27,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-function getInitials(name?: string | null, email?: string | null): string {
-  if (name) {
-    const parts = name.trim().split(/\s+/);
-    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-    return parts[0].slice(0, 2).toUpperCase();
-  }
-  if (email) return email.slice(0, 2).toUpperCase();
-  return "?";
-}
 
 type SelectedFile = {
   name: string;

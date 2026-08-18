@@ -81,6 +81,27 @@
   gap: var(--sm-space-3);
 }
 
+.page-landing .avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--sm-ink);
+  color: var(--sm-paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 700 13px/1 var(--sm-font);
+  flex-shrink: 0;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 150ms ease-out;
+}
+
+.page-landing .avatar:hover {
+  opacity: 0.85;
+}
+
 @media (max-width: 860px) {
   .page-landing .nav-links {
     display: none;

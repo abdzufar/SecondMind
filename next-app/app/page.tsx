@@ -3,10 +3,22 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
+import { useSession, signOut } from "next-auth/react";
+import { getInitials } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import "./landing.css";
 
 export default function LandingPage() {
   const artRef = useRef<HTMLDivElement>(null);
+  const { data: session, status } = useSession();
 
   useEffect(() => {
     const reveals = document.querySelectorAll(".page-landing .reveal");
@@ -75,12 +87,45 @@ export default function LandingPage() {
             <a href="#contoh">Contoh peta</a>
           </div>
           <div className="nav-cta">
-            <Link href="/login" className="sm-btn sm-btn--ghost">
-              Masuk
-            </Link>
-            <Link href="/register" className="sm-btn sm-btn--primary">
-              Coba gratis
-            </Link>
+            {status === "authenticated" ? (
+              <>
+                <Link href="/composer" className="sm-btn sm-btn--primary">
+                  Buka Composer
+                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="avatar" aria-label="Menu akun">
+                    {getInitials(session?.user?.name, session?.user?.email)}
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel>
+                        <div className="flex min-w-0 flex-col gap-0.5">
+                          <span className="truncate font-semibold text-foreground">
+                            {session?.user?.name ?? "Akun"}
+                          </span>
+                          {session?.user?.email && (
+                            <span className="truncate font-normal text-xs">{session.user.email}</span>
+                          )}
+                        </div>
+                      </DropdownMenuLabel>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem variant="destructive" onClick={() => signOut({ callbackUrl: "/" })}>
+                      Keluar
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : status === "unauthenticated" ? (
+              <>
+                <Link href="/login" className="sm-btn sm-btn--ghost">
+                  Masuk
+                </Link>
+                <Link href="/register" className="sm-btn sm-btn--primary">
+                  Coba gratis
+                </Link>
+              </>
+            ) : null}
           </div>
         </div>
       </nav>

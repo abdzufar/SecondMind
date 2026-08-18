@@ -273,6 +273,21 @@ a:hover {
 .sm-section-dark a {
   color: var(--sm-clay-bright);
 }
+.sm-section-dark a.sm-btn {
+  color: inherit;
+}
+.sm-section-dark a.sm-btn--primary,
+.sm-section-dark a.sm-btn--primary:hover {
+  color: #fff;
+}
+.sm-section-dark a.sm-btn--dark,
+.sm-section-dark a.sm-btn--dark:hover {
+  color: var(--sm-paper);
+}
+.sm-section-dark a.sm-btn--ghost,
+.sm-section-dark a.sm-btn--ghost:hover {
+  color: var(--sm-ink);
+}
 
 /* Belum ada rencana dark mode (§4) — .dark sengaja tidak didefinisikan.
    @custom-variant dark di atas tetap ada karena beberapa utility class
