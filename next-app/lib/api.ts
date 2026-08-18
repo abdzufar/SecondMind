@@ -1,10 +1,12 @@
-import type { Mindmap, MindmapEdge, MindmapNode, WireMindmap, WireTodo } from "@/lib/types";
-
-const MOCK_LATENCY_MS = 300;
-
-function delay<T>(value: T, ms = MOCK_LATENCY_MS): Promise<T> {
-  return new Promise((resolve) => setTimeout(() => resolve(value), ms));
-}
+import type {
+  Mindmap,
+  MindmapEdge,
+  MindmapNode,
+  WireMindmap,
+  WireMindmapEdge,
+  WireMindmapNode,
+  WireTodo,
+} from "@/lib/types";
 
 // Gemini balikin integer offset hari mentah (§5 CLAUDE.md) — frontend yang format jadi
 // "Hari X"/"Minggu Y" sendiri, gak pernah disimpan sebagai string di wire type.
@@ -78,22 +80,30 @@ export type ElaborateNodeInput = {
 export async function elaborateNode(
   input: ElaborateNodeInput
 ): Promise<{ newNodes: MindmapNode[]; newEdges: MindmapEdge[] }> {
-  const newNodeId = `${input.nodeId}-branch-${Date.now()}`;
-  const newNodes: MindmapNode[] = [
-    {
-      id: newNodeId,
-      type: "mindmap-branch",
-      position: { x: 0, y: 0 },
-      data: {
-        label: input.concept,
-        description: `Penjelasan tambahan soal "${input.concept}" akan muncul di sini.`,
-        timeOffsetDays: null,
-        timeMark: null,
-      },
+  const res = await fetch("/api/mindmap/elaborate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error ?? `Gagal memecah node (status ${res.status})`);
+  }
+
+  const wire: { newNodes: WireMindmapNode[]; newEdges: WireMindmapEdge[] } = await res.json();
+
+  const newNodes: MindmapNode[] = wire.newNodes.map((node) => ({
+    id: node.id,
+    type: node.type,
+    position: { x: 0, y: 0 },
+    data: {
+      ...node.data,
+      timeMark: formatTimeOffset(node.data.timeOffsetDays),
     },
-  ];
-  const newEdges: MindmapEdge[] = [{ id: `${input.nodeId}-${newNodeId}`, source: input.nodeId, target: newNodeId }];
-  return delay({ newNodes, newEdges });
+  }));
+
+  return { newNodes, newEdges: wire.newEdges.map((edge) => ({ ...edge })) };
 }
 
 // nodeLabel itu field UI-only (chip konteks di message bubble) — dihitung di pemanggil
