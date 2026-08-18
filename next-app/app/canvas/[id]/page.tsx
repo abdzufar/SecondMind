@@ -11,6 +11,7 @@ import { useCanvasStore } from "@/store/canvasStore";
 import { CanvasView } from "@/components/canvas/CanvasView";
 import { Drawer } from "@/components/canvas/Drawer";
 import { ExportButton } from "@/components/canvas/ExportButton";
+import { ShareButton } from "@/components/canvas/ShareButton";
 
 export default function CanvasPage() {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +20,7 @@ export default function CanvasPage() {
   const nodes = useCanvasStore((s) => s.nodes);
   const [mindmap, setMindmap] = useState<Mindmap | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [showFeasibilityWarning, setShowFeasibilityWarning] = useState(true);
 
   const stepNodes = nodes.filter((n) => n.type === "roadmap-step");
   const completedSteps = stepNodes.filter((n) => n.data.isCompleted).length;
@@ -70,12 +72,38 @@ export default function CanvasPage() {
           </div>
 
           <div className="header-actions">
-            <button type="button" className="sm-btn sm-btn--ghost">
-              Bagikan
-            </button>
+            {mindmap ? (
+              <ShareButton
+                mindmapId={mindmap._id}
+                isPublic={mindmap.isPublic}
+                shareId={mindmap.shareId}
+                onUpdate={(update) => setMindmap((prev) => (prev ? { ...prev, ...update } : prev))}
+              />
+            ) : (
+              <button type="button" className="sm-btn sm-btn--ghost" disabled>
+                Bagikan
+              </button>
+            )}
             <ExportButton filename={mindmap?.title ?? "canvas"} />
           </div>
         </header>
+
+        {mindmap?.feasibilityWarning && showFeasibilityWarning && (
+          <div className="feasibility-banner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+              <path d="M12 9v4" />
+              <path d="M12 17h.01" />
+            </svg>
+            <p>{mindmap.feasibilityWarning}</p>
+            <button type="button" aria-label="Tutup peringatan" onClick={() => setShowFeasibilityWarning(false)}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
 
         <div className={`canvas-body${selectedNodeId ? " has-drawer" : ""}`}>
           <div className="canvas-area">

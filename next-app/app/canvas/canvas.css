@@ -25,11 +25,110 @@
   border-bottom: 1px solid var(--sm-line);
 }
 
+.page-canvas .feasibility-banner {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sm-space-3);
+  padding: var(--sm-space-3) var(--sm-space-5);
+  background: var(--sm-clay-tint);
+  border-bottom: 1px solid var(--sm-line);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--sm-ink);
+}
+
+.page-canvas .feasibility-banner svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  color: var(--sm-clay);
+}
+
+.page-canvas .feasibility-banner p {
+  flex: 1;
+  margin: 0;
+}
+
+.page-canvas .feasibility-banner button {
+  flex-shrink: 0;
+  display: flex;
+  padding: 2px;
+  background: transparent;
+  border: none;
+  color: var(--sm-ink-45);
+  cursor: pointer;
+  transition: color 150ms ease-out;
+}
+
+.page-canvas .feasibility-banner button svg {
+  width: 16px;
+  height: 16px;
+  margin-top: 0;
+  color: inherit;
+}
+
+.page-canvas .feasibility-banner button:hover {
+  color: var(--sm-ink);
+}
+
+.page-canvas .share-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sm-space-3) 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sm-ink);
+}
+
+.page-canvas .share-url-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-2);
+}
+
+.page-canvas .share-url-input {
+  flex: 1;
+  height: 40px;
+  padding: 0 var(--sm-space-3);
+  border: 1px solid var(--sm-line);
+  border-radius: var(--sm-radius-sm);
+  background: var(--sm-paper);
+  color: var(--sm-ink-70);
+  font-family: var(--sm-font);
+  font-size: 13px;
+  min-width: 0;
+}
+
+.page-canvas .share-url-row .btn,
+.page-canvas .share-url-row button {
+  flex-shrink: 0;
+}
+
 .page-canvas .header-left {
   display: flex;
   align-items: center;
   gap: var(--sm-space-4);
   min-width: 0;
+}
+
+.page-canvas .brand {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.page-canvas .share-badge {
+  padding: var(--sm-space-1) var(--sm-space-3);
+  border-radius: var(--sm-radius-pill);
+  background: var(--sm-clay-tint);
+  color: var(--sm-clay);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .page-canvas .icon-btn {

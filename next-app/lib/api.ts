@@ -35,25 +35,14 @@ function toMindmap(wire: WireMindmap): Mindmap {
   return { ...wire, nodes, edges: wire.edges.map((edge) => ({ ...edge })) };
 }
 
-type MindmapRecord = WireMindmap & { createdAt: string };
-
 export type MindmapSummary = Pick<WireMindmap, "_id" | "title" | "topic" | "timeframe" | "isPublic" | "shareId"> & {
   createdAt: string;
 };
 
-// "Database" mock di memori — reset tiap reload halaman, cukup buat demo lokal.
-const mindmapsDb: MindmapRecord[] = [{ ...MOCK_MINDMAP, createdAt: MOCK_MINDMAP.startDate }];
 const todosDb: WireTodo[] = [...MOCK_TODOS];
 
-// Dev-only default: canvas page belum punya route [id] (M11), jadi sementara
-// selalu load mindmap mock ini.
+// Dev-only default: dipakai app/canvas/page.tsx (tanpa id) buat redirect.
 export const DEFAULT_MINDMAP_ID = MOCK_MINDMAP._id;
-
-function findMindmapOrThrow(id: string): MindmapRecord {
-  const mindmap = mindmapsDb.find((m) => m._id === id);
-  if (!mindmap) throw new Error(`Mindmap ${id} tidak ditemukan`);
-  return mindmap;
-}
 
 export type GenerateMindmapInput = {
   topic: string;
@@ -137,19 +126,49 @@ export async function getMindmap(id: string): Promise<Mindmap> {
 }
 
 export type SaveMindmapInput = {
-  nodes: MindmapNode[];
-  edges: MindmapEdge[];
+  nodes?: MindmapNode[];
+  edges?: MindmapEdge[];
+  isPublic?: boolean;
 };
 
 export async function saveMindmap(id: string, input: SaveMindmapInput): Promise<void> {
-  const mindmap = findMindmapOrThrow(id);
-  mindmap.nodes = input.nodes.map((node) => ({
-    id: node.id,
-    type: node.type,
-    data: { label: node.data.label, description: node.data.description, timeOffsetDays: node.data.timeOffsetDays },
-  }));
-  mindmap.edges = input.edges.map((edge) => ({ id: edge.id, source: edge.source, target: edge.target }));
-  await delay(undefined);
+  const body: Record<string, unknown> = {};
+  if (input.nodes) {
+    body.nodes = input.nodes.map((node) => ({
+      id: node.id,
+      type: node.type,
+      data: { label: node.data.label, description: node.data.description, timeOffsetDays: node.data.timeOffsetDays },
+    }));
+  }
+  if (input.edges) {
+    body.edges = input.edges.map((edge) => ({ id: edge.id, source: edge.source, target: edge.target }));
+  }
+  if (input.isPublic !== undefined) body.isPublic = input.isPublic;
+
+  const res = await fetch(`/api/mindmap/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error ?? `Gagal menyimpan mindmap (status ${res.status})`);
+  }
+}
+
+export async function getSharedMindmap(shareId: string): Promise<Mindmap> {
+  const res = await fetch(`/api/mindmap/share/${shareId}`);
+
+  if (!res.ok) {
+    if (res.status === 403) throw new Error("Mindmap ini gak lagi dibagikan secara publik.");
+    if (res.status === 404) throw new Error("Mindmap tidak ditemukan.");
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error ?? `Gagal memuat mindmap (status ${res.status})`);
+  }
+
+  const wire: WireMindmap = await res.json();
+  return toMindmap(wire);
 }
 
 export async function deleteMindmap(id: string): Promise<void> {
