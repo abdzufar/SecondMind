@@ -274,3 +274,23 @@ export async function updateTodo(id: string, input: { isCompleted: boolean }): P
     throw new Error(data?.error ?? `Gagal update to-do (status ${res.status})`);
   }
 }
+
+// Backend-side auto-generate (dari merge `development`, Zufar) — beda dari loop
+// `createTodo()` per-step yang lama: server yang nentuin taskText+description
+// (deskripsi digabung dari mindmap-branch yang terhubung ke tiap roadmap-step)
+// dan proteksi duplikatnya, bukan frontend. Respons cuma { success, generatedCount }
+// (bukan list Todo-nya) — caller (TodoPanel.tsx) manggil getTodos() lagi abis ini.
+export async function generateTodos(mindmapId: string): Promise<{ success: boolean; generatedCount: number }> {
+  const res = await fetch("/api/todo/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mindmapId }),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error ?? `Gagal generate to-do (status ${res.status})`);
+  }
+
+  return res.json();
+}

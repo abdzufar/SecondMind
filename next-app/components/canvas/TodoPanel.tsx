@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createTodo, updateTodo } from "@/lib/api";
+import { createTodo, generateTodos, getTodos, updateTodo } from "@/lib/api";
 import type { WireTodo } from "@/lib/types";
 import { useCanvasStore } from "@/store/canvasStore";
 
@@ -92,21 +92,18 @@ export function TodoPanel({ mindmapId, mindmapCreatedAt, selectedNodeLabel }: To
     setIsAutoGenerating(true);
     setFormError(null);
 
-    const results = await Promise.allSettled(
-      autogenCandidates.map((n) =>
-        createTodo({ mindmapId, taskText: n.data.label, timeOffsetDays: n.data.timeOffsetDays })
-      )
-    );
-
-    const created = results
-      .filter((r): r is PromiseFulfilledResult<WireTodo> => r.status === "fulfilled")
-      .map((r) => r.value);
-    const failedCount = results.length - created.length;
-
-    if (created.length > 0) setTodos([...todos, ...created]);
-    if (failedCount > 0) setFormError(`${failedCount} to-do gagal dibuat. Coba lagi.`);
-
-    setIsAutoGenerating(false);
+    // Server yang generate (nentuin taskText+description dari branch yang
+    // terhubung + skip duplikat) — respons cuma { generatedCount }, jadi
+    // refetch getTodos() abis itu buat nyinkronin store sama hasil aslinya.
+    try {
+      await generateTodos(mindmapId);
+      const refreshed = await getTodos(mindmapId);
+      setTodos(refreshed);
+    } catch {
+      setFormError("Gagal generate to-do. Coba lagi.");
+    } finally {
+      setIsAutoGenerating(false);
+    }
   }
 
   const sorted = [...todos].sort((a, b) => a.dueDate.localeCompare(b.dueDate));
@@ -127,6 +124,7 @@ export function TodoPanel({ mindmapId, mindmapCreatedAt, selectedNodeLabel }: To
         />
         <div className="todo-item-body">
           <span className="todo-item-text">{todo.taskText}</span>
+          {todo.description && <span className="todo-item-description">{todo.description}</span>}
           <span className="todo-item-due">{formatDueDate(todo.dueDate)}</span>
         </div>
       </li>

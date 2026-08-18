@@ -1323,6 +1323,16 @@
   text-decoration: line-through;
 }
 
+.page-canvas .todo-item-description {
+  font-size: 12px;
+  color: var(--sm-ink-70);
+  white-space: pre-wrap;
+}
+
+.page-canvas .todo-item.is-done .todo-item-description {
+  color: var(--sm-ink-45);
+}
+
 .page-canvas .todo-item-due {
   font-size: 11px;
   color: var(--sm-ink-45);
