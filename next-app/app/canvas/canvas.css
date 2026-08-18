@@ -287,6 +287,15 @@
 
 .page-canvas .react-flow__handle {
   opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  background-color: var(--sm-clay);
+  border: 2px solid var(--sm-surface);
+  width: 10px;
+  height: 10px;
+}
+
+.page-canvas .react-flow__node:hover .react-flow__handle {
+  opacity: 1;
 }
 
 .page-canvas .react-flow__attribution {

@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import "@xyflow/react/dist/style.css";
-import { Background, Controls, Panel, ReactFlow } from "@xyflow/react";
+import { Background, Controls, Panel, ReactFlow, type Connection, type Edge } from "@xyflow/react";
 import ReactMarkdown from "react-markdown";
 import { useCanvasStore } from "@/store/canvasStore";
 import type { MindmapEdge, MindmapNode } from "@/lib/types";
-import type { ChatMessage } from "@/lib/api";
+import { saveMindmap, type ChatMessage } from "@/lib/api";
 import { RoadmapStepNode } from "./nodes/RoadmapStepNode";
 import { MindmapBranchNode } from "./nodes/MindmapBranchNode";
 
@@ -21,6 +21,7 @@ type CanvasViewProps = {
   isChatSending?: boolean;
   chatError?: string | null;
   onSendChat?: (message: string) => void;
+  mindmapId?: string;
 };
 
 export function CanvasView({
@@ -29,6 +30,7 @@ export function CanvasView({
   isChatSending = false,
   chatError = null,
   onSendChat,
+  mindmapId,
 }: CanvasViewProps) {
   const nodes = useCanvasStore((s) => s.nodes);
   const edges = useCanvasStore((s) => s.edges);
@@ -36,6 +38,9 @@ export function CanvasView({
   const onEdgesChange = useCanvasStore((s) => s.onEdgesChange);
   const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
   const selectNode = useCanvasStore((s) => s.selectNode);
+  const connectEdge = useCanvasStore((s) => s.connectEdge);
+  const reconnectEdge = useCanvasStore((s) => s.reconnectEdge);
+  const deleteEdge = useCanvasStore((s) => s.deleteEdge);
 
   const [chatDraft, setChatDraft] = useState("");
 
@@ -47,6 +52,48 @@ export function CanvasView({
     setChatDraft("");
   }
 
+  function handleConnect(connection: Connection) {
+    if (connection.source === connection.target) return; // Prevent self-loops
+    connectEdge(connection);
+    if (mindmapId) {
+      // Small timeout to allow Zustand state to flush before saving
+      setTimeout(() => {
+        const { edges: currentEdges } = useCanvasStore.getState();
+        saveMindmap(mindmapId, { edges: currentEdges });
+      }, 0);
+    }
+  }
+
+  function handleEdgesDelete() {
+    if (mindmapId) {
+      setTimeout(() => {
+        const { edges: currentEdges } = useCanvasStore.getState();
+        saveMindmap(mindmapId, { edges: currentEdges });
+      }, 0);
+    }
+  }
+
+  function handleReconnect(oldEdge: Edge, newConnection: Connection) {
+    if (newConnection.source === newConnection.target) return; // Prevent self-loops
+    reconnectEdge(oldEdge, newConnection);
+    if (mindmapId) {
+      setTimeout(() => {
+        const { edges: currentEdges } = useCanvasStore.getState();
+        saveMindmap(mindmapId, { edges: currentEdges });
+      }, 0);
+    }
+  }
+
+  function handleEdgeDoubleClick(_event: React.MouseEvent, edge: Edge) {
+    deleteEdge(edge.id);
+    if (mindmapId) {
+      setTimeout(() => {
+        const { edges: currentEdges } = useCanvasStore.getState();
+        saveMindmap(mindmapId, { edges: currentEdges });
+      }, 0);
+    }
+  }
+
   return (
     <ReactFlow<MindmapNode, MindmapEdge>
       nodes={nodes}
@@ -56,11 +103,18 @@ export function CanvasView({
       onEdgesChange={onEdgesChange}
       onNodeClick={(_event, node) => selectNode(node.id)}
       onPaneClick={() => selectNode(null)}
-      nodesConnectable={false}
+      onConnect={handleConnect}
+      onReconnect={handleReconnect}
+      onEdgeDoubleClick={handleEdgeDoubleClick}
+      onEdgesDelete={handleEdgesDelete}
+      nodesConnectable={true}
+      edgesReconnectable={true}
+      elementsSelectable={true}
+      edgesFocusable={true}
       nodesDraggable={false}
       fitView
       proOptions={{ hideAttribution: true }}
-      defaultEdgeOptions={{ type: "smoothstep", style: { stroke: "#e7d9c6", strokeWidth: 1.5 } }}
+      defaultEdgeOptions={{ type: "smoothstep", interactionWidth: 25, style: { stroke: "#e7d9c6", strokeWidth: 1.5 } }}
     >
       <Background gap={22} size={1.5} color="#e0d4c3" />
       <Controls showInteractive={false} position="bottom-right" />

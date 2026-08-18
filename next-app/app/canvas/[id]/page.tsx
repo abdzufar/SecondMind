@@ -149,6 +149,7 @@ export default function CanvasPage() {
                 isChatSending={isChatSending}
                 chatError={chatError}
                 onSendChat={(message) => handleSendChat(message)}
+                mindmapId={mindmap._id}
               />
             ) : loadError ? (
               <div className="canvas-loading canvas-loading--error">

@@ -37,38 +37,82 @@ export function getLayoutedElements(nodes: MindmapNode[], edges: MindmapEdge[]) 
 
   edges.forEach((edge) => {
     if (stepIds.has(edge.source) && stepIds.has(edge.target)) {
-      edgeHandles.set(edge.id, { sourceHandle: "bottom", targetHandle: "top" });
+      edgeHandles.set(edge.id, { sourceHandle: "bottom-source", targetHandle: "top-target" });
     }
   });
 
   // Pass 2: cabang tiap step di-fan manual ke kiri/kanan, gantian per step
   // (bukan per cabang) — samain sama hero illustration di app/page.tsx.
   const stepsByY = [...steps].sort((a, b) => positions.get(a.id)!.y - positions.get(b.id)!.y);
+  const placedNodes = new Set<string>();
+  stepsByY.forEach((step) => placedNodes.add(step.id));
 
   stepsByY.forEach((step, stepIndex) => {
     const stepPos = positions.get(step.id)!;
-    const branchEdges = edges.filter((edge) => edge.source === step.id && branchesById.has(edge.target));
-    if (branchEdges.length === 0) return;
-
     const side = stepIndex % 2 === 0 ? "left" : "right";
-    const branchX = side === "left" ? stepPos.x - SPINE_TO_BRANCH_GAP - BRANCH_WIDTH : stepPos.x + STEP_WIDTH + SPINE_TO_BRANCH_GAP;
 
-    const stepCenterY = stepPos.y + STEP_HEIGHT / 2;
-    const totalHeight = branchEdges.length * BRANCH_HEIGHT + (branchEdges.length - 1) * BRANCH_GAP;
-    const startY = stepCenterY - totalHeight / 2;
+    let currentLevelIds = [step.id];
+    let levelIndex = 1;
 
-    branchEdges.forEach((edge, branchIndex) => {
-      positions.set(edge.target, { x: branchX, y: startY + branchIndex * (BRANCH_HEIGHT + BRANCH_GAP) });
-      edgeHandles.set(edge.id, { sourceHandle: side, targetHandle: side === "left" ? "right" : "left" });
-    });
+    while (currentLevelIds.length > 0) {
+      const nextLevelIds: string[] = [];
+      const branchEdgesAtLevel = edges.filter(
+        (edge) => currentLevelIds.includes(edge.source) && branchesById.has(edge.target) && !placedNodes.has(edge.target)
+      );
+
+      if (branchEdgesAtLevel.length === 0) break;
+
+      const totalHeight = branchEdgesAtLevel.length * BRANCH_HEIGHT + (branchEdgesAtLevel.length - 1) * BRANCH_GAP;
+      const stepCenterY = stepPos.y + STEP_HEIGHT / 2;
+      const startY = stepCenterY - totalHeight / 2;
+
+      const branchX = side === "left"
+        ? stepPos.x - (SPINE_TO_BRANCH_GAP + BRANCH_WIDTH) * levelIndex
+        : stepPos.x + STEP_WIDTH + SPINE_TO_BRANCH_GAP + (SPINE_TO_BRANCH_GAP + BRANCH_WIDTH) * (levelIndex - 1);
+
+      branchEdgesAtLevel.forEach((edge, branchIndex) => {
+        positions.set(edge.target, { x: branchX, y: startY + branchIndex * (BRANCH_HEIGHT + BRANCH_GAP) });
+        placedNodes.add(edge.target);
+        nextLevelIds.push(edge.target);
+
+        edgeHandles.set(edge.id, {
+          sourceHandle: side + "-source",
+          targetHandle: (side === "left" ? "right" : "left") + "-target",
+        });
+      });
+
+      currentLevelIds = nextLevelIds;
+      levelIndex++;
+    }
   });
+
+  // Pass 3: Floating branches (completely disconnected from steps)
+  const unplacedBranches = nodes.filter((node) => node.type === "mindmap-branch" && !placedNodes.has(node.id));
+  if (unplacedBranches.length > 0) {
+    let maxY = 0;
+    positions.forEach((p) => {
+      if (p.y > maxY) maxY = p.y;
+    });
+
+    unplacedBranches.forEach((node, i) => {
+      positions.set(node.id, { x: 0, y: maxY + 150 + i * (BRANCH_HEIGHT + BRANCH_GAP) });
+    });
+  }
 
   const layoutedNodes = nodes.map((node) => {
     const fallback = { x: 0, y: 0 };
     return { ...node, position: positions.get(node.id) ?? fallback };
   });
 
-  const layoutedEdges = edges.map((edge) => ({ ...edge, ...edgeHandles.get(edge.id) }));
+  const layoutedEdges = edges.map((edge) => {
+    const layoutHandles = edgeHandles.get(edge.id);
+    return {
+      sourceHandle: "right-source",
+      targetHandle: "left-target",
+      ...edge,
+      ...layoutHandles,
+    };
+  });
 
   return { nodes: layoutedNodes, edges: layoutedEdges };
 }
