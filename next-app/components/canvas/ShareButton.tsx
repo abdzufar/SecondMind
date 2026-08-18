@@ -13,6 +13,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+const OPEN_DELAY_MS = 1500;
+
 type ShareButtonProps = {
   mindmapId: string;
   isPublic: boolean;
@@ -22,11 +24,20 @@ type ShareButtonProps = {
 
 export function ShareButton({ mindmapId, isPublic, shareId, onUpdate }: ShareButtonProps) {
   const [open, setOpen] = useState(false);
+  const [isOpening, setIsOpening] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const shareUrl = shareId && typeof window !== "undefined" ? `${window.location.origin}/share/${shareId}` : null;
+
+  function handleOpenClick() {
+    setIsOpening(true);
+    setTimeout(() => {
+      setIsOpening(false);
+      setOpen(true);
+    }, OPEN_DELAY_MS);
+  }
 
   function handleToggle(checked: boolean) {
     setIsSaving(true);
@@ -50,8 +61,8 @@ export function ShareButton({ mindmapId, isPublic, shareId, onUpdate }: ShareBut
 
   return (
     <>
-      <button type="button" className="sm-btn sm-btn--ghost" onClick={() => setOpen(true)}>
-        Bagikan
+      <button type="button" className="sm-btn sm-btn--ghost" onClick={handleOpenClick} disabled={isOpening}>
+        {isOpening ? "Menyiapkan…" : "Bagikan"}
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>

@@ -74,7 +74,11 @@
   color: var(--sm-ink);
 }
 
-.page-canvas .share-toggle-row {
+/* Dialog konten (ShareButton) di-portal ke luar .page-canvas oleh Base UI,
+   jadi rule di bawah ini SENGAJA gak diprefix .page-canvas — kalau diprefix,
+   gak akan pernah match sama sekali. */
+
+.share-toggle-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -84,13 +88,13 @@
   color: var(--sm-ink);
 }
 
-.page-canvas .share-url-row {
+.share-url-row {
   display: flex;
   align-items: center;
   gap: var(--sm-space-2);
 }
 
-.page-canvas .share-url-input {
+.share-url-input {
   flex: 1;
   height: 40px;
   padding: 0 var(--sm-space-3);
@@ -101,10 +105,12 @@
   font-family: var(--sm-font);
   font-size: 13px;
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.page-canvas .share-url-row .btn,
-.page-canvas .share-url-row button {
+.share-url-row button {
   flex-shrink: 0;
 }
 
@@ -122,12 +128,18 @@
 }
 
 .page-canvas .share-badge {
-  padding: var(--sm-space-1) var(--sm-space-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  padding: 6px var(--sm-space-3) 5px;
   border-radius: var(--sm-radius-pill);
   background: var(--sm-clay-tint);
   color: var(--sm-clay);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--sm-fs-small);
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   white-space: nowrap;
 }
 
@@ -162,8 +174,16 @@
   min-width: 0;
 }
 
+.page-canvas .doc-info-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-2);
+  min-width: 0;
+}
+
 .page-canvas .doc-info strong {
   display: block;
+  min-width: 0;
   font-size: var(--sm-fs-body);
   font-weight: 700;
   color: var(--sm-ink);
@@ -917,4 +937,24 @@
   .page-canvas .header-actions .sm-btn {
     padding: 12px 16px;
   }
+}
+
+/* ===== halaman share (/share/[shareId]) =====
+   Header di halaman ini gak punya header-progress/header-actions kayak canvas
+   asli, jadi butuh tinggi + padding sendiri — .canvas-header dan .canvas-body
+   di canvas asli saling gantung lewat calc(), jadi override di-scope ke
+   .page-share biar canvas asli gak ikut kena. */
+
+.page-share .canvas-header {
+  height: 72px;
+}
+
+.page-share .canvas-body {
+  height: calc(100vh - 72px);
+}
+
+.page-share .doc-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
