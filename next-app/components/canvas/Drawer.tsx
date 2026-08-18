@@ -234,8 +234,13 @@ export function Drawer({
   }
 
   return (
-    <aside className="drawer">
-      <div className="drawer-head">
+    <>
+      {/* Cuma kepake di layar kecil (<900px, lihat canvas.css) — di layar
+          gede gak dirender secara visual (display:none), gak ganggu apa-apa. */}
+      <div className="drawer-backdrop" onClick={onClose} aria-hidden="true" />
+      <aside className="drawer">
+        <div className="drawer-handle" aria-hidden="true" />
+        <div className="drawer-head">
         <div className="drawer-tabs">
           <button
             type="button"
@@ -472,6 +477,7 @@ export function Drawer({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </aside>
+      </aside>
+    </>
   );
 }

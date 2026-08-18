@@ -679,6 +679,16 @@
   overflow-y: auto;
 }
 
+/* Backdrop + drag-handle cuma dipakai buat mode bottom sheet di layar kecil
+   (lihat @media max-width:900px di bawah) — di layar gede dua-duanya disembunyiin. */
+.page-canvas .drawer-backdrop {
+  display: none;
+}
+
+.page-canvas .drawer-handle {
+  display: none;
+}
+
 .page-canvas .drawer-head {
   position: sticky;
   top: 0;
@@ -1300,17 +1310,65 @@
 
 /* ===== responsive ===== */
 
+@keyframes drawer-backdrop-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes drawer-sheet-slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 900px) {
-  .page-canvas .canvas-body.has-drawer .canvas-area {
-    display: none;
+  /* Canvas tetap kelihatan di belakang sheet — bukan lagi ke-swap total kayak
+     sebelumnya (display:none), biar kerasa kayak bottom sheet beneran nutupin
+     sebagian layar, bukan ganti halaman. */
+  .page-canvas .drawer-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(34, 27, 20, 0.45); /* --sm-ink dengan alpha, gak ada token warna overlay terpisah */
+    z-index: 40;
+    animation: drawer-backdrop-fade-in 200ms ease-out;
   }
+
   .page-canvas .canvas-body.has-drawer .drawer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
     width: 100%;
-    border-left: none;
-  }
-  .page-canvas .canvas-body.has-drawer .drawer-body {
     max-width: 640px;
     margin: 0 auto;
+    max-height: 82vh;
+    border-left: none;
+    border-radius: var(--sm-radius-lg) var(--sm-radius-lg) 0 0;
+    box-shadow: 0 -8px 30px rgba(34, 27, 20, 0.2);
+    z-index: 41;
+    animation: drawer-sheet-slide-up 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .page-canvas .drawer-handle {
+    display: block;
+    width: 36px;
+    height: 4px;
+    border-radius: var(--sm-radius-pill);
+    background: var(--sm-line);
+    margin: var(--sm-space-3) auto 0;
+    flex-shrink: 0;
+  }
+
+  .page-canvas .canvas-body.has-drawer .drawer-body {
     width: 100%;
     box-sizing: border-box;
   }
