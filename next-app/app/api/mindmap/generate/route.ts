@@ -52,6 +52,10 @@ export async function POST(req: NextRequest) {
 				} else {
 					fileContext = buffer.toString("utf-8");
 				}
+					if (fileContext.trim().length < 20) {
+						console.log("[PDF_WARNING]: Extracted text is suspiciously short. It might be a scanned image.");
+						fileContext = "[The uploaded PDF was empty or image-based. The AI could not read the text. Inform the user in the feasibilityWarning that you could not read their document.]";
+					}
 			} catch (e) {
 				console.error("[FILE_PARSE_ERROR]:", e);
 			}

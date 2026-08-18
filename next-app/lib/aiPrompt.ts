@@ -2,9 +2,9 @@ export function getGeneratePrompt(topic: string, timeframe: string, language: st
   const contextBlock = fileContext ? `\n\n=== SOURCE DOCUMENT ===\n${fileContext.substring(0, 25000)}\n=== END SOURCE DOCUMENT ===\n` : '';
   
   let verbosityInstruction = "";
-  if (verbosity === "summary") {
+  if (verbosity === "ringkas" || verbosity === "summary") {
     verbosityInstruction = "You MUST NOT generate any 'mindmap-branch' nodes. Only generate the main 'roadmap-step' nodes.";
-  } else if (verbosity === "detailed") {
+  } else if (verbosity === "detail" || verbosity === "detailed") {
     verbosityInstruction = "You MUST generate at least 3 to 5 highly specific 'mindmap-branch' nodes for every single 'roadmap-step'.";
   } else {
     verbosityInstruction = "Generate 1 to 2 'mindmap-branch' nodes per 'roadmap-step' as needed.";
