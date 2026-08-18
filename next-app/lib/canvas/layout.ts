@@ -72,3 +72,49 @@ export function getLayoutedElements(nodes: MindmapNode[], edges: MindmapEdge[]) 
 
   return { nodes: layoutedNodes, edges: layoutedEdges };
 }
+
+// Hapus satu node (manual node edit — §9 M5 CLAUDE.md). Kalau yang dihapus roadmap-step,
+// cabang-cabangnya ikut kehapus (biar gak jadi node nyantol tanpa induk) dan spine-nya
+// disambung ulang (step sebelum <-> step sesudah) biar rantai roadmap-nya gak putus.
+// Nomor urut step di-hitung ulang dari sisa node yang ada.
+export function removeNodeCascade(nodes: MindmapNode[], edges: MindmapEdge[], idToDelete: string) {
+  const nodeToDelete = nodes.find((node) => node.id === idToDelete);
+  if (!nodeToDelete) return { nodes, edges };
+
+  const idsToRemove = new Set([idToDelete]);
+
+  if (nodeToDelete.type === "roadmap-step") {
+    edges
+      .filter((edge) => edge.source === idToDelete)
+      .map((edge) => edge.target)
+      .filter((targetId) => nodes.find((node) => node.id === targetId)?.type === "mindmap-branch")
+      .forEach((branchId) => idsToRemove.add(branchId));
+  }
+
+  const isStep = (id: string) => nodes.find((node) => node.id === id)?.type === "roadmap-step";
+  const incomingStepEdge = edges.find((edge) => edge.target === idToDelete && isStep(edge.source));
+  const outgoingStepEdge = edges.find((edge) => edge.source === idToDelete && isStep(edge.target));
+
+  const remainingNodes = nodes.filter((node) => !idsToRemove.has(node.id));
+  let remainingEdges = edges.filter((edge) => !idsToRemove.has(edge.source) && !idsToRemove.has(edge.target));
+
+  if (incomingStepEdge && outgoingStepEdge) {
+    remainingEdges = [
+      ...remainingEdges,
+      {
+        id: `${incomingStepEdge.source}-${outgoingStepEdge.target}`,
+        source: incomingStepEdge.source,
+        target: outgoingStepEdge.target,
+      },
+    ];
+  }
+
+  let stepCount = 0;
+  const renumberedNodes = remainingNodes.map((node) =>
+    node.type === "roadmap-step"
+      ? { ...node, data: { ...node.data, num: String(++stepCount).padStart(2, "0") } }
+      : node
+  );
+
+  return getLayoutedElements(renumberedNodes, remainingEdges);
+}

@@ -685,6 +685,26 @@
   gap: var(--sm-space-2);
 }
 
+.page-canvas .node-head-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sm-space-2);
+}
+
+.page-canvas .node-head-row .node-title,
+.page-canvas .node-head-row .node-title-static {
+  flex: 1;
+  min-width: 0;
+}
+
+.page-canvas .node-head-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
 .page-canvas .node-title {
   width: 100%;
   box-sizing: border-box;
