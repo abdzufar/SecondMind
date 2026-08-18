@@ -345,32 +345,6 @@
   color: var(--destructive);
 }
 
-.page-composer textarea {
-  width: 100%;
-  min-height: 90px;
-  padding: var(--sm-space-3);
-  background: var(--sm-paper);
-  border: 1px solid var(--sm-line);
-  border-radius: var(--sm-radius-sm);
-  color: var(--sm-ink);
-  font-family: var(--sm-font);
-  font-size: var(--sm-fs-body);
-  resize: vertical;
-  transition:
-    border-color 150ms ease-out,
-    box-shadow 150ms ease-out;
-}
-
-.page-composer textarea::placeholder {
-  color: var(--sm-ink-45);
-}
-
-.page-composer textarea:focus-visible {
-  border-color: var(--sm-clay);
-  outline: none;
-  box-shadow: 0 0 0 3px var(--sm-clay-tint);
-}
-
 .page-composer .upload-actions {
   display: flex;
   align-items: center;

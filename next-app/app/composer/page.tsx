@@ -318,13 +318,6 @@ export default function ComposerPage() {
             </label>
           )}
 
-          <div className="field">
-            <label className="label" htmlFor="instruction">
-              Instruksi tambahan (opsional)
-            </label>
-            <textarea id="instruction" placeholder="Contoh: fokus ke bagian strategi konten"></textarea>
-          </div>
-
           <div className="upload-actions">
             <button type="button" className="sm-btn sm-btn--ghost" onClick={() => fileInputRef.current?.click()}>
               Unggah File
