@@ -47,9 +47,21 @@ export function CanvasView({
     setChatDraft("");
   }
 
+  // Klik cabang (mindmap-branch) → langkah induknya ikut nyala (§ user request),
+  // biar hubungan cabang-ke-langkah kebaca jelas di canvas, bukan cuma di drawer.
+  const selectedNode = selectedNodeId ? nodes.find((n) => n.id === selectedNodeId) : undefined;
+  const activeParentStepId =
+    selectedNode?.type === "mindmap-branch"
+      ? edges.find((e) => e.target === selectedNode.id)?.source
+      : undefined;
+  const displayNodes = nodes.map((n) => ({
+    ...n,
+    data: { ...n.data, isActive: n.id === activeParentStepId },
+  }));
+
   return (
     <ReactFlow<MindmapNode, MindmapEdge>
-      nodes={nodes}
+      nodes={displayNodes}
       edges={edges}
       nodeTypes={nodeTypes}
       onNodesChange={onNodesChange}

@@ -80,6 +80,9 @@ export function Drawer({
 
   const [chatDraft, setChatDraft] = useState("");
 
+  const [isTogglingComplete, setIsTogglingComplete] = useState(false);
+  const [completeError, setCompleteError] = useState<string | null>(null);
+
   const [prevNodeId, setPrevNodeId] = useState(selectedNodeId);
   if (selectedNodeId !== prevNodeId) {
     setPrevNodeId(selectedNodeId);
@@ -88,6 +91,7 @@ export function Drawer({
     setDeleteDialogOpen(false);
     setDeleteError(null);
     setChatDraft("");
+    setCompleteError(null);
   }
 
   const node = selectedNodeId ? nodes.find((n) => n.id === selectedNodeId) : undefined;
@@ -139,6 +143,21 @@ export function Drawer({
         setRenameError("Gagal menyimpan judul baru.");
       })
       .finally(() => setIsSavingTitle(false));
+  }
+
+  function handleToggleComplete() {
+    if (!node) return;
+
+    setIsTogglingComplete(true);
+    setCompleteError(null);
+    toggleNodeComplete(node.id);
+    const { nodes: updatedNodes } = useCanvasStore.getState();
+    saveMindmap(mindmapId, { nodes: updatedNodes })
+      .catch(() => {
+        toggleNodeComplete(node.id);
+        setCompleteError("Gagal menyimpan status selesai.");
+      })
+      .finally(() => setIsTogglingComplete(false));
   }
 
   function handleConfirmDelete() {
@@ -288,16 +307,20 @@ export function Drawer({
           </div>
 
           {!isBranch && (
-            <button
-              type="button"
-              className={`complete-btn${node.data.isCompleted ? " is-complete" : ""}`}
-              onClick={() => toggleNodeComplete(node.id)}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 6 9 17l-5-5" />
-              </svg>
-              {node.data.isCompleted ? "Sudah selesai" : "Tandai selesai"}
-            </button>
+            <>
+              <button
+                type="button"
+                className={`complete-btn${node.data.isCompleted ? " is-complete" : ""}`}
+                onClick={handleToggleComplete}
+                disabled={isTogglingComplete}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+                {node.data.isCompleted ? "Sudah selesai" : "Tandai selesai"}
+              </button>
+              {completeError && <p className="field-error">{completeError}</p>}
+            </>
           )}
 
           <div className="drawer-divider"></div>

@@ -5,7 +5,9 @@ export function RoadmapStepNode({ data, selected }: NodeProps<MindmapNode>) {
   const isComplete = data.isCompleted;
 
   return (
-    <div className={`xf-step${selected ? " is-selected" : ""}${isComplete ? " is-complete" : ""}`}>
+    <div
+      className={`xf-step${selected ? " is-selected" : ""}${data.isActive ? " is-active" : ""}${isComplete ? " is-complete" : ""}`}
+    >
       <Handle type="target" position={Position.Top} id="top" />
       <Handle type="source" position={Position.Left} id="left" />
       <Handle type="source" position={Position.Right} id="right" />

@@ -316,8 +316,12 @@
   box-shadow: var(--sm-shadow-md);
 }
 
-.page-canvas .xf-step.is-selected {
-  box-shadow: 0 0 0 2px var(--sm-clay);
+.page-canvas .xf-step.is-selected,
+.page-canvas .xf-step.is-active {
+  box-shadow:
+    0 0 0 3px var(--sm-paper),
+    0 0 0 6px var(--sm-clay-bright);
+  transform: translateY(-2px);
 }
 
 .page-canvas .xf-step.is-complete {
@@ -412,6 +416,8 @@
   border-color: var(--sm-clay);
   border-width: 2px;
   padding: 9px 13px;
+  box-shadow: 0 0 0 4px var(--sm-clay-tint);
+  transform: translateY(-1px);
 }
 
 /* ===== react flow chrome ===== */

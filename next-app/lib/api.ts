@@ -99,6 +99,7 @@ export async function elaborateNode(
     position: { x: 0, y: 0 },
     data: {
       ...node.data,
+      isCompleted: false,
       timeMark: formatTimeOffset(node.data.timeOffsetDays),
     },
   }));
@@ -171,7 +172,12 @@ export async function saveMindmap(id: string, input: SaveMindmapInput): Promise<
     body.nodes = input.nodes.map((node) => ({
       id: node.id,
       type: node.type,
-      data: { label: node.data.label, description: node.data.description, timeOffsetDays: node.data.timeOffsetDays },
+      data: {
+        label: node.data.label,
+        description: node.data.description,
+        timeOffsetDays: node.data.timeOffsetDays,
+        isCompleted: node.data.isCompleted,
+      },
     }));
   }
   if (input.edges) {
