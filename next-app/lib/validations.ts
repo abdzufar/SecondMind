@@ -35,3 +35,9 @@ export const UpdateMindmapSchema = z.object({
   edges: z.array(z.any()).optional(),
   isPublic: z.boolean().optional()
 });
+
+export const ChatSchema = z.object({
+  mindmapId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid Mindmap ID format'),
+  message: z.string().min(1, 'Message is required'),
+  nodeId: z.string().optional()
+});

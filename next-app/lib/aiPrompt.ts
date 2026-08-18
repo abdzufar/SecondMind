@@ -80,3 +80,26 @@ CRITICAL RULES:
 - The output MUST be strictly valid JSON. Do not include markdown \`\`\`json blocks.
 - Ensure every new edge correctly links the sourceNodeId to the new branch nodes.`;
 }
+
+export function getChatSystemPrompt(mindmapTopic: string, mindmapNodes: any[], targetNode?: any) {
+  let contextInjection = `You are SecondMind, a brilliant, concise educational assistant.
+The user is currently studying a roadmap/mindmap about: "${mindmapTopic}".
+
+Here is the complete structure of their roadmap (for your context):
+${JSON.stringify(mindmapNodes.map((n: any) => ({ id: n.id, title: n.data.label, description: n.data.description })), null, 2)}
+`;
+
+  if (targetNode) {
+    contextInjection += `\n[CRITICAL CONTEXT]: The user is currently looking specifically at the node titled "${targetNode.data.label}".
+Description of this node: "${targetNode.data.description}"
+Unless the user explicitly changes the subject, you MUST assume their questions are specifically about this node. Tailor your response and examples directly to this concept!
+`;
+  }
+
+  contextInjection += `\nRules:
+- Keep your answers concise, formatted in markdown, and directly helpful to their learning journey.
+- Do not ramble.
+- You do not need to return JSON. Return standard conversational markdown text.`;
+
+  return contextInjection;
+}
