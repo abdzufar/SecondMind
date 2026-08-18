@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { ReactFlowProvider } from "@xyflow/react";
+import { Eye } from "lucide-react";
 import "../../canvas/canvas.css";
 import { getSharedMindmap } from "@/lib/api";
 import type { Mindmap } from "@/lib/types";
@@ -38,30 +39,29 @@ export default function SharePage() {
 
   return (
     <ReactFlowProvider>
-      <div className="page-canvas">
+      <div className="page-canvas page-share">
         <header className="canvas-header">
           <div className="header-left">
             <Link className="brand" href="/">
               <Image src="/brand/svg/mark.svg" width={24} height={24} alt="Second Mind" />
             </Link>
             <div className="doc-info">
-              <strong>{mindmap?.title ?? (loadError ? "Gagal memuat" : "Memuat…")}</strong>
+              <div className="doc-info-title-row">
+                <strong>{mindmap?.title ?? (loadError ? "Gagal memuat" : "Memuat…")}</strong>
+                <span className="share-badge">
+                  <Eye className="size-3.5" strokeWidth={2} />
+                  Tampilan publik
+                </span>
+              </div>
               <span>{mindmap ? `Roadmap ${mindmap.timeframe} · ${mindmap.nodes.length} node` : ""}</span>
             </div>
-          </div>
-
-          <div className="header-actions">
-            <span className="share-badge">Tampilan publik</span>
-            <Link className="sm-btn sm-btn--primary" href="/register">
-              Buat mindmap sendiri
-            </Link>
           </div>
         </header>
 
         <div className="canvas-body">
           <div className="canvas-area">
             {mindmap ? (
-              <CanvasView />
+              <CanvasView showCommandBar={false} />
             ) : loadError ? (
               <div className="canvas-loading canvas-loading--error">
                 <p>{loadError}</p>

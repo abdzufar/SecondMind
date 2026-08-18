@@ -12,7 +12,7 @@ const nodeTypes = {
   "mindmap-branch": MindmapBranchNode,
 };
 
-export function CanvasView() {
+export function CanvasView({ showCommandBar = true }: { showCommandBar?: boolean }) {
   const nodes = useCanvasStore((s) => s.nodes);
   const edges = useCanvasStore((s) => s.edges);
   const onNodesChange = useCanvasStore((s) => s.onNodesChange);
@@ -49,17 +49,19 @@ export function CanvasView() {
             </span>
           </Panel>
 
-          <Panel position="bottom-center">
-            <form className="command-bar" onSubmit={(e) => e.preventDefault()}>
-              <input type="text" placeholder="Tanya atau perintahkan sesuatu tentang roadmap ini…" />
-              <button type="submit" aria-label="Kirim">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="m22 2-7 20-4-9-9-4Z" />
-                  <path d="M22 2 11 13" />
-                </svg>
-              </button>
-            </form>
-          </Panel>
+          {showCommandBar && (
+            <Panel position="bottom-center">
+              <form className="command-bar" onSubmit={(e) => e.preventDefault()}>
+                <input type="text" placeholder="Tanya atau perintahkan sesuatu tentang roadmap ini…" />
+                <button type="submit" aria-label="Kirim">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m22 2-7 20-4-9-9-4Z" />
+                    <path d="M22 2 11 13" />
+                  </svg>
+                </button>
+              </form>
+            </Panel>
+          )}
         </>
       )}
     </ReactFlow>
