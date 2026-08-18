@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getElaboratePrompt } from "@/lib/aiPrompt";
 import { validateEdges } from "@/lib/validateEdges";
+import { ElaborateMindmapSchema } from "@/lib/validations";
 
 export const maxDuration = 60; // Avoid Vercel timeout limits
 
@@ -15,19 +16,21 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json();
-		const { nodeId, concept, action, language } = body;
+		const parsed = ElaborateMindmapSchema.safeParse(body);
 
-		if (!nodeId || !concept || !action || !language) {
+		if (!parsed.success) {
 			return NextResponse.json(
-				{ error: "Missing required fields" },
+				{ error: parsed.error.issues[0].message },
 				{ status: 400 },
 			);
 		}
 
+		const { concept, action, language, nodeId } = parsed.data;
+
 		const genAI = new GoogleGenerativeAI(
 			process.env.GEMINI_API_KEY || "fake-api-key",
 		);
-		const model = genAI.getGenerativeModel({ model: "gemini-3.7-flash" });
+		const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash-lite" });
 
 		const prompt = getElaboratePrompt(concept, action, language, nodeId);
 

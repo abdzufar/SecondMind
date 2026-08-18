@@ -5,13 +5,14 @@ import dbConnect from '@/lib/db';
 import Mindmap from '@/models/Mindmap';
 import Todo from '@/models/Todo';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session || !session.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     
     await dbConnect();
-    const mindmap = await Mindmap.findOne({ _id: params.id, userId: session.user.id });
+    const mindmap = await Mindmap.findOne({ _id: id, userId: session.user.id });
     
     if (!mindmap) return NextResponse.json({ error: 'Mindmap not found' }, { status: 404 });
     return NextResponse.json(mindmap, { status: 200 });
@@ -21,8 +22,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session || !session.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     
@@ -30,7 +32,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     
     await dbConnect();
     
-    const mindmap = await Mindmap.findOne({ _id: params.id, userId: session.user.id });
+    const mindmap = await Mindmap.findOne({ _id: id, userId: session.user.id });
     if (!mindmap) return NextResponse.json({ error: 'Mindmap not found' }, { status: 404 });
     
     const updateData: Record<string, unknown> = { updatedAt: Date.now() };
@@ -46,7 +48,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 
     const updated = await Mindmap.findOneAndUpdate(
-      { _id: params.id, userId: session.user.id },
+      { _id: id, userId: session.user.id },
       { $set: updateData },
       { new: true } // Return updated doc
     );
@@ -59,18 +61,19 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session || !session.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     
     await dbConnect();
-    const deleted = await Mindmap.findOneAndDelete({ _id: params.id, userId: session.user.id });
+    const deleted = await Mindmap.findOneAndDelete({ _id: id, userId: session.user.id });
     
     if (!deleted) return NextResponse.json({ error: 'Mindmap not found' }, { status: 404 });
     
     // Cascading delete for Todos
-    await Todo.deleteMany({ mindmapId: params.id });
+    await Todo.deleteMany({ mindmapId: id });
 
     return NextResponse.json({ success: true, message: 'Mindmap deleted.' }, { status: 200 });
   } catch (err) {
