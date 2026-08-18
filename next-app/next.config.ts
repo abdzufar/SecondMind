@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
   // Next.js: iya, Turbopack emang sengaja dipakai di sini (`next dev`, gak
   // ada `--webpack`), key `webpack` yang nempel itu bukan kesalahan.
   turbopack: {},
+  serverExternalPackages: ["pdf-parse", "pdfjs-dist", "@napi-rs/canvas"],
 };
 
 // next-pwa cuma jalan pas `next build --webpack` (package.json) — Turbopack
