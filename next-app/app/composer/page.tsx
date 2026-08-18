@@ -92,12 +92,27 @@ export default function ComposerPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    getMindmaps()
-      .then((mindmaps) => {
-        setHistory(mindmaps);
-        setHistoryStatus("ready");
-      })
-      .catch(() => setHistoryStatus("error"));
+    function loadHistory() {
+      getMindmaps()
+        .then((mindmaps) => {
+          setHistory(mindmaps);
+          setHistoryStatus("ready");
+        })
+        .catch(() => setHistoryStatus("error"));
+    }
+
+    loadHistory();
+
+    // Kalau halaman ini dipulihkan dari bfcache browser (mis. tombol back),
+    // JS gak jalan ulang sama sekali — riwayat bisa nyangkut versi lama
+    // (sebelum generate) sampai di-reload manual. `pageshow` + `persisted`
+    // ngedeteksi kejadian itu dan fetch ulang.
+    function handlePageShow(event: PageTransitionEvent) {
+      if (event.persisted) loadHistory();
+    }
+
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
   }, []);
 
   function handleDeleteConfirm() {
