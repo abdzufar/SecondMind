@@ -209,6 +209,12 @@ Marks a task as complete.
 * **Request Body:** `{ "isCompleted": true }`
 * **Success Output (200 OK):** `{ "success": true, "message": "Task updated." }`
 
+### `DELETE /todo/:id`
+Deletes a specific task from the To-Do list.
+* **Security:** Enforces strict ownership checking (verifies the user owns the parent mindmap).
+* **Success Output (200 OK):** `{ "success": true }`
+
+
 ### `GET /cron/reminders`
 Protected endpoint pinged daily by Vercel Cron.
 * **Headers Required:** `Authorization: Bearer <CRON_SECRET>`
