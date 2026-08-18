@@ -1,7 +1,6 @@
 "use client";
 
 import { useCanvasStore } from "@/store/canvasStore";
-import { MOCK_MINDMAP } from "@/lib/mock/mindmap";
 import { TodoPanel } from "./TodoPanel";
 
 export type DrawerTab = "detail" | "todo";
@@ -9,12 +8,13 @@ export type DrawerTab = "detail" | "todo";
 type DrawerProps = {
   mindmapId: string;
   mindmapCreatedAt: string;
+  mindmapTopic: string;
   activeTab: DrawerTab;
   onTabChange: (tab: DrawerTab) => void;
   onClose: () => void;
 };
 
-export function Drawer({ mindmapId, mindmapCreatedAt, activeTab, onTabChange, onClose }: DrawerProps) {
+export function Drawer({ mindmapId, mindmapCreatedAt, mindmapTopic, activeTab, onTabChange, onClose }: DrawerProps) {
   const nodes = useCanvasStore((s) => s.nodes);
   const edges = useCanvasStore((s) => s.edges);
   const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
@@ -154,7 +154,7 @@ export function Drawer({ mindmapId, mindmapCreatedAt, activeTab, onTabChange, on
             </button>
           </div>
 
-          <p className="drawer-meta">Topik: {MOCK_MINDMAP.topic}</p>
+          <p className="drawer-meta">Topik: {mindmapTopic}</p>
         </div>
       )}
     </aside>

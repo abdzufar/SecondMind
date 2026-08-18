@@ -142,7 +142,7 @@ Error yang perlu ditangani di UI: `400` (format file salah), `413` (PDF terlalu 
 
 ## 7. Aturan arsitektur
 
-1. **Semua akses data lewat `lib/api.ts`.** Selama backend belum siap, isinya mengembalikan mock dari `lib/mock/`. Integrasi nanti cukup mengganti isi file ini, bukan menyisir komponen. *(Berlaku untuk `nodes`/`edges` — `store/canvasStore.ts` sekarang load lewat `getMindmap()`. Belum berlaku untuk metadata mindmap: `app/canvas/page.tsx`, `Drawer.tsx`, `ExportButton` masih import `MOCK_MINDMAP` langsung buat `title`/`topic`/`timeframe`, karena store cuma nyimpen `nodes`/`edges`/`selectedNodeId` — belum ada tempat buat metadata level-mindmap. Perlu diputuskan nanti: tambah field ke store, atau state terpisah.)*
+1. **Semua akses data lewat `lib/api.ts`.** Selama backend belum siap, isinya mengembalikan mock dari `lib/mock/`. Integrasi nanti cukup mengganti isi file ini, bukan menyisir komponen. *(Berlaku untuk `nodes`/`edges` — `store/canvasStore.ts` sekarang load lewat `getMindmap()`. Metadata mindmap (`title`/`topic`/`timeframe`/`createdAt`) gak disimpan di store — tetap gak ada rencana nambah field ke store buat ini, karena udah terbukti cukup diteruskan sebagai props biasa dari `page.tsx` yang nyimpen `mindmap` di state lokal, turun ke `Drawer`/`ExportButton`/`ShareButton` yang butuh. `Drawer.tsx` sempat jadi satu-satunya sisa yang masih import `MOCK_MINDMAP` langsung buat `topic` — udah dibenerin, sekarang nerima `mindmapTopic` sebagai prop kayak yang lain.)*
 2. **Logika dagre diisolasi di `lib/canvas/layout.ts`**, tidak boleh ada di dalam komponen.
 3. **Store zustand dikonsumsi dengan selector spesifik** (`useStore(s => s.nodes)`), bukan mengambil seluruh store. Kalau tidak, canvas re-render tiap klik satu node.
 4. **Drag node dimatikan.** Pan, zoom, dan fit view tetap aktif.
@@ -284,7 +284,7 @@ Sejak M2 kelar, beberapa hal udah nyusul: routing `/canvas/[id]` (M11), tombol h
 
 **Satu keputusan yang masih menunggu:** nasib "tandai selesai" per-node (§9 M4) — tetap visual lokal, atau digeser ke status To-Do (M8) yang persisted. Belum ada urgensi mendesak buat mutusin ini.
 
-Gap kecil yang tersisa dari §7 poin 1: `Drawer.tsx` baris "Topik: {MOCK_MINDMAP.topic}" masih baca mock statis langsung, bukan dari mindmap yang lagi dimuat — satu-satunya sisa metadata yang belum ikut migrasi ke `/canvas/[id]` (header & filename export udah bener).
+~~Gap kecil dari §7 poin 1: `Drawer.tsx` baris "Topik: {MOCK_MINDMAP.topic}" masih baca mock statis langsung~~ — **udah dibenerin**: `Drawer` sekarang nerima prop `mindmapTopic` dari `app/canvas/[id]/page.tsx` (`mindmap.topic`), gak import `MOCK_MINDMAP` sama sekali lagi. Diverifikasi lewat Playwright: generate mindmap dengan topik custom → buka detail node → baris "Topik: ..." di bawah panel cocok persis sama topik yang diketik user, bukan lagi teks mock "Strategi growth marketing".
 
 Kandidat milestone berikutnya:
 - **Wiring tombol "Buat Mindmap"** — baca form (topik/timeframe/verbosity/bahasa/file), panggil `generateMindmap()`, redirect ke `/canvas/[id]` hasilnya. Ini yang nyambungin M6 loading state ke alur nyata.

@@ -144,6 +144,7 @@ export default function CanvasPage() {
             <Drawer
               mindmapId={mindmap._id}
               mindmapCreatedAt={mindmap.createdAt}
+              mindmapTopic={mindmap.topic}
               activeTab={sidebarTab}
               onTabChange={setSidebarTab}
               onClose={() => {
