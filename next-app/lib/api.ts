@@ -96,6 +96,36 @@ export async function elaborateNode(
   return delay({ newNodes, newEdges });
 }
 
+// nodeLabel itu field UI-only (chip konteks di message bubble) — dihitung di pemanggil
+// (app/canvas/[id]/page.tsx), bukan bagian response backend (§5 CLAUDE.md).
+export type ChatMessage = { role: "user" | "assistant"; content: string; nodeLabel?: string };
+
+export type SendChatMessageInput = {
+  mindmapId: string;
+  message: string;
+  nodeId?: string;
+};
+
+export async function sendChatMessage(input: SendChatMessageInput): Promise<string> {
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      mindmapId: input.mindmapId,
+      message: input.message,
+      ...(input.nodeId ? { nodeId: input.nodeId } : {}),
+    }),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error ?? `Gagal mengirim pesan (status ${res.status})`);
+  }
+
+  const data: { message: string } = await res.json();
+  return data.message;
+}
+
 export async function getMindmaps(): Promise<MindmapSummary[]> {
   const res = await fetch("/api/mindmap");
 

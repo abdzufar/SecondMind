@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { ReactFlowProvider } from "@xyflow/react";
 import "../canvas.css";
-import { getMindmap } from "@/lib/api";
+import { getMindmap, sendChatMessage, type ChatMessage } from "@/lib/api";
 import type { Mindmap } from "@/lib/types";
 import { useCanvasStore } from "@/store/canvasStore";
 import { CanvasView } from "@/components/canvas/CanvasView";
@@ -24,6 +24,9 @@ export default function CanvasPage() {
   const [showFeasibilityWarning, setShowFeasibilityWarning] = useState(true);
   const [sidebarTab, setSidebarTab] = useState<DrawerTab>("detail");
   const [todoPanelOpen, setTodoPanelOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [isChatSending, setIsChatSending] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
   const [prevSelectedNodeId, setPrevSelectedNodeId] = useState(selectedNodeId);
 
   if (selectedNodeId !== prevSelectedNodeId) {
@@ -55,6 +58,18 @@ export default function CanvasPage() {
       document.body.style.overflow = previous;
     };
   }, []);
+
+  function handleSendChat(message: string, nodeId?: string, nodeLabel?: string) {
+    if (!mindmap) return;
+
+    setChatMessages((prev) => [...prev, { role: "user", content: message, nodeLabel }]);
+    setIsChatSending(true);
+    setChatError(null);
+    sendChatMessage({ mindmapId: mindmap._id, message, nodeId })
+      .then((reply) => setChatMessages((prev) => [...prev, { role: "assistant", content: reply }]))
+      .catch(() => setChatError("Gagal mengirim pesan. Coba lagi."))
+      .finally(() => setIsChatSending(false));
+  }
 
   return (
     <ReactFlowProvider>
@@ -129,7 +144,12 @@ export default function CanvasPage() {
         <div className={`canvas-body${isSidebarOpen ? " has-drawer" : ""}`}>
           <div className="canvas-area">
             {mindmap ? (
-              <CanvasView />
+              <CanvasView
+                chatMessages={chatMessages}
+                isChatSending={isChatSending}
+                chatError={chatError}
+                onSendChat={(message) => handleSendChat(message)}
+              />
             ) : loadError ? (
               <div className="canvas-loading canvas-loading--error">
                 <p>{loadError}</p>
@@ -147,6 +167,7 @@ export default function CanvasPage() {
               mindmapTopic={mindmap.topic}
               activeTab={sidebarTab}
               onTabChange={setSidebarTab}
+              onSendChat={handleSendChat}
               onClose={() => {
                 clearSelection();
                 setTodoPanelOpen(false);

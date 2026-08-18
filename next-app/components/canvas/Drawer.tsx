@@ -23,6 +23,7 @@ type DrawerProps = {
   mindmapTopic: string;
   activeTab: DrawerTab;
   onTabChange: (tab: DrawerTab) => void;
+  onSendChat: (message: string, nodeId?: string, nodeLabel?: string) => void;
   onClose: () => void;
 };
 
@@ -46,7 +47,15 @@ function TrashIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-export function Drawer({ mindmapId, mindmapCreatedAt, mindmapTopic, activeTab, onTabChange, onClose }: DrawerProps) {
+export function Drawer({
+  mindmapId,
+  mindmapCreatedAt,
+  mindmapTopic,
+  activeTab,
+  onTabChange,
+  onSendChat,
+  onClose,
+}: DrawerProps) {
   const nodes = useCanvasStore((s) => s.nodes);
   const edges = useCanvasStore((s) => s.edges);
   const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
@@ -69,6 +78,8 @@ export function Drawer({ mindmapId, mindmapCreatedAt, mindmapTopic, activeTab, o
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
+  const [chatDraft, setChatDraft] = useState("");
+
   const [prevNodeId, setPrevNodeId] = useState(selectedNodeId);
   if (selectedNodeId !== prevNodeId) {
     setPrevNodeId(selectedNodeId);
@@ -76,6 +87,7 @@ export function Drawer({ mindmapId, mindmapCreatedAt, mindmapTopic, activeTab, o
     setRenameError(null);
     setDeleteDialogOpen(false);
     setDeleteError(null);
+    setChatDraft("");
   }
 
   const node = selectedNodeId ? nodes.find((n) => n.id === selectedNodeId) : undefined;
@@ -143,6 +155,15 @@ export function Drawer({ mindmapId, mindmapCreatedAt, mindmapTopic, activeTab, o
       })
       .catch(() => setDeleteError("Gagal menghapus node. Coba lagi."))
       .finally(() => setIsDeleting(false));
+  }
+
+  function handleSubmitChat(e: React.FormEvent) {
+    e.preventDefault();
+    if (!node) return;
+    const trimmed = chatDraft.trim();
+    if (!trimmed) return;
+    onSendChat(trimmed, node.id, node.data.label);
+    onClose();
   }
 
   function handleExpand() {
@@ -314,8 +335,13 @@ export function Drawer({ mindmapId, mindmapCreatedAt, mindmapTopic, activeTab, o
               </svg>
               Aksi AI
             </span>
-            <form className="ask-ai" onSubmit={(e) => e.preventDefault()}>
-              <input type="text" placeholder="Tanya soal cabang ini…" />
+            <form className="ask-ai" onSubmit={handleSubmitChat}>
+              <input
+                type="text"
+                value={chatDraft}
+                onChange={(e) => setChatDraft(e.target.value)}
+                placeholder="Tanya soal cabang ini…"
+              />
               <button type="submit" aria-label="Kirim">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="m22 2-7 20-4-9-9-4Z" />
