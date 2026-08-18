@@ -50,6 +50,7 @@ export type WireTodo = {
 export type MindmapNodeData = WireMindmapNode["data"] & {
   num?: string;
   isActive?: boolean;
+  isSelected?: boolean; // dihitung dari selectedNodeId di CanvasView.tsx, bukan dari backend
   timeMark?: string | null; // "Hari X" / "Minggu Y", diformat dari timeOffsetDays — bukan dari backend
 };
 

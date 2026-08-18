@@ -13,15 +13,15 @@ function BiHandle({ id, position }: { id: string; position: Position }) {
   );
 }
 
-export function RoadmapStepNode({ data, selected }: NodeProps<MindmapNode>) {
+export function RoadmapStepNode({ data }: NodeProps<MindmapNode>) {
   const isComplete = data.isCompleted;
-  const hasPendingTasks = useCanvasStore((s) => 
+  const hasPendingTasks = useCanvasStore((s) =>
     s.todos.some((t) => !t.isCompleted && t.taskText === data.label)
   );
 
   return (
     <div
-      className={`xf-step${selected ? " is-selected" : ""}${data.isActive ? " is-active" : ""}${isComplete ? " is-complete" : ""}${hasPendingTasks && !isComplete ? " has-pending-tasks" : ""}`}
+      className={`xf-step${data.isSelected ? " is-selected" : ""}${data.isActive ? " is-active" : ""}${isComplete ? " is-complete" : ""}${hasPendingTasks && !isComplete ? " has-pending-tasks" : ""}`}
     >
       <BiHandle position={Position.Top} id="top" />
       <BiHandle position={Position.Left} id="left" />

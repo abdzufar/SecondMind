@@ -94,16 +94,39 @@ export function CanvasView({
     }
   }
 
-  // Klik cabang (mindmap-branch) → langkah induknya ikut nyala (§ user request),
-  // biar hubungan cabang-ke-langkah kebaca jelas di canvas, bukan cuma di drawer.
+  // Klik cabang (mindmap-branch) → seluruh jalur ke atas ikut nyala (§ user request:
+  // "satu jalur menyala semua") — tiap cabang perantara sampai roadmap-step akarnya,
+  // bukan cuma step-nya doang. Cabang sekarang bisa nested berlapis (multi-level
+  // layout), jadi jalan ke atas terus lewat rantai edge, catat SEMUA node yang
+  // dilewatin (bukan cuma yang terakhir).
   const selectedNode = selectedNodeId ? nodes.find((n) => n.id === selectedNodeId) : undefined;
-  const activeParentStepId =
-    selectedNode?.type === "mindmap-branch"
-      ? edges.find((e) => e.target === selectedNode.id)?.source
-      : undefined;
+  const activePathIds = new Set<string>();
+  if (selectedNode?.type === "mindmap-branch") {
+    // `visited` (cycle guard) dipisah dari `activePathIds` (hasil) — kalau dua-duanya
+    // dijadiin satu Set, node yang baru ditambahin di iterasi ini bakal ke-anggep
+    // "udah pernah dikunjungi" pas dicek ulang di iterasi berikutnya, bikin loop
+    // berhenti satu langkah lebih awal (gak sampai ke roadmap-step akarnya).
+    const visited = new Set<string>([selectedNode.id]);
+    let currentId: string | undefined = selectedNode.id;
+    while (currentId) {
+      const parentId: string | undefined = edges.find((e) => e.target === currentId)?.source;
+      const parentNode = parentId ? nodes.find((n) => n.id === parentId) : undefined;
+      if (!parentNode || visited.has(parentNode.id)) break;
+      visited.add(parentNode.id);
+      activePathIds.add(parentNode.id);
+      if (parentNode.type === "roadmap-step") break; // sampai akar, jangan lanjut naik ke spine step sebelumnya
+      currentId = parentNode.id;
+    }
+  }
+
+  // Status "dipilih" dihitung sendiri dari selectedNodeId (canvasStore), bukan dari
+  // prop `selected` bawaan React Flow — soalnya React Flow nyimpen status seleksi
+  // internal sendiri yang gak ikut ke-clear kalau selection dibersihin dari luar
+  // canvas (mis. tombol close di drawer manggil clearSelection(), yang cuma update
+  // canvasStore, gak pernah ngirim event ke React Flow).
   const displayNodes = nodes.map((n) => ({
     ...n,
-    data: { ...n.data, isActive: n.id === activeParentStepId },
+    data: { ...n.data, isActive: activePathIds.has(n.id), isSelected: n.id === selectedNodeId },
   }));
 
   return (
