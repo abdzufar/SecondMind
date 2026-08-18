@@ -13,6 +13,8 @@ type CanvasState = {
   clearSelection: () => void;
   toggleNodeComplete: (id: string) => void;
   setGraph: (nodes: MindmapNode[], edges: MindmapEdge[]) => void;
+  appendNodes: (newNodes: MindmapNode[], newEdges: MindmapEdge[]) => void;
+  applyLayout: () => void;
 };
 
 export const useCanvasStore = create<CanvasState>((set, get) => ({
@@ -30,4 +32,10 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       ),
     }),
   setGraph: (nodes, edges) => set(getLayoutedElements(nodes, edges)),
+  appendNodes: (newNodes, newEdges) =>
+    set((state) => ({
+      nodes: [...state.nodes, ...newNodes],
+      edges: [...state.edges, ...newEdges],
+    })),
+  applyLayout: () => set((state) => getLayoutedElements(state.nodes, state.edges)),
 }));

@@ -187,7 +187,7 @@ Status per 2026-08-17, dicek ulang terhadap working tree — bukan cuma niat.
 - [x] Migrasi `timeMark: string` → `timeOffsetDays: number` di `lib/types.ts` + format "Hari X"/"Minggu Y" pas mapping wire→UI di `lib/api.ts` (lihat §5) — kelar, `lib/mock/mindmap.ts` dan komponen node/drawer udah konsisten
 
 ### M3 — Store zustand
-- [~] State dan actions sesuai bagian 7 — `clearSelection`, `toggleNodeComplete`, `setGraph` sudah ada; `status`, `isOnline`, `appendNodes`, `applyLayout` sengaja ditunda ke M7/M10 (lihat §7)
+- [~] State dan actions sesuai bagian 7 — `clearSelection`, `toggleNodeComplete`, `setGraph`, `appendNodes`, `applyLayout` (lihat M7) sudah ada; `status`, `isOnline` masih ditunda ke M10 (offline-related, belum kepake sampai fitur itu jalan)
 - [x] Konsumsi pakai selector spesifik — semua pemakaian sudah `useCanvasStore(s => s.x)`
 
 ### M4 — Node dan layout
@@ -213,8 +213,9 @@ Status per 2026-08-17, dicek ulang terhadap working tree — bukan cuma niat.
 
 ### M7 — Alur elaborate
 - [ ] Input chat mengirim node yang sedang dipilih (chip konteks) — command bar ada tapi belum kirim konteks node
-- [ ] Node baru masuk lewat `appendNodes`, lalu `applyLayout` dipanggil ulang — action-nya belum ada di store
-- [ ] Viewport jangan lompat setelah node bertambah
+- [x] Node baru masuk lewat `appendNodes`, lalu `applyLayout` dipanggil ulang — `store/canvasStore.ts` sekarang punya dua action baru: `appendNodes(newNodes, newEdges)` (nambahin ke array `nodes`/`edges` yang ada, tanpa re-layout) dan `applyLayout()` (manggil ulang `getLayoutedElements(state.nodes, state.edges)` dari `lib/canvas/layout.ts` yang sama dipakai `setGraph`, jadi cabang baru ikut di-fan ulang bareng cabang lama di step yang sama).
+  - **Contoh pemakaian nyata**: tombol "Pecah jadi sub-cabang" di `Drawer.tsx` (dulu no-op) sekarang manggil `elaborateNode()` (masih **mock**, belum backend asli — kontrak `{ newNodes, newEdges }` sama kayak yang bakal dipakai beneran nanti) lalu `appendNodes()` + `applyLayout()`. Dikasih state `isExpanding` (teks tombol jadi "Memproses…", disabled selagi jalan) dan `expandError` (pesan `.field-error` kalau gagal — class baru, alias ke style yang sama kayak `.todo-form-error` tapi generik gak nyebut "todo", dipisah biar gak aneh dipake di luar konteks form to-do).
+- [x] Viewport jangan lompat setelah node bertambah — gak butuh kode tambahan sama sekali, ternyata udah otomatis aman: React Flow cuma manggil ulang `fitView` pas mount awal (gotcha yang udah dicatat di §9 M1), dan `appendNodes`/`applyLayout` cuma nge-set ulang `nodes`/`edges` di store, gak ada kode yang manggil `fitView()` lagi atau remount `<CanvasView />`. Diverifikasi lewat Playwright: pan viewport ke posisi custom → baca `.react-flow__viewport`'s inline `transform` → klik "Pecah jadi sub-cabang" → baca transform lagi → **identik persis** sebelum dan sesudah, plus jumlah node nambah tepat 1.
 
 ### M8 — To-do dan reminder
 - [x] Panel to-do per mindmap (tab kedua di sidebar) — `Drawer.tsx` sekarang punya tab bar ("Detail" / "To-Do") di `drawer-head`, gantiin label statis "Detail node". **Perubahan struktural**: Drawer gak lagi `return null` kalau gak ada node dipilih — visibility-nya sekarang dikontrol `app/canvas/[id]/page.tsx` lewat `isSidebarOpen = !!selectedNodeId || todoPanelOpen` (state baru), jadi sidebar bisa kebuka buat lihat to-do walau lagi gak ada node yang diklik. Tombol header baru "To-Do" (`sm-btn sm-btn--ghost`, sejajar Bagikan/Export) buka drawer langsung ke tab To-Do. Klik node di canvas otomatis balik ke tab "Detail" (state `sidebarTab` disesuaikan langsung pas render — bukan lewat `useEffect`, ngikutin pola React "adjusting state during prop change" biar gak kena lint `react-hooks/set-state-in-effect`). Tombol tutup (X) sekarang nutup dua-duanya sekaligus (`clearSelection()` + `setTodoPanelOpen(false)`), gak peduli tab mana yang lagi aktif.

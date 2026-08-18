@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { elaborateNode } from "@/lib/api";
 import { useCanvasStore } from "@/store/canvasStore";
 import { TodoPanel } from "./TodoPanel";
 
@@ -20,6 +22,10 @@ export function Drawer({ mindmapId, mindmapCreatedAt, mindmapTopic, activeTab, o
   const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
   const selectNode = useCanvasStore((s) => s.selectNode);
   const toggleNodeComplete = useCanvasStore((s) => s.toggleNodeComplete);
+  const appendNodes = useCanvasStore((s) => s.appendNodes);
+  const applyLayout = useCanvasStore((s) => s.applyLayout);
+  const [isExpanding, setIsExpanding] = useState(false);
+  const [expandError, setExpandError] = useState<string | null>(null);
 
   const node = selectedNodeId ? nodes.find((n) => n.id === selectedNodeId) : undefined;
 
@@ -33,6 +39,20 @@ export function Drawer({ mindmapId, mindmapCreatedAt, mindmapTopic, activeTab, o
 
   const typeLabel = isBranch ? "Cabang mindmap" : "Langkah roadmap";
   const siblingsLabel = isBranch ? "Cabang lain di langkah ini" : "Cabang di langkah ini";
+
+  function handleExpand() {
+    if (!node) return;
+
+    setIsExpanding(true);
+    setExpandError(null);
+    elaborateNode({ nodeId: node.id, concept: node.data.label, action: "expand", language: "id" })
+      .then(({ newNodes, newEdges }) => {
+        appendNodes(newNodes, newEdges);
+        applyLayout();
+      })
+      .catch(() => setExpandError("Gagal memecah jadi sub-cabang. Coba lagi."))
+      .finally(() => setIsExpanding(false));
+  }
 
   return (
     <aside className="drawer">
@@ -145,13 +165,14 @@ export function Drawer({ mindmapId, mindmapCreatedAt, mindmapTopic, activeTab, o
                 </svg>
               </button>
             </form>
-            <button type="button" className="expand-btn">
+            <button type="button" className="expand-btn" onClick={handleExpand} disabled={isExpanding}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 5v14" />
                 <path d="M5 12h14" />
               </svg>
-              Pecah jadi sub-cabang
+              {isExpanding ? "Memproses…" : "Pecah jadi sub-cabang"}
             </button>
+            {expandError && <p className="field-error">{expandError}</p>}
           </div>
 
           <p className="drawer-meta">Topik: {mindmapTopic}</p>

@@ -1131,7 +1131,8 @@
   cursor: not-allowed;
 }
 
-.page-canvas .todo-form-error {
+.page-canvas .todo-form-error,
+.page-canvas .field-error {
   margin: 0;
   font-size: 12px;
   color: var(--destructive);
