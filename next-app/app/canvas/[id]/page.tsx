@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { ReactFlowProvider } from "@xyflow/react";
+import { ListChecks, Share2 } from "lucide-react";
 import "../canvas.css";
 import { getMindmap, sendChatMessage, type ChatMessage } from "@/lib/api";
 import type { Mindmap } from "@/lib/types";
@@ -103,12 +104,14 @@ export default function CanvasPage() {
               type="button"
               className="sm-btn sm-btn--ghost"
               disabled={!mindmap}
+              aria-label="To-Do"
               onClick={() => {
                 setSidebarTab("todo");
                 setTodoPanelOpen(true);
               }}
             >
-              To-Do
+              <ListChecks />
+              <span className="btn-label">To-Do</span>
             </button>
             {mindmap ? (
               <ShareButton
@@ -118,8 +121,9 @@ export default function CanvasPage() {
                 onUpdate={(update) => setMindmap((prev) => (prev ? { ...prev, ...update } : prev))}
               />
             ) : (
-              <button type="button" className="sm-btn sm-btn--ghost" disabled>
-                Bagikan
+              <button type="button" className="sm-btn sm-btn--ghost" disabled aria-label="Bagikan">
+                <Share2 />
+                <span className="btn-label">Bagikan</span>
               </button>
             )}
             <ExportButton filename={mindmap?.title ?? "canvas"} />

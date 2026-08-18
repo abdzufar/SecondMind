@@ -537,4 +537,20 @@
     padding: var(--sm-space-5);
     text-align: center;
   }
+
+  /* Icon(36) + judul + pill "Lihat →" + tombol hapus(40) berdesakan di ~375px
+     kalau gap/padding-nya masih ukuran desktop — dikecilin biar .history-info
+     (yang udah truncate) punya lebih banyak ruang buat judulnya. */
+  .page-composer .history-item {
+    gap: var(--sm-space-2);
+    padding: var(--sm-space-3);
+  }
+
+  .page-composer .history-item-link {
+    gap: var(--sm-space-2);
+  }
+
+  .page-composer .history-item .link-sm {
+    padding: 8px 14px;
+  }
 }

@@ -108,6 +108,109 @@
   }
 }
 
+.page-landing .nav-hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: var(--sm-radius-sm);
+  background: transparent;
+  color: var(--sm-ink);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 150ms ease-out;
+}
+
+.page-landing .nav-hamburger:hover {
+  background: var(--sm-paper);
+}
+
+.page-landing .nav-hamburger svg {
+  width: 22px;
+  height: 22px;
+}
+
+.page-landing .mobile-nav-panel {
+  display: none;
+}
+
+/* Link navigasi (Cara kerja/Fitur/Contoh peta) hilang total dari .nav-links
+   di ≤860px tanpa pengganti — dropdown ini isinya link yang sama, dibuka lewat
+   .nav-hamburger, biar section-section itu tetap bisa dituju di mobile. Tombol
+   akun (Masuk/Coba gratis/avatar) gak perlu masuk sini, udah tetap kelihatan
+   di .nav-cta karena cuma .nav-links yang di-hide. */
+@media (max-width: 860px) {
+  .page-landing .nav-hamburger {
+    display: flex;
+  }
+
+  .page-landing .mobile-nav-panel {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    gap: var(--sm-space-1);
+    padding: var(--sm-space-3) var(--sm-space-5) var(--sm-space-4);
+    background: var(--sm-surface);
+    border-bottom: 1px solid var(--sm-line);
+    box-shadow: var(--sm-shadow-md);
+    transform: translateY(-8px);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      transform 180ms ease-out,
+      opacity 180ms ease-out;
+  }
+
+  .page-landing .mobile-nav-panel.is-open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .page-landing .mobile-nav-panel a {
+    padding: var(--sm-space-3) var(--sm-space-2);
+    border-radius: var(--sm-radius-sm);
+    color: var(--sm-ink-70);
+    font-size: 15px;
+  }
+
+  .page-landing .mobile-nav-panel a:hover {
+    background: var(--sm-paper);
+    color: var(--sm-ink);
+    text-decoration: none;
+  }
+}
+
+/* Brand + nav-cta (Masuk/Coba gratis, atau Buka Composer/avatar) + hamburger
+   udah gak nyender ~430px minimum lebar sebelum breakpoint ini ada, gak muat
+   di HP umum (320-414px) — .nav-links yang di-hide di ≤860px doang gak cukup
+   ngasih ruang. Padding/gap/tombol dikecilin khusus di sini, gak ganggu ≤860px
+   yang di atas karena udah kebukti muat sendiri lewat pengukuran nyata. */
+@media (max-width: 480px) {
+  .page-landing nav.site-nav .in {
+    padding: 0 var(--sm-space-4);
+    gap: var(--sm-space-3);
+  }
+
+  .page-landing .brand .sm-wordmark {
+    font-size: 15px;
+  }
+
+  .page-landing .nav-cta {
+    gap: var(--sm-space-2);
+  }
+
+  .page-landing .nav-cta .sm-btn {
+    padding: 9px 14px;
+    font-size: 12.5px;
+  }
+}
+
 /* hero */
 
 .page-landing .hero {

@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
+import { Menu, X } from "lucide-react";
 import { getInitials } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -19,6 +20,7 @@ import "./landing.css";
 export default function LandingPage() {
   const artRef = useRef<HTMLDivElement>(null);
   const { data: session, status } = useSession();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     const reveals = document.querySelectorAll(".page-landing .reveal");
@@ -127,6 +129,26 @@ export default function LandingPage() {
               </>
             ) : null}
           </div>
+          <button
+            type="button"
+            className="nav-hamburger"
+            aria-label={mobileNavOpen ? "Tutup menu" : "Buka menu"}
+            aria-expanded={mobileNavOpen}
+            onClick={() => setMobileNavOpen((v) => !v)}
+          >
+            {mobileNavOpen ? <X /> : <Menu />}
+          </button>
+        </div>
+        <div className={`mobile-nav-panel${mobileNavOpen ? " is-open" : ""}`}>
+          <a href="#cara-kerja" onClick={() => setMobileNavOpen(false)}>
+            Cara kerja
+          </a>
+          <a href="#fitur" onClick={() => setMobileNavOpen(false)}>
+            Fitur
+          </a>
+          <a href="#contoh" onClick={() => setMobileNavOpen(false)}>
+            Contoh peta
+          </a>
         </div>
       </nav>
 

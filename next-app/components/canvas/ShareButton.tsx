@@ -61,8 +61,15 @@ export function ShareButton({ mindmapId, isPublic, shareId, onUpdate }: ShareBut
 
   return (
     <>
-      <button type="button" className="sm-btn sm-btn--ghost" onClick={handleOpenClick} disabled={isOpening}>
-        {isOpening ? "Menyiapkan…" : "Bagikan"}
+      <button
+        type="button"
+        className="sm-btn sm-btn--ghost"
+        onClick={handleOpenClick}
+        disabled={isOpening}
+        aria-label="Bagikan"
+      >
+        <Share2 />
+        <span className="btn-label">{isOpening ? "Menyiapkan…" : "Bagikan"}</span>
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>

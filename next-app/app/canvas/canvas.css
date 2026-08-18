@@ -586,6 +586,75 @@
   box-shadow: var(--sm-shadow-md);
 }
 
+.page-canvas .chat-history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px 2px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--sm-ink-45);
+  flex-shrink: 0;
+}
+
+.page-canvas .chat-history-head button {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: var(--sm-radius-sm);
+  color: var(--sm-ink-45);
+  cursor: pointer;
+  transition:
+    background 150ms ease-out,
+    color 150ms ease-out;
+}
+
+.page-canvas .chat-history-head button:hover {
+  background: var(--sm-paper);
+  color: var(--sm-ink);
+}
+
+.page-canvas .chat-history-head svg {
+  width: 16px;
+  height: 16px;
+}
+
+.page-canvas .chat-history-collapsed {
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-2);
+  padding: 8px 18px;
+  background: var(--sm-surface);
+  border: 1px solid var(--sm-line);
+  border-radius: var(--sm-radius-pill);
+  box-shadow: var(--sm-shadow-sm);
+  font-family: var(--sm-font);
+  font-size: var(--sm-fs-small, 13.5px);
+  font-weight: 600;
+  color: var(--sm-ink-70);
+  cursor: pointer;
+  transition:
+    border-color 150ms ease-out,
+    color 150ms ease-out;
+}
+
+.page-canvas .chat-history-collapsed:hover {
+  border-color: var(--sm-clay);
+  color: var(--sm-ink);
+}
+
+.page-canvas .chat-history-collapsed svg {
+  width: 14px;
+  height: 14px;
+  color: var(--sm-clay);
+}
+
 .page-canvas .chat-message {
   max-width: 82%;
   padding: var(--sm-space-2) var(--sm-space-3);
@@ -1381,8 +1450,23 @@
 }
 
 @media (max-width: 560px) {
+  /* 3 tombol teks penuh (To-Do/Bagikan/Export) + judul dokumen gak muat sejajar
+     di header 1-baris pada layar sempit (~375-414px) — teks di-sembunyiin,
+     sisain ikon aja (mirip .icon-btn), label tetap kebaca screen reader lewat
+     aria-label yang ditambahin di masing-masing tombol. */
   .page-canvas .header-actions .sm-btn {
-    padding: 12px 16px;
+    padding: 10px;
+    gap: 0;
+  }
+
+  .page-canvas .header-actions .btn-label {
+    display: none;
+  }
+
+  .page-canvas .canvas-legend {
+    gap: var(--sm-space-2);
+    padding: 6px 10px;
+    font-size: 10.5px;
   }
 }
 

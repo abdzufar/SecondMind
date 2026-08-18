@@ -115,8 +115,10 @@ export function ExportButton({ filename }: { filename: string }) {
         className="sm-btn sm-btn--dark"
         onClick={handleClick}
         disabled={status !== "idle"}
+        aria-label="Export"
       >
-        {BUTTON_LABEL[status]}
+        <ImageDown />
+        <span className="btn-label">{BUTTON_LABEL[status]}</span>
       </button>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

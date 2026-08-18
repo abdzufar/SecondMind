@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "@xyflow/react/dist/style.css";
 import { Background, Controls, Panel, ReactFlow, type Connection, type Edge } from "@xyflow/react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useCanvasStore } from "@/store/canvasStore";
 import type { MindmapEdge, MindmapNode } from "@/lib/types";
@@ -43,6 +44,19 @@ export function CanvasView({
   const deleteEdge = useCanvasStore((s) => s.deleteEdge);
 
   const [chatDraft, setChatDraft] = useState("");
+  const [isChatMinimized, setIsChatMinimized] = useState(false);
+
+  // Pesan baru bisa masuk dari 2 sumber (command bar sendiri, atau handoff dari
+  // Drawer.tsx pas submit chat lewat node) — daripada tracking manual di tiap
+  // titik pengiriman, cukup buka lagi otomatis begitu jumlah pesan nambah,
+  // biar user gak ketinggalan balasan pas panelnya lagi diminimize.
+  const prevMessageCountRef = useRef(chatMessages.length);
+  useEffect(() => {
+    if (chatMessages.length > prevMessageCountRef.current) {
+      setIsChatMinimized(false);
+    }
+    prevMessageCountRef.current = chatMessages.length;
+  }, [chatMessages.length]);
 
   function handleSubmitChat(e: React.FormEvent) {
     e.preventDefault();
@@ -167,27 +181,47 @@ export function CanvasView({
 
           {showCommandBar && (
             <Panel position="bottom-center" className="command-bar-panel">
-              {chatMessages.length > 0 && (
-                <div className="chat-history">
-                  {chatMessages.map((msg, i) => (
-                    <div key={i} className={`chat-message chat-message--${msg.role}`}>
-                      {msg.nodeLabel && <span className="chat-message-context">Konteks: {msg.nodeLabel}</span>}
-                      {msg.role === "assistant" ? (
-                        <div className="chat-message-markdown">
-                          <ReactMarkdown>{msg.content}</ReactMarkdown>
-                        </div>
-                      ) : (
-                        <p>{msg.content}</p>
-                      )}
+              {chatMessages.length > 0 &&
+                (isChatMinimized ? (
+                  <button
+                    type="button"
+                    className="chat-history-collapsed"
+                    onClick={() => setIsChatMinimized(false)}
+                  >
+                    <ChevronUp />
+                    {chatMessages.length} pesan
+                  </button>
+                ) : (
+                  <div className="chat-history">
+                    <div className="chat-history-head">
+                      <span>Percakapan</span>
+                      <button
+                        type="button"
+                        aria-label="Minimalkan percakapan"
+                        onClick={() => setIsChatMinimized(true)}
+                      >
+                        <ChevronDown />
+                      </button>
                     </div>
-                  ))}
-                  {isChatSending && (
-                    <div className="chat-message chat-message--assistant chat-message--pending">
-                      <p>Mengetik…</p>
-                    </div>
-                  )}
-                </div>
-              )}
+                    {chatMessages.map((msg, i) => (
+                      <div key={i} className={`chat-message chat-message--${msg.role}`}>
+                        {msg.nodeLabel && <span className="chat-message-context">Konteks: {msg.nodeLabel}</span>}
+                        {msg.role === "assistant" ? (
+                          <div className="chat-message-markdown">
+                            <ReactMarkdown>{msg.content}</ReactMarkdown>
+                          </div>
+                        ) : (
+                          <p>{msg.content}</p>
+                        )}
+                      </div>
+                    ))}
+                    {isChatSending && (
+                      <div className="chat-message chat-message--assistant chat-message--pending">
+                        <p>Mengetik…</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
               {chatError && <p className="field-error">{chatError}</p>}
               <form className="command-bar" onSubmit={handleSubmitChat}>
                 <input
