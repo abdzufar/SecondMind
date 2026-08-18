@@ -50,6 +50,7 @@ export async function GET(req: NextRequest) {
               <div style="background-color: #f6f8fa; border-left: 4px solid #0070f3; padding: 16px; margin: 24px 0; border-radius: 4px;">
                 <h3 style="margin: 0 0 8px 0; color: #1a1a1a; font-size: 18px;">Task Details</h3>
                 <p style="margin: 0; color: #4a4a4a; font-weight: 500;">${todo.taskText}</p>
+                ${todo.description ? `<div style="margin-top: 12px; font-size: 14px; color: #666; white-space: pre-wrap;">${todo.description}</div>` : ''}
               </div>
 
               <div style="text-align: center; margin: 32px 0;">

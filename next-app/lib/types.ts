@@ -41,6 +41,7 @@ export type WireTodo = {
   _id: string;
   mindmapId: string;
   taskText: string;
+  description: string;
   dueDate: string;
   isCompleted: boolean;
 };

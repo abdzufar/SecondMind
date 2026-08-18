@@ -71,6 +71,7 @@ const TodoSchema = new mongoose.Schema({
   mindmapId: { type: mongoose.Schema.Types.ObjectId, ref: 'Mindmap', required: true },
   
   taskText: { type: String, required: true },
+  description: { type: String, default: "" },
   dueDate: { type: Date, required: true },
   isCompleted: { type: Boolean, default: false },
   

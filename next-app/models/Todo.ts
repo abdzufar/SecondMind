@@ -4,6 +4,7 @@ export interface ITodo extends Document {
   userId: mongoose.Types.ObjectId;
   mindmapId: mongoose.Types.ObjectId;
   taskText: string;
+  description: string;
   dueDate: Date;
   isCompleted: boolean;
   emailReminderSent: boolean;
@@ -14,6 +15,7 @@ const TodoSchema: Schema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   mindmapId: { type: Schema.Types.ObjectId, ref: 'Mindmap', required: true },
   taskText: { type: String, required: true },
+  description: { type: String, default: "" },
   dueDate: { type: Date, required: true },
   isCompleted: { type: Boolean, default: false },
   emailReminderSent: { type: Boolean, default: false },
