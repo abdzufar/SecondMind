@@ -1,5 +1,4 @@
 import type { Mindmap, MindmapEdge, MindmapNode, WireMindmap, WireTodo } from "@/lib/types";
-import { MOCK_MINDMAP } from "@/lib/mock/mindmap";
 
 const MOCK_LATENCY_MS = 300;
 
@@ -38,9 +37,6 @@ export type MindmapSummary = Pick<
   WireMindmap,
   "_id" | "title" | "topic" | "timeframe" | "isPublic" | "shareId" | "createdAt"
 >;
-
-// Dev-only default: dipakai app/canvas/page.tsx (tanpa id) buat redirect.
-export const DEFAULT_MINDMAP_ID = MOCK_MINDMAP._id;
 
 export type GenerateMindmapInput = {
   topic: string;
