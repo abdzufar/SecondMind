@@ -9,7 +9,7 @@ import { getMindmap } from "@/lib/api";
 import type { Mindmap } from "@/lib/types";
 import { useCanvasStore } from "@/store/canvasStore";
 import { CanvasView } from "@/components/canvas/CanvasView";
-import { Drawer } from "@/components/canvas/Drawer";
+import { Drawer, type DrawerTab } from "@/components/canvas/Drawer";
 import { ExportButton } from "@/components/canvas/ExportButton";
 import { ShareButton } from "@/components/canvas/ShareButton";
 
@@ -17,14 +17,24 @@ export default function CanvasPage() {
   const { id } = useParams<{ id: string }>();
   const setGraph = useCanvasStore((s) => s.setGraph);
   const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
+  const clearSelection = useCanvasStore((s) => s.clearSelection);
   const nodes = useCanvasStore((s) => s.nodes);
   const [mindmap, setMindmap] = useState<Mindmap | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showFeasibilityWarning, setShowFeasibilityWarning] = useState(true);
+  const [sidebarTab, setSidebarTab] = useState<DrawerTab>("detail");
+  const [todoPanelOpen, setTodoPanelOpen] = useState(false);
+  const [prevSelectedNodeId, setPrevSelectedNodeId] = useState(selectedNodeId);
+
+  if (selectedNodeId !== prevSelectedNodeId) {
+    setPrevSelectedNodeId(selectedNodeId);
+    if (selectedNodeId) setSidebarTab("detail");
+  }
 
   const stepNodes = nodes.filter((n) => n.type === "roadmap-step");
   const completedSteps = stepNodes.filter((n) => n.data.isCompleted).length;
   const progress = stepNodes.length > 0 ? Math.round((completedSteps / stepNodes.length) * 100) : 0;
+  const isSidebarOpen = !!selectedNodeId || todoPanelOpen;
 
   useEffect(() => {
     getMindmap(id)
@@ -72,6 +82,17 @@ export default function CanvasPage() {
           </div>
 
           <div className="header-actions">
+            <button
+              type="button"
+              className="sm-btn sm-btn--ghost"
+              disabled={!mindmap}
+              onClick={() => {
+                setSidebarTab("todo");
+                setTodoPanelOpen(true);
+              }}
+            >
+              To-Do
+            </button>
             {mindmap ? (
               <ShareButton
                 mindmapId={mindmap._id}
@@ -105,7 +126,7 @@ export default function CanvasPage() {
           </div>
         )}
 
-        <div className={`canvas-body${selectedNodeId ? " has-drawer" : ""}`}>
+        <div className={`canvas-body${isSidebarOpen ? " has-drawer" : ""}`}>
           <div className="canvas-area">
             {mindmap ? (
               <CanvasView />
@@ -119,7 +140,17 @@ export default function CanvasPage() {
             )}
           </div>
 
-          {selectedNodeId && <Drawer />}
+          {isSidebarOpen && mindmap && (
+            <Drawer
+              mindmapId={mindmap._id}
+              activeTab={sidebarTab}
+              onTabChange={setSidebarTab}
+              onClose={() => {
+                clearSelection();
+                setTodoPanelOpen(false);
+              }}
+            />
+          )}
         </div>
       </div>
     </ReactFlowProvider>
