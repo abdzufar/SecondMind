@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
     
-    const { mindmapId, taskText, timeOffsetDays } = parsed.data;
+    const { mindmapId, taskText, description, timeOffsetDays } = parsed.data;
 
     await dbConnect();
     
@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
       userId: session.user.id,
       mindmapId,
       taskText,
+      description: description || "",
       dueDate,
       isCompleted: false
     });

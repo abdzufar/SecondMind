@@ -23,11 +23,13 @@ export const ElaborateMindmapSchema = z.object({
 export const CreateTodoSchema = z.object({
   mindmapId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid Mindmap ID format'),
   taskText: z.string().min(1, 'Task text is required'),
+  description: z.string().optional(),
   timeOffsetDays: z.number().nullable().optional()
 });
 
 export const UpdateTodoSchema = z.object({
-  isCompleted: z.boolean()
+  isCompleted: z.boolean().optional(),
+  description: z.string().optional()
 });
 
 export const UpdateMindmapSchema = z.object({
