@@ -175,6 +175,10 @@ export function Drawer({
       .then(({ newNodes, newEdges }) => {
         appendNodes(newNodes, newEdges);
         applyLayout();
+        const { nodes: updatedNodes, edges: updatedEdges } = useCanvasStore.getState();
+        return saveMindmap(mindmapId, { nodes: updatedNodes, edges: updatedEdges }).catch(() => {
+          setExpandError("Cabang baru muncul tapi gagal disimpan — refresh bisa menghilangkannya. Coba lagi.");
+        });
       })
       .catch(() => setExpandError("Gagal memecah jadi sub-cabang. Coba lagi."))
       .finally(() => setIsExpanding(false));
