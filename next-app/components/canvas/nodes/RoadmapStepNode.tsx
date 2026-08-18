@@ -1,8 +1,9 @@
-import { Handle, Position, type NodeProps, useStore } from "@xyflow/react";
+import { Handle, Position, type NodeProps, useStore as useXyStore } from "@xyflow/react";
+import { useCanvasStore } from "@/store/canvasStore";
 import type { MindmapNode } from "@/lib/types";
 
 function BiHandle({ id, position }: { id: string; position: Position }) {
-  const connectionNodeId = useStore((s) => s.connectionNodeId);
+  const connectionNodeId = useXyStore((s) => s.connectionNodeId);
   const isDragging = connectionNodeId !== null;
 
   return (
@@ -15,9 +16,12 @@ function BiHandle({ id, position }: { id: string; position: Position }) {
 
 export function RoadmapStepNode({ data, selected }: NodeProps<MindmapNode>) {
   const isComplete = data.isCompleted;
+  const hasPendingTasks = useCanvasStore((s) => 
+    s.todos.some((t) => !t.isCompleted && t.taskText === data.label)
+  );
 
   return (
-    <div className={`xf-step${selected ? " is-selected" : ""}${isComplete ? " is-complete" : ""}`}>
+    <div className={`xf-step${selected ? " is-selected" : ""}${isComplete ? " is-complete" : ""}${hasPendingTasks && !isComplete ? " has-pending-tasks" : ""}`}>
       <BiHandle position={Position.Top} id="top" />
       <BiHandle position={Position.Left} id="left" />
       <BiHandle position={Position.Right} id="right" />
@@ -30,6 +34,7 @@ export function RoadmapStepNode({ data, selected }: NodeProps<MindmapNode>) {
           data.num
         )}
       </span>
+      {hasPendingTasks && !isComplete && <span className="xf-pending-dot" aria-label="Ada tugas belum selesai" />}
       <span className="xf-step-body">
         <span className="xf-step-time">{data.timeMark}</span>
         <span className="xf-step-label">{data.label}</span>
