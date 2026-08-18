@@ -247,7 +247,8 @@ Creates a new task linked to a mindmap.
 {
 	"mindmapId": "64b5f8...",
 	"taskText": "Read Docker documentation Chapter 1",
-	"dueDate": "2026-08-16T10:00:00Z"
+	"description": "Optional detailed description or combined branches.",
+	"timeOffsetDays": 5
 }
 ```
 
@@ -262,6 +263,27 @@ Creates a new task linked to a mindmap.
 	"emailReminderSent": false
 }
 ```
+
+### `POST /todo/generate` (NEW)
+
+Auto-generates a list of To-Do tasks directly from the `roadmap-step` nodes in a specific Mindmap.
+
+- **Content-Type:** `application/json`
+- **Request Body (Required):**
+
+```json
+{
+	"mindmapId": "64b5f8..."
+}
+```
+
+- **Backend Process:**
+  1. Finds all `roadmap-step` nodes.
+  2. Finds their connected `mindmap-branch` nodes.
+  3. Formats the descriptions of the branches into a Markdown bulleted list.
+  4. Automatically calculates `dueDate` from the mindmap's `startDate`/`createdAt`.
+  5. Skips generation if a task with the exact same `taskText` already exists.
+- **Success Output (201 Created):** `{ "success": true, "generatedCount": 5 }`
 
 ### `GET /todo?mindmapId=64b5f8...`
 
