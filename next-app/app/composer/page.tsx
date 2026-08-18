@@ -90,6 +90,7 @@ export default function ComposerPage() {
   const [historyStatus, setHistoryStatus] = useState<HistoryStatus>("loading");
   const [deleteTarget, setDeleteTarget] = useState<MindmapSummary | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     function loadHistory() {
@@ -118,11 +119,13 @@ export default function ComposerPage() {
   function handleDeleteConfirm() {
     if (!deleteTarget) return;
     setIsDeleting(true);
+    setDeleteError(null);
     deleteMindmap(deleteTarget._id)
       .then(() => {
         setHistory((prev) => prev.filter((item) => item._id !== deleteTarget._id));
         setDeleteTarget(null);
       })
+      .catch(() => setDeleteError("Gagal menghapus mindmap. Coba lagi."))
       .finally(() => setIsDeleting(false));
   }
 
@@ -382,7 +385,10 @@ export default function ComposerPage() {
                     type="button"
                     className="history-delete"
                     aria-label={`Hapus ${item.title}`}
-                    onClick={() => setDeleteTarget(item)}
+                    onClick={() => {
+                      setDeleteError(null);
+                      setDeleteTarget(item);
+                    }}
                   >
                     <TrashIcon className="size-4" />
                   </button>
@@ -393,7 +399,15 @@ export default function ComposerPage() {
         </div>
       </main>
 
-      <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+      <Dialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteTarget(null);
+            setDeleteError(null);
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader className="items-center text-center">
             <div className="flex size-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
@@ -401,6 +415,7 @@ export default function ComposerPage() {
             </div>
             <DialogTitle>Hapus &quot;{deleteTarget?.title}&quot;?</DialogTitle>
             <DialogDescription>Mindmap dan seluruh cabangnya akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.</DialogDescription>
+            {deleteError && <p className="field-error">{deleteError}</p>}
           </DialogHeader>
           <DialogFooter className="justify-center" style={{ justifyContent: "center" }}>
             <Button
@@ -408,7 +423,10 @@ export default function ComposerPage() {
               size="lg"
               className="px-7"
               style={{ height: 40, paddingLeft: 28, paddingRight: 28 }}
-              onClick={() => setDeleteTarget(null)}
+              onClick={() => {
+                setDeleteTarget(null);
+                setDeleteError(null);
+              }}
               disabled={isDeleting}
             >
               Batal

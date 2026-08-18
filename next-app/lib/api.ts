@@ -43,7 +43,7 @@ export type MindmapSummary = Pick<WireMindmap, "_id" | "title" | "topic" | "time
 
 // "Database" mock di memori — reset tiap reload halaman, cukup buat demo lokal.
 const mindmapsDb: MindmapRecord[] = [{ ...MOCK_MINDMAP, createdAt: MOCK_MINDMAP.startDate }];
-let todosDb: WireTodo[] = [...MOCK_TODOS];
+const todosDb: WireTodo[] = [...MOCK_TODOS];
 
 // Dev-only default: canvas page belum punya route [id] (M11), jadi sementara
 // selalu load mindmap mock ini.
@@ -153,10 +153,12 @@ export async function saveMindmap(id: string, input: SaveMindmapInput): Promise<
 }
 
 export async function deleteMindmap(id: string): Promise<void> {
-  const index = mindmapsDb.findIndex((m) => m._id === id);
-  if (index !== -1) mindmapsDb.splice(index, 1);
-  todosDb = todosDb.filter((todo) => todo.mindmapId !== id);
-  await delay(undefined);
+  const res = await fetch(`/api/mindmap/${id}`, { method: "DELETE" });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error ?? `Gagal menghapus mindmap (status ${res.status})`);
+  }
 }
 
 export async function getTodos(mindmapId: string): Promise<WireTodo[]> {
