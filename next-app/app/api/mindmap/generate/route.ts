@@ -75,6 +75,13 @@ export async function POST(req: NextRequest) {
 		const cleanJson = responseText.replace(/```json\n?|```/g, "").trim();
 		const parsedData = JSON.parse(cleanJson);
 
+		if (parsedData.error === "REJECTED") {
+			return NextResponse.json(
+				{ error: "Permintaan ditolak karena melanggar panduan keamanan atau tidak relevan." },
+				{ status: 400 },
+			);
+		}
+
 		const validNodes = parsedData.nodes || [];
 		const validEdges = validateEdges(validNodes, parsedData.edges || []);
 

@@ -6,7 +6,11 @@ Your task is to generate a comprehensive learning roadmap for the topic: "${topi
 The user wants to complete this roadmap within: "${timeframe}".
 Language: "${language}".${contextBlock}
 
-You must output a strictly valid JSON object matching this schema exactly:
+You must output a strictly valid JSON object matching this schema exactly.
+IF the topic is harmful, illegal, explicitly violates safety guidelines, or is completely irrelevant to learning/education, you MUST strictly return ONLY this JSON object:
+{ "error": "REJECTED" }
+
+Otherwise, return the roadmap schema:
 {
   "title": "A short, catchy title for the roadmap",
   "feasibilityWarning": "If the timeframe is completely unrealistic (e.g., learning Quantum Physics in 1 day), provide a polite, short warning explaining why and suggest they pace themselves. If feasible, return null.",
@@ -41,6 +45,7 @@ You must output a strictly valid JSON object matching this schema exactly:
 
 CRITICAL RULES:
 - The output MUST be strictly valid JSON. Do not include markdown \`\`\`json blocks. Do not include any trailing commas.
+- If the topic is harmful or irrelevant, return ONLY the error JSON object.
 - Ensure every edge source and target exists in the nodes array.
 - Generate BOTH 'roadmap-step' nodes (the main timeline) and 'mindmap-branch' nodes (detailed sub-topics connected to the main steps).
 - Detail level should be: ${verbosity} (if 'detailed', generate many mindmap-branch nodes).
