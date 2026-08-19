@@ -244,6 +244,7 @@ export async function getTodos(mindmapId: string): Promise<WireTodo[]> {
 export type CreateTodoInput = {
   mindmapId: string;
   taskText: string;
+  description?: string;
   timeOffsetDays: number | null;
 };
 

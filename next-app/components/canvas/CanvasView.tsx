@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import "@xyflow/react/dist/style.css";
-import { Background, Controls, Panel, ReactFlow, type Connection, type Edge } from "@xyflow/react";
+import { Background, Controls, Panel, ReactFlow, type Connection, type Edge, type EdgeChange } from "@xyflow/react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useCanvasStore } from "@/store/canvasStore";
@@ -23,6 +23,7 @@ type CanvasViewProps = {
   chatError?: string | null;
   onSendChat?: (message: string) => void;
   mindmapId?: string;
+  readOnly?: boolean;
 };
 
 export function CanvasView({
@@ -32,6 +33,7 @@ export function CanvasView({
   chatError = null,
   onSendChat,
   mindmapId,
+  readOnly = false,
 }: CanvasViewProps) {
   const nodes = useCanvasStore((s) => s.nodes);
   const edges = useCanvasStore((s) => s.edges);
@@ -68,7 +70,7 @@ export function CanvasView({
   }
 
   function handleConnect(connection: Connection) {
-    if (!isOnline) return;
+    if (readOnly || !isOnline) return;
     if (connection.source === connection.target) return; // Prevent self-loops
     connectEdge(connection);
     if (mindmapId) {
@@ -81,7 +83,7 @@ export function CanvasView({
   }
 
   function handleEdgesDelete() {
-    if (!isOnline) return;
+    if (readOnly || !isOnline) return;
     if (mindmapId) {
       setTimeout(() => {
         // `nodes` diikutkan (bukan cuma `edges`) karena edge yang kehapus bisa
@@ -95,7 +97,7 @@ export function CanvasView({
   }
 
   function handleReconnect(oldEdge: Edge, newConnection: Connection) {
-    if (!isOnline) return;
+    if (readOnly || !isOnline) return;
     if (newConnection.source === newConnection.target) return; // Prevent self-loops
     reconnectEdge(oldEdge, newConnection);
     if (mindmapId) {
@@ -107,7 +109,7 @@ export function CanvasView({
   }
 
   function handleEdgeDoubleClick(_event: React.MouseEvent, edge: Edge) {
-    if (!isOnline) return;
+    if (readOnly || !isOnline) return;
     deleteEdge(edge.id);
     if (mindmapId) {
       setTimeout(() => {
@@ -115,6 +117,15 @@ export function CanvasView({
         saveMindmap(mindmapId, { nodes: currentNodes, edges: currentEdges });
       }, 0);
     }
+  }
+
+  // Di halaman publik (share/[shareId]), React Flow tetap ngizinin hapus edge
+  // lewat tombol Delete/Backspace terlepas dari handler custom di atas (jalur
+  // itu langsung lewat onEdgesChange bawaan store, bukan handleEdgeDoubleClick).
+  // Filter perubahan "remove" di sini biar viewer publik beneran read-only —
+  // "select" tetap diloloskan supaya klik edge masih bisa dipilih/dilihat.
+  function handleEdgesChange(changes: EdgeChange<MindmapEdge>[]) {
+    onEdgesChange(readOnly ? changes.filter((c) => c.type === "select") : changes);
   }
 
   // Klik cabang (mindmap-branch) → seluruh jalur ke atas ikut nyala (§ user request:
@@ -158,15 +169,15 @@ export function CanvasView({
       edges={edges}
       nodeTypes={nodeTypes}
       onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
+      onEdgesChange={handleEdgesChange}
       onNodeClick={(_event, node) => selectNode(node.id)}
       onPaneClick={() => selectNode(null)}
       onConnect={handleConnect}
       onReconnect={handleReconnect}
       onEdgeDoubleClick={handleEdgeDoubleClick}
       onEdgesDelete={handleEdgesDelete}
-      nodesConnectable={isOnline}
-      edgesReconnectable={isOnline}
+      nodesConnectable={!readOnly && isOnline}
+      edgesReconnectable={!readOnly && isOnline}
       elementsSelectable={true}
       edgesFocusable={true}
       nodesDraggable={false}

@@ -221,40 +221,20 @@
 }
 
 .page-canvas .doc-info span {
+  display: block;
+  min-width: 0;
   font-size: 12px;
   color: var(--sm-ink-45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .page-canvas .header-actions {
   display: flex;
-  gap: var(--sm-space-3);
-  flex-shrink: 0;
-}
-
-.page-canvas .header-progress {
-  flex: 1;
-  display: flex;
   align-items: center;
-  justify-content: center;
   gap: var(--sm-space-3);
-  min-width: 0;
-  padding: 0 var(--sm-space-5);
-}
-
-.page-canvas .header-progress-bar {
-  width: min(220px, 100%);
-  height: 6px;
-  border-radius: var(--sm-radius-pill);
-  background: var(--sm-paper);
-  overflow: hidden;
   flex-shrink: 0;
-}
-
-.page-canvas .header-progress-fill {
-  height: 100%;
-  background: var(--sm-clay);
-  border-radius: var(--sm-radius-pill);
-  transition: width 200ms ease-out;
 }
 
 .page-canvas .header-progress-label {
@@ -265,11 +245,29 @@
   flex-shrink: 0;
 }
 
+/* Garis progress sekarang baris sendiri full-width nempel di bawah header
+   (bukan lagi rebutan ruang di tengah header sama judul/tombol aksi — itu
+   yang dulu bikin dia meluber kalau judulnya panjang, lihat commit
+   "fix: progress bar overlap on long titles"). PROGRESS_TRACK_HEIGHT (4px)
+   dipakein juga di .canvas-body's height calc di bawah. */
+.page-canvas .header-progress-track {
+  position: relative;
+  z-index: 25;
+  height: 4px;
+  background: var(--sm-paper);
+}
+
+.page-canvas .header-progress-fill {
+  height: 100%;
+  background: var(--sm-clay);
+  transition: width 200ms ease-out;
+}
+
 /* ===== body: canvas + drawer ===== */
 
 .page-canvas .canvas-body {
   position: relative;
-  height: calc(100vh - 56px);
+  height: calc(100vh - 56px - 4px);
   display: flex;
 }
 
@@ -1360,13 +1358,48 @@
 }
 
 .page-canvas .todo-item-description {
-  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  line-height: 1.55;
   color: var(--sm-ink-70);
-  white-space: pre-wrap;
+}
+
+.page-canvas .todo-item-description strong {
+  color: var(--sm-ink);
+  font-weight: 700;
+}
+
+.page-canvas .todo-desc-bullet {
+  position: relative;
+  padding-left: 14px;
+}
+
+.page-canvas .todo-desc-bullet::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 8px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--sm-clay);
 }
 
 .page-canvas .todo-item.is-done .todo-item-description {
   color: var(--sm-ink-45);
+}
+
+.page-canvas .todo-item.is-done .todo-item-description strong {
+  color: inherit;
+}
+
+.page-canvas .todo-item.is-done .todo-desc-bullet::before {
+  background: var(--sm-ink-45);
 }
 
 .page-canvas .todo-item-due {
@@ -1413,8 +1446,32 @@
   color: var(--sm-ink);
 }
 
+.page-canvas .todo-form-description {
+  /* flex-shrink:0 penting — tanpa ini, flex-wrap milih nyusutin textarea biar
+     tetep muat sebaris sama input task (bukan wrap ke baris sendiri kayak
+     maksudnya `100%` basis), hasilnya dua field keliatan kepepet sebelah-
+     sebelahan alih-alih masing-masing lega di barisnya sendiri. */
+  flex: 1 0 100%;
+  min-height: 56px;
+  box-sizing: border-box;
+  padding: var(--sm-space-2) var(--sm-space-3);
+  border: 1px solid var(--sm-line);
+  border-radius: var(--sm-radius-sm);
+  background: var(--sm-paper);
+  color: var(--sm-ink);
+  font-family: var(--sm-font);
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.page-canvas .todo-form-description::placeholder {
+  color: var(--sm-ink-45);
+}
+
 .page-canvas .todo-form-text:focus-visible,
-.page-canvas .todo-form-date:focus-visible {
+.page-canvas .todo-form-date:focus-visible,
+.page-canvas .todo-form-description:focus-visible {
   border-color: var(--sm-clay);
   outline: none;
   box-shadow: 0 0 0 3px var(--sm-clay-tint);
@@ -1497,6 +1554,20 @@
 }
 
 @media (max-width: 900px) {
+  /* Command bar (chat AI) lebarnya ngikutin viewport (min(560px, 100vw-48px))
+     dan nempel di bottom-center — di layar sempit dia meluas sampai numpuk
+     kontrol zoom +/- React Flow yang nempel di bottom-right (dua-duanya
+     anchor ke bawah dengan offset yang mirip). Geser kontrol zoom naik ke
+     atas command bar-nya. */
+  /* Selector di-samain lengkap ke class asli React Flow (bukan cuma
+     .react-flow__controls) — React Flow sendiri nge-style lewat
+     .react-flow__panel.bottom.right (3 class dirantai), yang spesifisitasnya
+     lebih tinggi dari .page-canvas .react-flow__controls (2 class) dan bakal
+     menang/nimpa override ini kalau gak disamain selector-nya. */
+  .page-canvas .react-flow__panel.react-flow__controls.bottom.right {
+    bottom: 84px;
+  }
+
   /* Canvas tetap kelihatan di belakang sheet — bukan lagi ke-swap total kayak
      sebelumnya (display:none), biar kerasa kayak bottom sheet beneran nutupin
      sebagian layar, bukan ganti halaman. */
@@ -1542,12 +1613,6 @@
   }
 }
 
-@media (max-width: 760px) {
-  .page-canvas .header-progress {
-    display: none;
-  }
-}
-
 @media (max-width: 560px) {
   /* 3 tombol teks penuh (To-Do/Bagikan/Export) + judul dokumen gak muat sejajar
      di header 1-baris pada layar sempit (~375-414px) — teks di-sembunyiin,
@@ -1569,18 +1634,71 @@
   }
 }
 
-/* ===== halaman share (/share/[shareId]) =====
-   Header di halaman ini gak punya header-progress/header-actions kayak canvas
-   asli, jadi butuh tinggi + padding sendiri — .canvas-header dan .canvas-body
-   di canvas asli saling gantung lewat calc(), jadi override di-scope ke
-   .page-share biar canvas asli gak ikut kena. */
+/* Header jadi 2 baris mulai lebar tablet ke bawah — sebelumnya judul dokumen
+   sebaris sama label progress + tombol aksi, jadi kepotong parah/ketutupan
+   begitu judulnya lumayan panjang. Baris 1: back button + judul. Baris 2:
+   label progress + tombol aksi. Tinggi header jadi dinamis (bukan 56px
+   tetap), jadi .page-canvas dijadiin flex-column dan .canvas-body pakai
+   flex:1 buat ngisi sisa viewport — gantiin height:calc() yang sebelumnya
+   ngasumsiin header selalu 1 baris (cuma berlaku di breakpoint ini). 900px
+   dipilih biar konsisten sama breakpoint drawer-jadi-bottom-sheet di atas. */
+@media (max-width: 900px) {
+  .page-canvas {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
 
-.page-share .canvas-header {
-  height: 72px;
+  .page-canvas .canvas-header {
+    height: auto;
+    flex-wrap: wrap;
+    row-gap: var(--sm-space-2);
+    padding: var(--sm-space-3) var(--sm-space-4);
+    flex-shrink: 0;
+  }
+
+  .page-canvas .header-left {
+    flex: 1 1 100%;
+  }
+
+  .page-canvas .header-actions {
+    flex: 1 1 100%;
+    justify-content: space-between;
+  }
+
+  .page-canvas .header-progress-track {
+    flex-shrink: 0;
+  }
+
+  .page-canvas .offline-banner,
+  .page-canvas .feasibility-banner {
+    flex-shrink: 0;
+  }
+
+  .page-canvas .canvas-body {
+    height: auto;
+    flex: 1;
+    min-height: 0;
+  }
 }
 
-.page-share .canvas-body {
-  height: calc(100vh - 72px);
+/* ===== halaman share (/share/[shareId]) =====
+   Header di halaman ini gak punya header-progress-track/header-actions kayak
+   canvas asli, jadi butuh tinggi + padding sendiri — .canvas-header dan
+   .canvas-body di canvas asli saling gantung lewat calc(), jadi override
+   di-scope ke .page-share biar canvas asli gak ikut kena. */
+
+/* Di-scope ke ≥901px — di bawah itu, breakpoint header-2-baris (900px, lihat
+   media query di atas) yang harus menang biar CTA "Coba gratis" gak kepotong
+   pas header-actions ikutan wrap ke baris kedua. */
+@media (min-width: 901px) {
+  .page-share .canvas-header {
+    height: 72px;
+  }
+
+  .page-share .canvas-body {
+    height: calc(100vh - 72px);
+  }
 }
 
 .page-share .doc-info {
