@@ -13,6 +13,7 @@ import { getInitials } from "@/lib/utils";
 import { clearOfflineCache } from "@/lib/offlineCache";
 import { useCanvasStore } from "@/store/canvasStore";
 import { useHistoryStore } from "@/store/historyStore";
+import { InstallAppButton } from "@/components/InstallAppButton";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -236,6 +237,7 @@ export default function ComposerPage() {
           </span>
         </Link>
         <div className="account-chip">
+          <InstallAppButton />
           <a href="#riwayat">Riwayat</a>
           <DropdownMenu>
             <DropdownMenuTrigger className="avatar" aria-label="Menu akun">

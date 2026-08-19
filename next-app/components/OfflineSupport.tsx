@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useCanvasStore } from "@/store/canvasStore";
 import { clearOfflineCache, getCachedUserId, setCachedUserId } from "@/lib/offlineCache";
+import { useInstallPromptStore, type BeforeInstallPromptEvent } from "@/store/installPromptStore";
 
 // Satu listener online/offline di root (§7 aturan arsitektur) + guard cache
 // per-user, dua-duanya digabung di sini karena sama-sama "sekali di boot,
@@ -11,6 +12,7 @@ import { clearOfflineCache, getCachedUserId, setCachedUserId } from "@/lib/offli
 // (butuh useSession(), jadi harus di dalam SessionProvider).
 export function OfflineSupport() {
   const setIsOnline = useCanvasStore((s) => s.setIsOnline);
+  const setDeferredPrompt = useInstallPromptStore((s) => s.setDeferredPrompt);
   const { data: session, status } = useSession();
 
   useEffect(() => {
@@ -41,6 +43,29 @@ export function OfflineSupport() {
       console.error("[PWA] gagal register service worker:", err);
     });
   }, []);
+
+  useEffect(() => {
+    // Browser nembak ini pas situsnya installable DAN belum di-install —
+    // `preventDefault()` nyetop UI generik bawaan browser, event-nya
+    // disimpan biar bisa dipicu belakangan dari tombol custom kita sendiri
+    // (`InstallAppButton.tsx`), bukan langsung ditampilin di sini.
+    function handleBeforeInstallPrompt(e: Event) {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    }
+    // Nembak abis instalasi beneran kelar (baik lewat tombol kita atau ikon
+    // install generik browser kalau usernya gak sempat lihat tombol kita) —
+    // clear biar tombol ilang, gak ada state usang yang nyangkut.
+    function handleAppInstalled() {
+      setDeferredPrompt(null);
+    }
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, [setDeferredPrompt]);
 
   useEffect(() => {
     if (status !== "authenticated") return;

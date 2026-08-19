@@ -611,6 +611,18 @@
     padding: 0 var(--sm-space-5);
   }
 
+  /* Tombol "Install App" (teks penuh) desek logo/Riwayat/avatar di layar
+     sempit — sama kayak pola header-actions canvas, teks disembunyiin,
+     sisain ikon aja, label tetap kebaca screen reader lewat aria-label. */
+  .page-composer .account-chip .sm-btn {
+    padding: 10px;
+    gap: 0;
+  }
+
+  .page-composer .account-chip .btn-label {
+    display: none;
+  }
+
   .page-composer .upload-actions {
     flex-direction: column-reverse;
     align-items: stretch;

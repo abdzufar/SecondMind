@@ -22,6 +22,10 @@ export default function LandingPage() {
   const artRef = useRef<HTMLDivElement>(null);
   const { data: session, status } = useSession();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  // CTA "Buat peta pertama" (hero + section akhir) ngarah ke /composer kalau
+  // udah login — sebelumnya hardcode ke /register terus walau sesi aktif,
+  // beda sama nav bar yang udah bener duluan (lihat §11 M11 CLAUDE.md).
+  const ctaHref = status === "authenticated" ? "/composer" : "/register";
 
   useEffect(() => {
     const reveals = document.querySelectorAll(".page-landing .reveal");
@@ -171,7 +175,7 @@ export default function LandingPage() {
               dan ditanya — bukan cuma dirangkum.
             </p>
             <div className="cta-row sm-rise" style={{ animationDelay: "80ms" }}>
-              <Link href="/register" className="sm-btn sm-btn--primary">
+              <Link href={ctaHref} className="sm-btn sm-btn--primary">
                 Buat peta pertama
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h13M12 5l7 7-7 7" />
@@ -318,7 +322,7 @@ export default function LandingPage() {
         <div className="in reveal">
           <h2>Satu dokumen, satu menit.</h2>
           <p>Coba dengan bahan yang sedang kamu baca sekarang.</p>
-          <Link href="/register" className="sm-btn sm-btn--primary">
+          <Link href={ctaHref} className="sm-btn sm-btn--primary">
             Buat peta pertama
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h13M12 5l7 7-7 7" />
