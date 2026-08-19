@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import "./composer.css";
@@ -73,6 +73,18 @@ function formatRelativeTime(iso: string) {
 }
 
 export default function ComposerPage() {
+  return (
+    <Suspense fallback={null}>
+      <ComposerPageContent />
+    </Suspense>
+  );
+}
+
+// `useSearchParams()` (dipakai di bawah buat baca `?settings=email`) butuh
+// nempel di bawah `<Suspense>` — kalau enggak, `next build` bail out total
+// (bukan cuma warning) karena gak bisa nentuin nilainya pas prerender static
+// (query string cuma ada pas request beneran, bukan pas build).
+function ComposerPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
