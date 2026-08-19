@@ -81,6 +81,13 @@
   gap: var(--sm-space-3);
 }
 
+.page-landing .nav-cta .sm-btn {
+  /* Tanpa ini, .sm-btn (inline-flex, gak ada nowrap bawaan) bisa "curang" ikut
+     flex-shrink dengan numpuk teksnya jadi 2 baris ("Coba" / "gratis") di HP
+     sempit, alih-alih tetap 1 baris kayak tombol "Masuk" di sebelahnya. */
+  white-space: nowrap;
+}
+
 .page-landing .avatar {
   width: 34px;
   height: 34px;

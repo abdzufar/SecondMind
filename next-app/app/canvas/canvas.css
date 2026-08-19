@@ -244,15 +244,23 @@
   gap: var(--sm-space-3);
   min-width: 0;
   padding: 0 var(--sm-space-5);
+  /* Judul panjang di .header-left bikin kontainer ini kepepet sempit — tanpa
+     ini, bar+label yang gak bisa nyusut bakal meluber ke judul/tombol aksi
+     di sebelahnya (bukan cuma ke-crop rapi). */
+  overflow: hidden;
 }
 
 .page-canvas .header-progress-bar {
   width: min(220px, 100%);
+  min-width: 32px;
   height: 6px;
   border-radius: var(--sm-radius-pill);
   background: var(--sm-paper);
   overflow: hidden;
-  flex-shrink: 0;
+  /* Sebelumnya flex-shrink:0 — gak bisa nyusut sama sekali, jadi begitu
+     .header-progress kepepet (judul panjang), bar+label ini meluber keluar
+     kontainer (numpuk ke judul/tombol) alih-alih ngecil ngikutin ruang. */
+  flex-shrink: 1;
 }
 
 .page-canvas .header-progress-fill {
