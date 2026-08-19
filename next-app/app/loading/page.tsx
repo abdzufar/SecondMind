@@ -1,0 +1,116 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import "./loading-page.css";
+import { generateMindmap, ApiError, type GenerateMindmapInput } from "@/lib/api";
+import { takePendingGenerateInput } from "@/lib/pendingGenerate";
+
+const MESSAGES = [
+  "Membaca dokumen…",
+  "Memahami topik dan konteks…",
+  "Menyusun struktur roadmap…",
+  "Menghubungkan antar konsep…",
+  "Merapikan tata letak…",
+  "Menyelesaikan sentuhan akhir…",
+];
+
+export default function LoadingPage() {
+  const router = useRouter();
+  const [messageIndex, setMessageIndex] = useState(0);
+  const [status, setStatus] = useState<"loading" | "error" | "rejected">("loading");
+  const payloadRef = useRef<GenerateMindmapInput | null>(null);
+
+  useEffect(() => {
+    if (status !== "loading") return;
+    const interval = setInterval(() => {
+      setMessageIndex((i) => Math.min(i + 1, MESSAGES.length - 1));
+    }, 1100);
+    return () => clearInterval(interval);
+  }, [status]);
+
+  const performGenerate = useCallback(
+    (input: GenerateMindmapInput) => {
+      generateMindmap(input)
+        .then((mindmap) => {
+          router.replace(`/canvas/${mindmap._id}`);
+        })
+        .catch((err) => {
+          if (err instanceof ApiError && err.status === 400) {
+            setStatus("rejected");
+          } else {
+            setStatus("error");
+          }
+        });
+    },
+    [router]
+  );
+
+  const hasStartedRef = useRef(false);
+
+  useEffect(() => {
+    if (hasStartedRef.current) return;
+    hasStartedRef.current = true;
+
+    const pending = takePendingGenerateInput();
+    if (!pending) {
+      router.replace("/composer");
+      return;
+    }
+    payloadRef.current = pending;
+    performGenerate(pending);
+  }, [router, performGenerate]);
+
+  function handleRetry() {
+    if (!payloadRef.current) return;
+    setStatus("loading");
+    setMessageIndex(0);
+    performGenerate(payloadRef.current);
+  }
+
+  return (
+    <div className="page-loading">
+      <div className="loading-wrap">
+        <div className="brand">
+          <Image src="/brand/svg/mark.svg" width={28} height={28} alt="Second Mind" />
+          <span className="sm-wordmark">
+            <span>Second</span>
+            <b>Mind</b>
+          </span>
+        </div>
+
+        {status === "loading" ? (
+          <>
+            <div className="spinner" role="status" aria-label="Memproses"></div>
+            <p className="status">{MESSAGES[messageIndex]}</p>
+            <div className="build-progress" aria-hidden="true">
+              <div
+                className="build-progress-fill"
+                style={{ width: `${Math.round(((messageIndex + 1) / MESSAGES.length) * 90)}%` }}
+              />
+            </div>
+          </>
+        ) : status === "rejected" ? (
+          <>
+            <p className="status status--error">Topik atau dokumen ditolak karena tidak relevan atau melanggar panduan keamanan.</p>
+            <div className="loading-actions">
+              <Link href="/composer" className="sm-btn sm-btn--primary">Perbaiki Input</Link>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="status status--error">Sistem sedang sibuk atau terjadi gangguan sementara. Coba lagi?</p>
+            <div className="loading-actions">
+              <button type="button" className="sm-btn sm-btn--primary" onClick={handleRetry}>
+                Coba Lagi
+              </button>
+              <Link href="/composer">Kembali ke form</Link>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}

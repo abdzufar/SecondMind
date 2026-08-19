@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Strategi Growth 2026 — Second Mind</title>
+    <link rel="icon" href="icons&logo/svg/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="icons&logo/png/favicon-32.png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="icons&logo/png/apple-touch-icon-180.png" />
+    <meta name="theme-color" content="#221B14" />
+    <style>
+      @import url("icons&logo/tokens.css");
+
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
+
+      a {
+        transition: border-color 150ms ease-out, color 150ms ease-out;
+      }
+
+      :focus-visible {
+        outline: 2px solid var(--sm-clay);
+        outline-offset: 2px;
+        border-radius: var(--sm-radius-sm);
+      }
+
+      .sm-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      /* ===== header ===== */
+
+      .canvas-header {
+        position: relative;
+        z-index: 30;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 var(--sm-space-5);
+        background: var(--sm-surface);
+        border-bottom: 1px solid var(--sm-line);
+      }
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: var(--sm-space-4);
+        min-width: 0;
+      }
+
+      .icon-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--sm-radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--sm-ink-70);
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: background 150ms ease-out, color 150ms ease-out;
+      }
+
+      .icon-btn:hover {
+        background: var(--sm-paper);
+        color: var(--sm-ink);
+      }
+
+      .icon-btn svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .doc-info {
+        min-width: 0;
+      }
+
+      .doc-info strong {
+        display: block;
+        font-size: var(--sm-fs-body);
+        font-weight: 700;
+        color: var(--sm-ink);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .doc-info span {
+        font-size: 12px;
+        color: var(--sm-ink-45);
+      }
+
+      .header-actions {
+        display: flex;
+        gap: var(--sm-space-3);
+        flex-shrink: 0;
+      }
+
+      /* ===== canvas shell ===== */
+
+      .canvas-area {
+        position: relative;
+        height: calc(100vh - 56px);
+        background-color: var(--sm-paper);
+        background-image: radial-gradient(#e0d4c3 1.5px, transparent 1.5px);
+        background-size: 22px 22px;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+
+      /* ===== roadmap layout =====
+         Node diposisikan lewat CSS grid, bukan persentase absolut, dan semua
+         konektor memakai garis siku (horizontal/vertikal) — jadi jaraknya rata
+         dengan sendirinya dan tidak ada garis yang bisa miring/ter-skew. */
+
+      .roadmap {
+        width: 100%;
+        max-width: 920px;
+        margin: 0 auto;
+        padding: var(--sm-space-8) var(--sm-space-5) 148px;
+      }
+
+      .rm-stage {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        column-gap: 96px;
+        padding: var(--sm-space-4) 0;
+      }
+
+      /* batang utama — otomatis nyambung antar stage */
+      .rm-stage::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        margin-left: -1px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--sm-line);
+      }
+
+      .rm-stage:first-child::before {
+        top: 50%;
+      }
+
+      .rm-stage:last-child::before {
+        bottom: 50%;
+      }
+
+      /* ===== node: langkah roadmap (roadmap-step) ===== */
+
+      .rm-step {
+        position: relative;
+        z-index: 1;
+        grid-column: 2;
+        box-sizing: border-box;
+        width: 280px;
+        display: flex;
+        align-items: center;
+        gap: var(--sm-space-3);
+        background: var(--sm-ink);
+        border: 1px solid var(--sm-ink);
+        border-radius: var(--sm-radius-md);
+        padding: 12px 16px;
+        text-decoration: none;
+        transition: transform 150ms ease-out, box-shadow 150ms ease-out;
+      }
+
+      .rm-step:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--sm-shadow-md);
+      }
+
+      .rm-step-num {
+        flex-shrink: 0;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: var(--sm-clay);
+        color: var(--sm-surface);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1;
+      }
+
+      .rm-step-body {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+
+      .rm-step-time {
+        font-size: 9.5px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--sm-clay-bright);
+        line-height: 12px;
+      }
+
+      .rm-step-label {
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: var(--sm-paper);
+        line-height: 19px;
+      }
+
+      /* ===== node: cabang mindmap (mindmap-branch) ===== */
+
+      .rm-cluster {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: var(--sm-space-3);
+      }
+
+      .rm-cluster--left {
+        grid-column: 1;
+        align-items: flex-end;
+      }
+
+      .rm-cluster--right {
+        grid-column: 3;
+        align-items: flex-start;
+      }
+
+      /* rel vertikal yang menyatukan cabang-cabang dalam satu stage */
+      .rm-cluster::before {
+        content: "";
+        position: absolute;
+        top: 21px;
+        bottom: 21px;
+        width: 1px;
+        background: var(--sm-line);
+      }
+
+      .rm-cluster--left::before {
+        right: -32px;
+      }
+
+      .rm-cluster--right::before {
+        left: -32px;
+      }
+
+      /* garis dari rel menuju node langkah */
+      .rm-cluster::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 64px;
+        height: 1px;
+        background: var(--sm-line);
+      }
+
+      .rm-cluster--left::after {
+        right: -96px;
+      }
+
+      .rm-cluster--right::after {
+        left: -96px;
+      }
+
+      .rm-branch {
+        position: relative;
+        box-sizing: border-box;
+        width: 210px;
+        background: var(--sm-surface);
+        border: 1px solid var(--sm-line);
+        border-radius: var(--sm-radius-md);
+        padding: 10px 14px;
+        color: var(--sm-ink);
+        font-size: 12.5px;
+        font-weight: 600;
+        line-height: 20px;
+        text-decoration: none;
+        box-shadow: var(--sm-shadow-sm);
+        transition: border-color 150ms ease-out, transform 150ms ease-out;
+      }
+
+      .rm-branch:hover {
+        border-color: var(--sm-clay);
+        transform: translateY(-1px);
+      }
+
+      .rm-branch.is-active {
+        border-color: var(--sm-clay);
+        border-width: 2px;
+        padding: 9px 13px;
+      }
+
+      /* penghubung pendek dari tiap cabang ke rel */
+      .rm-branch::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 32px;
+        height: 1px;
+        background: var(--sm-line);
+      }
+
+      .rm-cluster--left .rm-branch::after {
+        right: -32px;
+      }
+
+      .rm-cluster--right .rm-branch::after {
+        left: -32px;
+      }
+
+      /* ===== overlay: legend, toolbar, command bar ===== */
+
+      .canvas-legend {
+        position: fixed;
+        left: var(--sm-space-5);
+        top: 80px;
+        z-index: 20;
+        display: flex;
+        gap: var(--sm-space-4);
+        background: var(--sm-surface);
+        border: 1px solid var(--sm-line);
+        border-radius: var(--sm-radius-md);
+        box-shadow: var(--sm-shadow-sm);
+        padding: 8px 14px;
+        font-size: 11.5px;
+        color: var(--sm-ink-70);
+      }
+
+      .canvas-legend span {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .legend-chip {
+        width: 14px;
+        height: 10px;
+        border-radius: 3px;
+        flex-shrink: 0;
+      }
+
+      .legend-chip--step {
+        background: var(--sm-ink);
+      }
+
+      .legend-chip--branch {
+        background: var(--sm-surface);
+        border: 1px solid var(--sm-line);
+      }
+
+      .canvas-toolbar {
+        position: fixed;
+        right: var(--sm-space-5);
+        bottom: 104px;
+        z-index: 20;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        background: var(--sm-surface);
+        border: 1px solid var(--sm-line);
+        border-radius: var(--sm-radius-md);
+        box-shadow: var(--sm-shadow-md);
+        padding: 4px;
+      }
+
+      .canvas-toolbar button {
+        width: 36px;
+        height: 36px;
+        border: none;
+        background: transparent;
+        border-radius: var(--sm-radius-sm);
+        color: var(--sm-ink-70);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 150ms ease-out, color 150ms ease-out;
+      }
+
+      .canvas-toolbar button:hover {
+        background: var(--sm-paper);
+        color: var(--sm-ink);
+      }
+
+      .canvas-toolbar button svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .command-bar {
+        position: fixed;
+        left: 50%;
+        bottom: var(--sm-space-5);
+        transform: translateX(-50%);
+        z-index: 20;
+        width: min(560px, calc(100% - 48px));
+        display: flex;
+        align-items: center;
+        gap: var(--sm-space-2);
+        background: var(--sm-surface);
+        border: 1px solid var(--sm-line);
+        border-radius: var(--sm-radius-pill);
+        box-shadow: var(--sm-shadow-md);
+        padding: 6px 6px 6px 20px;
+      }
+
+      .command-bar input {
+        flex: 1;
+        min-width: 0;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-family: var(--sm-font);
+        font-size: var(--sm-fs-body);
+        color: var(--sm-ink);
+      }
+
+      .command-bar input::placeholder {
+        color: var(--sm-ink-45);
+      }
+
+      .command-bar button {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: none;
+        background: var(--sm-clay);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: background 0.18s ease;
+      }
+
+      .command-bar button:hover {
+        background: #b24e2f;
+      }
+
+      .command-bar button svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      /* ===== responsive ===== */
+
+      @media (max-width: 900px) {
+        .rm-stage {
+          column-gap: 64px;
+        }
+
+        .rm-step {
+          width: 232px;
+        }
+
+        .rm-branch {
+          width: 168px;
+          font-size: 12px;
+        }
+
+        .rm-cluster--left::before {
+          right: -24px;
+        }
+        .rm-cluster--right::before {
+          left: -24px;
+        }
+        .rm-cluster--left::after {
+          right: -64px;
+          width: 40px;
+        }
+        .rm-cluster--right::after {
+          left: -64px;
+          width: 40px;
+        }
+        .rm-cluster--left .rm-branch::after {
+          right: -24px;
+          width: 24px;
+        }
+        .rm-cluster--right .rm-branch::after {
+          left: -24px;
+          width: 24px;
+        }
+
+        .canvas-legend {
+          display: none;
+        }
+      }
+
+      /* di layar sempit: tumpuk jadi satu kolom, rel pindah ke kiri */
+      @media (max-width: 680px) {
+        .rm-stage {
+          display: block;
+          padding: var(--sm-space-3) 0;
+        }
+
+        .rm-stage::before {
+          left: 13px;
+          margin-left: 0;
+        }
+
+        .rm-step,
+        .rm-branch {
+          width: 100%;
+          max-width: 420px;
+        }
+
+        .rm-step {
+          margin-left: 0;
+        }
+
+        .rm-cluster {
+          margin: var(--sm-space-3) 0 0 var(--sm-space-6);
+          align-items: stretch;
+        }
+
+        .rm-cluster::before,
+        .rm-cluster::after,
+        .rm-branch::after {
+          display: none;
+        }
+
+        .header-actions .sm-btn {
+          padding: 12px 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="canvas-header">
+      <div class="header-left">
+        <a class="icon-btn" href="composer.html" aria-label="Kembali ke composer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+        </a>
+        <div class="doc-info">
+          <strong>Strategi Growth 2026</strong>
+          <span>Roadmap 5 minggu · 18 node · diperbarui 2 jam lalu</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="sm-btn sm-btn--ghost">Bagikan</button>
+        <button type="button" class="sm-btn sm-btn--dark">Export</button>
+      </div>
+    </header>
+
+    <main class="canvas-area">
+      <div class="roadmap">
+        <!-- Stage 1 -->
+        <div class="rm-stage">
+          <div class="rm-cluster rm-cluster--left">
+            <a class="rm-branch" href="drawer.html">Analisis Kompetitor</a>
+            <a class="rm-branch" href="drawer.html">Segmentasi Audiens</a>
+          </div>
+          <a class="rm-step" href="drawer.html">
+            <span class="rm-step-num">01</span>
+            <span class="rm-step-body">
+              <span class="rm-step-time">Minggu 1</span>
+              <span class="rm-step-label">Riset Pasar</span>
+            </span>
+          </a>
+        </div>
+
+        <!-- Stage 2 -->
+        <div class="rm-stage">
+          <a class="rm-step" href="drawer.html">
+            <span class="rm-step-num">02</span>
+            <span class="rm-step-body">
+              <span class="rm-step-time">Minggu 2</span>
+              <span class="rm-step-label">Strategi Konten</span>
+            </span>
+          </a>
+          <div class="rm-cluster rm-cluster--right">
+            <a class="rm-branch" href="drawer.html">Kalender Konten Q1</a>
+            <a class="rm-branch" href="drawer.html">20 Ide Topik</a>
+            <a class="rm-branch" href="drawer.html">Kolaborasi Kreator</a>
+          </div>
+        </div>
+
+        <!-- Stage 3 -->
+        <div class="rm-stage">
+          <div class="rm-cluster rm-cluster--left">
+            <a class="rm-branch" href="drawer.html">Email Marketing</a>
+            <a class="rm-branch is-active" href="drawer.html">SEO</a>
+            <a class="rm-branch" href="drawer.html">Media Sosial</a>
+            <a class="rm-branch" href="drawer.html">Partnership</a>
+          </div>
+          <a class="rm-step" href="drawer.html">
+            <span class="rm-step-num">03</span>
+            <span class="rm-step-body">
+              <span class="rm-step-time">Minggu 3</span>
+              <span class="rm-step-label">Distribusi &amp; Channel</span>
+            </span>
+          </a>
+        </div>
+
+        <!-- Stage 4 -->
+        <div class="rm-stage">
+          <a class="rm-step" href="drawer.html">
+            <span class="rm-step-num">04</span>
+            <span class="rm-step-body">
+              <span class="rm-step-time">Minggu 4</span>
+              <span class="rm-step-label">Anggaran</span>
+            </span>
+          </a>
+          <div class="rm-cluster rm-cluster--right">
+            <a class="rm-branch" href="drawer.html">Estimasi Biaya</a>
+          </div>
+        </div>
+
+        <!-- Stage 5 -->
+        <div class="rm-stage">
+          <div class="rm-cluster rm-cluster--left">
+            <a class="rm-branch" href="drawer.html">KPI Engagement</a>
+            <a class="rm-branch" href="drawer.html">KPI Konversi</a>
+            <a class="rm-branch" href="drawer.html">Review Bulanan</a>
+          </div>
+          <a class="rm-step" href="drawer.html">
+            <span class="rm-step-num">05</span>
+            <span class="rm-step-body">
+              <span class="rm-step-time">Minggu 5</span>
+              <span class="rm-step-label">Evaluasi &amp; KPI</span>
+            </span>
+          </a>
+        </div>
+      </div>
+    </main>
+
+    <div class="canvas-legend" aria-hidden="true">
+      <span><span class="legend-chip legend-chip--step"></span>Langkah roadmap</span>
+      <span><span class="legend-chip legend-chip--branch"></span>Cabang mindmap</span>
+    </div>
+
+    <div class="canvas-toolbar" aria-hidden="true">
+      <button type="button" aria-label="Zoom in">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /><path d="M11 8v6" /><path d="M8 11h6" /></svg>
+      </button>
+      <button type="button" aria-label="Zoom out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /><path d="M8 11h6" /></svg>
+      </button>
+      <button type="button" aria-label="Fit view">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3" /><path d="M21 8V5a2 2 0 0 0-2-2h-3" /><path d="M3 16v3a2 2 0 0 0 2 2h3" /><path d="M16 21h3a2 2 0 0 0 2-2v-3" /></svg>
+      </button>
+      <button type="button" aria-label="Export">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="M7 10l5 5 5-5" /><path d="M12 15V3" /></svg>
+      </button>
+    </div>
+
+    <form class="command-bar" onsubmit="event.preventDefault();">
+      <input type="text" placeholder="Tanya atau perintahkan sesuatu tentang roadmap ini…" />
+      <button type="submit" aria-label="Kirim">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z" /><path d="M22 2 11 13" /></svg>
+      </button>
+    </form>
+  </body>
+</html>

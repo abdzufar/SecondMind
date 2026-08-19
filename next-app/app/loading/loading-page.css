@@ -1,0 +1,105 @@
+/* Loading/processing page — scoped under .page-loading */
+
+.page-loading {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-loading .loading-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sm-space-6);
+  text-align: center;
+  padding: var(--sm-space-5);
+}
+
+.page-loading .brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-3);
+}
+
+.page-loading .brand .sm-wordmark {
+  font-size: 19px;
+}
+
+.page-loading .spinner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid var(--sm-line);
+  border-top-color: var(--sm-clay);
+  animation: loading-spin 800ms linear infinite;
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.page-loading .status {
+  min-height: 20px;
+  font-family: var(--sm-font);
+  font-size: 13px;
+  color: var(--sm-ink-45);
+}
+
+.page-loading .status--error {
+  color: var(--destructive);
+}
+
+.page-loading .loading-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-4);
+}
+
+.page-loading .build-progress {
+  width: 260px;
+  max-width: 70vw;
+  height: 6px;
+  border-radius: var(--sm-radius-pill);
+  background: var(--sm-line);
+  overflow: hidden;
+}
+
+.page-loading .build-progress-fill {
+  position: relative;
+  height: 100%;
+  border-radius: var(--sm-radius-pill);
+  background: var(--sm-clay);
+  overflow: hidden;
+  transition: width 600ms ease-out;
+}
+
+.page-loading .build-progress-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: translateX(-100%);
+  animation: build-shimmer 1600ms ease-in-out infinite;
+}
+
+@keyframes build-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-loading .spinner {
+    animation: none;
+  }
+  .page-loading .build-progress-fill {
+    transition: none;
+  }
+  .page-loading .build-progress-fill::after {
+    animation: none;
+    display: none;
+  }
+}

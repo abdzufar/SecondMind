@@ -1,0 +1,1590 @@
+/* Canvas (React Flow + dagre) + node-drawer — scoped under .page-canvas */
+
+.page-canvas a {
+  transition:
+    border-color 150ms ease-out,
+    color 150ms ease-out;
+}
+
+.page-canvas .sm-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ===== header ===== */
+
+.page-canvas .canvas-header {
+  position: relative;
+  z-index: 30;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--sm-space-5);
+  background: var(--sm-surface);
+  border-bottom: 1px solid var(--sm-line);
+}
+
+.page-canvas .feasibility-banner {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sm-space-3);
+  padding: var(--sm-space-3) var(--sm-space-5);
+  background: var(--sm-clay-tint);
+  border-bottom: 1px solid var(--sm-line);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--sm-ink);
+}
+
+.page-canvas .feasibility-banner svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  color: var(--sm-clay);
+}
+
+.page-canvas .feasibility-banner p {
+  flex: 1;
+  margin: 0;
+}
+
+.page-canvas .feasibility-banner button {
+  flex-shrink: 0;
+  display: flex;
+  padding: 2px;
+  background: transparent;
+  border: none;
+  color: var(--sm-ink-45);
+  cursor: pointer;
+  transition: color 150ms ease-out;
+}
+
+.page-canvas .feasibility-banner button svg {
+  width: 16px;
+  height: 16px;
+  margin-top: 0;
+  color: inherit;
+}
+
+.page-canvas .feasibility-banner button:hover {
+  color: var(--sm-ink);
+}
+
+/* Beda palet dari .feasibility-banner (clay-tint, "heads up soal konten") — ini
+   status koneksi, dipakai warna netral (paper+ink-45) biar gak ketuker sama
+   warning konten pas dua-duanya kebetulan tampil bareng. */
+.page-canvas .offline-banner {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-3);
+  padding: var(--sm-space-3) var(--sm-space-5);
+  background: var(--sm-paper);
+  border-bottom: 1px solid var(--sm-line);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--sm-ink-70);
+}
+
+.page-canvas .offline-banner svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--sm-ink-45);
+}
+
+.page-canvas .offline-banner p {
+  margin: 0;
+}
+
+/* Dialog konten (ShareButton) di-portal ke luar .page-canvas oleh Base UI,
+   jadi rule di bawah ini SENGAJA gak diprefix .page-canvas — kalau diprefix,
+   gak akan pernah match sama sekali. */
+
+.share-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sm-space-3) 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sm-ink);
+}
+
+.share-url-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-2);
+}
+
+.share-url-input {
+  flex: 1;
+  height: 40px;
+  padding: 0 var(--sm-space-3);
+  border: 1px solid var(--sm-line);
+  border-radius: var(--sm-radius-sm);
+  background: var(--sm-paper);
+  color: var(--sm-ink-70);
+  font-family: var(--sm-font);
+  font-size: 13px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.share-url-row button {
+  flex-shrink: 0;
+}
+
+.page-canvas .header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-4);
+  min-width: 0;
+}
+
+.page-canvas .brand {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.page-canvas .share-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  padding: 6px var(--sm-space-3) 5px;
+  border-radius: var(--sm-radius-pill);
+  background: var(--sm-clay-tint);
+  color: var(--sm-clay);
+  font-size: var(--sm-fs-small);
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.page-canvas .icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--sm-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sm-ink-70);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background 150ms ease-out,
+    color 150ms ease-out;
+}
+
+.page-canvas .icon-btn:hover {
+  background: var(--sm-paper);
+  color: var(--sm-ink);
+}
+
+.page-canvas .icon-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.page-canvas .doc-info {
+  min-width: 0;
+}
+
+.page-canvas .doc-info-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-2);
+  min-width: 0;
+}
+
+.page-canvas .doc-info strong {
+  display: block;
+  min-width: 0;
+  font-size: var(--sm-fs-body);
+  font-weight: 700;
+  color: var(--sm-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.page-canvas .doc-info span {
+  font-size: 12px;
+  color: var(--sm-ink-45);
+}
+
+.page-canvas .header-actions {
+  display: flex;
+  gap: var(--sm-space-3);
+  flex-shrink: 0;
+}
+
+.page-canvas .header-progress {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sm-space-3);
+  min-width: 0;
+  padding: 0 var(--sm-space-5);
+}
+
+.page-canvas .header-progress-bar {
+  width: min(220px, 100%);
+  height: 6px;
+  border-radius: var(--sm-radius-pill);
+  background: var(--sm-paper);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.page-canvas .header-progress-fill {
+  height: 100%;
+  background: var(--sm-clay);
+  border-radius: var(--sm-radius-pill);
+  transition: width 200ms ease-out;
+}
+
+.page-canvas .header-progress-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--sm-ink-45);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ===== body: canvas + drawer ===== */
+
+.page-canvas .canvas-body {
+  position: relative;
+  height: calc(100vh - 56px);
+  display: flex;
+}
+
+.page-canvas .canvas-area {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+}
+
+.page-canvas .canvas-loading {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sm-paper);
+  color: var(--sm-ink-45);
+  font-size: 13px;
+}
+
+.page-canvas .canvas-loading--error {
+  flex-direction: column;
+  gap: var(--sm-space-3);
+}
+
+.page-canvas .canvas-loading--error p {
+  color: var(--destructive);
+  margin: 0;
+}
+
+.page-canvas .react-flow {
+  background-color: var(--sm-paper);
+}
+
+.page-canvas .react-flow__edge-path {
+  stroke: var(--sm-line);
+  stroke-width: 1.5px;
+}
+
+.page-canvas .react-flow__edge.selected .react-flow__edge-path {
+  stroke: var(--sm-clay);
+}
+
+.page-canvas .react-flow__handle {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  background-color: var(--sm-clay);
+  border: 2px solid var(--sm-surface);
+  width: 10px;
+  height: 10px;
+}
+
+.page-canvas .react-flow__node:hover .react-flow__handle {
+  opacity: 1;
+}
+
+.page-canvas .react-flow__attribution {
+  display: none;
+}
+
+/* ===== node: langkah roadmap (roadmap-step) ===== */
+
+.page-canvas .xf-step {
+  box-sizing: border-box;
+  width: 220px;
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-3);
+  background: var(--sm-ink);
+  border: 1px solid var(--sm-ink);
+  border-radius: var(--sm-radius-md);
+  padding: 12px 16px;
+  cursor: pointer;
+  transition:
+    transform 150ms ease-out,
+    box-shadow 150ms ease-out,
+    border-color 150ms ease-out;
+  position: relative;
+}
+
+.page-canvas .xf-step:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--sm-shadow-md);
+}
+
+.page-canvas .xf-step.is-selected,
+.page-canvas .xf-step.is-active {
+  box-shadow:
+    0 0 0 3px var(--sm-paper),
+    0 0 0 6px var(--sm-clay-bright);
+  transform: translateY(-2px);
+}
+
+.page-canvas .xf-step.is-complete {
+  background: var(--sm-clay);
+  border-color: var(--sm-clay);
+}
+
+.page-canvas .xf-step.is-complete .xf-step-num {
+  background: var(--sm-surface);
+  color: var(--sm-clay);
+}
+
+.page-canvas .xf-step.is-complete .xf-step-num svg {
+  width: 13px;
+  height: 13px;
+}
+
+.page-canvas .xf-step.is-complete .xf-step-time {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.page-canvas .xf-step.is-complete .xf-step-label {
+  color: #fff;
+}
+
+.page-canvas .xf-step-num {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--sm-clay);
+  color: var(--sm-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.page-canvas .xf-step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.page-canvas .xf-step-time {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sm-clay-bright);
+  line-height: 12px;
+}
+
+.page-canvas .xf-step-label {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--sm-paper);
+  line-height: 19px;
+}
+
+.page-canvas .xf-pending-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--sm-clay-bright);
+  border: 2px solid var(--sm-surface);
+  box-shadow: var(--sm-shadow-sm);
+  z-index: 10;
+}
+
+.page-canvas .xf-step.has-pending-tasks {
+  border-color: var(--sm-clay-bright);
+}
+
+.page-canvas .xf-branch.has-pending-tasks {
+  border-color: var(--sm-clay-bright);
+}
+
+/* ===== node: cabang mindmap (mindmap-branch) ===== */
+
+.page-canvas .xf-branch {
+  box-sizing: border-box;
+  width: 190px;
+  background: var(--sm-surface);
+  border: 1px solid var(--sm-line);
+  border-radius: var(--sm-radius-md);
+  padding: 10px 14px;
+  color: var(--sm-ink);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 18px;
+  cursor: pointer;
+  box-shadow: var(--sm-shadow-sm);
+  transition:
+    border-color 150ms ease-out,
+    transform 150ms ease-out;
+  position: relative;
+}
+
+.page-canvas .xf-branch:hover {
+  border-color: var(--sm-clay);
+  transform: translateY(-1px);
+}
+
+.page-canvas .xf-branch.is-active,
+.page-canvas .xf-branch.is-selected {
+  border-color: var(--sm-clay);
+  border-width: 2px;
+  padding: 9px 13px;
+  box-shadow: 0 0 0 4px var(--sm-clay-tint);
+  transform: translateY(-1px);
+}
+
+/* ===== react flow chrome ===== */
+
+.page-canvas .react-flow__controls {
+  box-shadow: var(--sm-shadow-md);
+  border-radius: var(--sm-radius-md);
+  overflow: hidden;
+  border: 1px solid var(--sm-line);
+}
+
+.page-canvas .react-flow__controls-button {
+  background: var(--sm-surface);
+  border: none;
+  border-bottom: 1px solid var(--sm-line);
+  color: var(--sm-ink-70);
+}
+
+.page-canvas .react-flow__controls-button:hover {
+  background: var(--sm-paper);
+  color: var(--sm-ink);
+}
+
+.page-canvas .react-flow__controls-button svg {
+  fill: currentColor;
+}
+
+/* ===== overlay: legend, command bar (rendered via <Panel>) ===== */
+
+.page-canvas .canvas-legend {
+  display: flex;
+  gap: var(--sm-space-4);
+  background: var(--sm-surface);
+  border: 1px solid var(--sm-line);
+  border-radius: var(--sm-radius-md);
+  box-shadow: var(--sm-shadow-sm);
+  padding: 8px 14px;
+  font-size: 11.5px;
+  color: var(--sm-ink-70);
+}
+
+.page-canvas .canvas-legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.page-canvas .legend-chip {
+  width: 14px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.page-canvas .legend-chip--step {
+  background: var(--sm-ink);
+}
+
+.page-canvas .legend-chip--branch {
+  background: var(--sm-surface);
+  border: 1px solid var(--sm-line);
+}
+
+.page-canvas .command-bar {
+  width: min(560px, calc(100vw - 48px));
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-2);
+  background: var(--sm-surface);
+  border: 1px solid var(--sm-line);
+  border-radius: var(--sm-radius-pill);
+  box-shadow: var(--sm-shadow-md);
+  padding: 6px 6px 6px 20px;
+}
+
+.page-canvas .command-bar input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--sm-font);
+  font-size: var(--sm-fs-body);
+  color: var(--sm-ink);
+}
+
+.page-canvas .command-bar input::placeholder {
+  color: var(--sm-ink-45);
+}
+
+.page-canvas .command-bar button {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: var(--sm-clay);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.18s ease;
+}
+
+.page-canvas .command-bar button:hover {
+  background: #b24e2f;
+}
+
+.page-canvas .command-bar button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.page-canvas .command-bar-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sm-space-2);
+}
+
+.page-canvas .chat-history {
+  width: min(560px, calc(100vw - 48px));
+  max-height: 40vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sm-space-2);
+  padding: var(--sm-space-3);
+  background: var(--sm-surface);
+  border: 1px solid var(--sm-line);
+  border-radius: var(--sm-radius-md);
+  box-shadow: var(--sm-shadow-md);
+}
+
+.page-canvas .chat-history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px 2px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--sm-ink-45);
+  flex-shrink: 0;
+}
+
+.page-canvas .chat-history-head button {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: var(--sm-radius-sm);
+  color: var(--sm-ink-45);
+  cursor: pointer;
+  transition:
+    background 150ms ease-out,
+    color 150ms ease-out;
+}
+
+.page-canvas .chat-history-head button:hover {
+  background: var(--sm-paper);
+  color: var(--sm-ink);
+}
+
+.page-canvas .chat-history-head svg {
+  width: 16px;
+  height: 16px;
+}
+
+.page-canvas .chat-history-collapsed {
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-2);
+  padding: 8px 18px;
+  background: var(--sm-surface);
+  border: 1px solid var(--sm-line);
+  border-radius: var(--sm-radius-pill);
+  box-shadow: var(--sm-shadow-sm);
+  font-family: var(--sm-font);
+  font-size: var(--sm-fs-small, 13.5px);
+  font-weight: 600;
+  color: var(--sm-ink-70);
+  cursor: pointer;
+  transition:
+    border-color 150ms ease-out,
+    color 150ms ease-out;
+}
+
+.page-canvas .chat-history-collapsed:hover {
+  border-color: var(--sm-clay);
+  color: var(--sm-ink);
+}
+
+.page-canvas .chat-history-collapsed svg {
+  width: 14px;
+  height: 14px;
+  color: var(--sm-clay);
+}
+
+.page-canvas .chat-message {
+  max-width: 82%;
+  padding: var(--sm-space-2) var(--sm-space-3);
+  border-radius: var(--sm-radius-md);
+  font-size: var(--sm-fs-small, 13.5px);
+  line-height: 1.5;
+}
+
+.page-canvas .chat-message p {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.page-canvas .chat-message-markdown {
+  word-break: break-word;
+}
+
+.page-canvas .chat-message-markdown > *:first-child {
+  margin-top: 0;
+}
+
+.page-canvas .chat-message-markdown > *:last-child {
+  margin-bottom: 0;
+}
+
+.page-canvas .chat-message-markdown p {
+  margin: 0 0 var(--sm-space-2);
+}
+
+.page-canvas .chat-message-markdown ul,
+.page-canvas .chat-message-markdown ol {
+  margin: 0 0 var(--sm-space-2);
+  padding-left: 1.2em;
+}
+
+.page-canvas .chat-message-markdown li {
+  margin-bottom: 2px;
+}
+
+.page-canvas .chat-message-markdown strong {
+  font-weight: 700;
+  color: var(--sm-ink);
+}
+
+.page-canvas .chat-message-markdown code {
+  background: var(--sm-clay-tint);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.92em;
+}
+
+.page-canvas .chat-message--user {
+  align-self: flex-end;
+  background: var(--sm-clay-tint);
+  color: var(--sm-ink);
+}
+
+.page-canvas .chat-message--assistant {
+  align-self: flex-start;
+  background: var(--sm-paper);
+  border: 1px solid var(--sm-line);
+  color: var(--sm-ink);
+}
+
+.page-canvas .chat-message--pending p {
+  color: var(--sm-ink-45);
+  font-style: italic;
+}
+
+.page-canvas .chat-message-context {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--sm-clay);
+  margin-bottom: 2px;
+}
+
+/* ===== drawer panel ===== */
+
+.page-canvas .drawer {
+  width: clamp(400px, 32vw, 500px);
+  flex-shrink: 0;
+  background: var(--sm-surface);
+  border-left: 1px solid var(--sm-line);
+  box-shadow: var(--sm-shadow-md);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* Backdrop + drag-handle cuma dipakai buat mode bottom sheet di layar kecil
+   (lihat @media max-width:900px di bawah) — di layar gede dua-duanya disembunyiin. */
+.page-canvas .drawer-backdrop {
+  display: none;
+}
+
+.page-canvas .drawer-handle {
+  display: none;
+}
+
+.page-canvas .drawer-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sm-space-3);
+  padding: var(--sm-space-4) var(--sm-space-6);
+  background: var(--sm-surface);
+  border-bottom: 1px solid var(--sm-line);
+}
+
+.page-canvas .drawer-head-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sm-ink-45);
+}
+
+.page-canvas .node-title-static {
+  margin: 0;
+  font-family: var(--sm-font);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--sm-ink);
+}
+
+.page-canvas .drawer-tabs {
+  display: flex;
+  gap: 3px;
+  background: var(--sm-paper);
+  border-radius: var(--sm-radius-pill);
+  padding: 3px;
+}
+
+.page-canvas .drawer-tab {
+  border: none;
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: var(--sm-radius-pill);
+  font-family: var(--sm-font);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--sm-ink-70);
+  cursor: pointer;
+  transition:
+    background 150ms ease-out,
+    color 150ms ease-out;
+}
+
+.page-canvas .drawer-tab:hover {
+  color: var(--sm-ink);
+}
+
+.page-canvas .drawer-tab.is-active {
+  background: var(--sm-surface);
+  color: var(--sm-ink);
+  box-shadow: var(--sm-shadow-sm);
+}
+
+.page-canvas .drawer-body {
+  padding: var(--sm-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sm-space-5);
+}
+
+.page-canvas .drawer-empty {
+  margin: 0;
+  padding: var(--sm-space-6) 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--sm-ink-45);
+}
+
+.page-canvas .drawer-divider {
+  height: 1px;
+  background: var(--sm-line);
+}
+
+.page-canvas .parent-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--sm-ink);
+  border: none;
+  border-radius: var(--sm-radius-md);
+  padding: 10px 14px;
+  text-decoration: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 150ms ease-out;
+}
+
+.page-canvas .parent-step:hover {
+  transform: translateY(-1px);
+}
+
+.page-canvas .parent-step-num {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--sm-clay);
+  color: var(--sm-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.page-canvas .parent-step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.page-canvas .parent-step-time {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sm-clay-bright);
+  line-height: 11px;
+}
+
+.page-canvas .parent-step-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--sm-paper);
+  line-height: 17px;
+}
+
+.page-canvas .node-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sm-space-2);
+}
+
+.page-canvas .node-head-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sm-space-2);
+}
+
+.page-canvas .node-head-row .node-title,
+.page-canvas .node-head-row .node-title-static {
+  flex: 1;
+  min-width: 0;
+}
+
+.page-canvas .node-head-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.page-canvas .node-title {
+  width: 100%;
+  box-sizing: border-box;
+  margin-left: -8px;
+  padding: 4px 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--sm-radius-sm);
+  font-family: var(--sm-font);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--sm-ink);
+  transition:
+    border-color 150ms ease-out,
+    background 150ms ease-out;
+}
+
+.page-canvas .node-title:hover,
+.page-canvas .node-title:focus-visible {
+  border-color: var(--sm-line);
+  background: var(--sm-paper);
+  outline: none;
+}
+
+.page-canvas .node-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sm-ink-70);
+}
+
+.page-canvas .node-type::before {
+  content: "";
+  width: 13px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--sm-surface);
+  border: 1px solid var(--sm-line);
+  flex-shrink: 0;
+}
+
+.page-canvas .node-type.is-step::before {
+  background: var(--sm-ink);
+  border-color: var(--sm-ink);
+}
+
+.page-canvas .complete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--sm-radius-sm);
+  border: 1px solid var(--sm-line);
+  background: var(--sm-surface);
+  color: var(--sm-ink);
+  font-family: var(--sm-font);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 150ms ease-out,
+    border-color 150ms ease-out,
+    color 150ms ease-out;
+}
+
+.page-canvas .complete-btn:hover {
+  border-color: var(--sm-clay);
+  color: var(--sm-clay);
+}
+
+.page-canvas .complete-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.page-canvas .complete-btn.is-complete {
+  background: var(--sm-clay);
+  border-color: var(--sm-clay);
+  color: #fff;
+}
+
+.page-canvas .complete-btn.is-complete:hover {
+  background: #b24e2f;
+  border-color: #b24e2f;
+  color: #fff;
+}
+
+.page-canvas .drawer-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sm-space-2);
+}
+
+.page-canvas .drawer-section h4 {
+  margin: 0;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sm-ink-45);
+}
+
+.page-canvas .drawer-section p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--sm-ink-70);
+}
+
+.page-canvas .drawer-section textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 84px;
+  padding: var(--sm-space-3);
+  background: var(--sm-paper);
+  border: 1px solid var(--sm-line);
+  border-radius: var(--sm-radius-sm);
+  color: var(--sm-ink);
+  font-family: var(--sm-font);
+  font-size: 13px;
+  line-height: 1.6;
+  resize: vertical;
+  transition:
+    border-color 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+
+.page-canvas .drawer-section textarea::placeholder {
+  color: var(--sm-ink-45);
+}
+
+.page-canvas .drawer-section textarea:focus-visible {
+  border-color: var(--sm-clay);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--sm-clay-tint);
+}
+
+.page-canvas .branch-section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--sm-clay);
+}
+
+.page-canvas .branch-section-title svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+.page-canvas .branch-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: var(--sm-radius-pill);
+  background: var(--sm-clay-tint);
+  color: var(--sm-clay);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.page-canvas .branch-section-empty {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--sm-ink-45);
+}
+
+.page-canvas .sibling-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.page-canvas .sibling {
+  background: var(--sm-paper);
+  border: 1px solid var(--sm-line);
+  border-radius: var(--sm-radius-pill);
+  padding: 5px 11px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--sm-ink-70);
+  text-decoration: none;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease-out,
+    color 150ms ease-out;
+}
+
+.page-canvas .sibling:hover {
+  border-color: var(--sm-clay);
+  color: var(--sm-clay);
+}
+
+.page-canvas .ai-zone {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sm-space-3);
+  background: var(--sm-clay-tint);
+  border-radius: var(--sm-radius-md);
+  padding: var(--sm-space-4);
+}
+
+.page-canvas .ai-zone-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sm-clay);
+}
+
+.page-canvas .ai-zone-title svg {
+  width: 13px;
+  height: 13px;
+}
+
+.page-canvas .ask-ai {
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-2);
+  background: var(--sm-surface);
+  border: 1px solid var(--sm-line);
+  border-radius: var(--sm-radius-pill);
+  padding: 4px 4px 4px 14px;
+}
+
+.page-canvas .ask-ai input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--sm-font);
+  font-size: 13px;
+  color: var(--sm-ink);
+}
+
+.page-canvas .ask-ai input::placeholder {
+  color: var(--sm-ink-45);
+}
+
+.page-canvas .ask-ai button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--sm-clay);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.18s ease;
+}
+
+.page-canvas .ask-ai button:hover {
+  background: #b24e2f;
+}
+
+.page-canvas .ask-ai button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.page-canvas .expand-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  background: transparent;
+  border: 1px dashed var(--sm-clay);
+  border-radius: var(--sm-radius-sm);
+  padding: 9px;
+  color: var(--sm-clay);
+  font-family: var(--sm-font);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 150ms ease-out;
+}
+
+.page-canvas .expand-btn:hover {
+  background: var(--sm-surface);
+}
+
+.page-canvas .expand-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.page-canvas .expand-btn:disabled:hover {
+  background: transparent;
+}
+
+.page-canvas .expand-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.page-canvas .drawer-meta {
+  font-size: 11.5px;
+  color: var(--sm-ink-45);
+}
+
+/* ===== to-do panel ===== */
+
+.page-canvas .todo-quickadd {
+  align-self: flex-start;
+  background: var(--sm-clay-tint);
+  border: none;
+  border-radius: var(--sm-radius-pill);
+  padding: 7px 14px;
+  font-family: var(--sm-font);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sm-clay);
+  cursor: pointer;
+  transition: background 150ms ease-out;
+}
+
+.page-canvas .todo-quickadd:hover {
+  background: #efd6cb;
+}
+
+.page-canvas .todo-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sm-space-2);
+}
+
+.page-canvas .todo-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-2);
+  padding: 2px 0;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sm-ink-45);
+  white-space: nowrap;
+}
+
+.page-canvas .todo-divider::before,
+.page-canvas .todo-divider::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  background: var(--sm-ink-45);
+  border-radius: var(--sm-radius-pill);
+}
+
+.page-canvas .todo-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sm-space-3);
+  padding: var(--sm-space-3);
+  border: 1px solid var(--sm-line);
+  border-radius: var(--sm-radius-sm);
+  background: var(--sm-surface);
+}
+
+.page-canvas .todo-checkbox {
+  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--sm-clay);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.page-canvas .todo-item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.page-canvas .todo-item-text {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--sm-ink);
+}
+
+.page-canvas .todo-item.is-done .todo-item-text {
+  color: var(--sm-ink-45);
+  text-decoration: line-through;
+}
+
+.page-canvas .todo-item-description {
+  font-size: 12px;
+  color: var(--sm-ink-70);
+  white-space: pre-wrap;
+}
+
+.page-canvas .todo-item.is-done .todo-item-description {
+  color: var(--sm-ink-45);
+}
+
+.page-canvas .todo-item-due {
+  font-size: 11px;
+  color: var(--sm-ink-45);
+}
+
+.page-canvas .todo-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sm-space-2);
+  padding-top: var(--sm-space-3);
+  border-top: 1px solid var(--sm-line);
+}
+
+.page-canvas .todo-form-text {
+  flex: 1 1 160px;
+  min-width: 0;
+  height: 38px;
+  box-sizing: border-box;
+  padding: 0 var(--sm-space-3);
+  border: 1px solid var(--sm-line);
+  border-radius: var(--sm-radius-sm);
+  background: var(--sm-paper);
+  font-family: var(--sm-font);
+  font-size: 13px;
+  color: var(--sm-ink);
+}
+
+.page-canvas .todo-form-text::placeholder {
+  color: var(--sm-ink-45);
+}
+
+.page-canvas .todo-form-date {
+  flex: 1 1 130px;
+  height: 38px;
+  box-sizing: border-box;
+  padding: 0 var(--sm-space-2);
+  border: 1px solid var(--sm-line);
+  border-radius: var(--sm-radius-sm);
+  background: var(--sm-paper);
+  font-family: var(--sm-font);
+  font-size: 13px;
+  color: var(--sm-ink);
+}
+
+.page-canvas .todo-form-text:focus-visible,
+.page-canvas .todo-form-date:focus-visible {
+  border-color: var(--sm-clay);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--sm-clay-tint);
+}
+
+.page-canvas .todo-form-submit {
+  flex-shrink: 0;
+  height: 38px;
+  padding: 0 var(--sm-space-4);
+  border: none;
+  border-radius: var(--sm-radius-sm);
+  background: var(--sm-clay);
+  color: #fff;
+  font-family: var(--sm-font);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 150ms ease-out;
+}
+
+.page-canvas .todo-form-submit:hover {
+  background: #b24e2f;
+}
+
+.page-canvas .todo-form-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Tombol/field yang ke-disable pas mode offline (§M10) — dulu gak ada satu pun
+   dari elemen ini yang punya visual `:disabled`, jadi diklik kelihatan gak
+   ngapa-ngapain tanpa penjelasan. Disatuin di sini biar konsisten. */
+.page-canvas .icon-btn:disabled,
+.page-canvas .complete-btn:disabled,
+.page-canvas .command-bar button:disabled,
+.page-canvas .ask-ai button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.page-canvas .command-bar input:disabled,
+.page-canvas .ask-ai input:disabled,
+.page-canvas .todo-form-text:disabled,
+.page-canvas .todo-form-date:disabled,
+.page-canvas textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.page-canvas .todo-checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.page-canvas .todo-form-error,
+.page-canvas .field-error {
+  margin: 0;
+  font-size: 12px;
+  color: var(--destructive);
+}
+
+/* ===== responsive ===== */
+
+@keyframes drawer-backdrop-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes drawer-sheet-slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) {
+  /* Canvas tetap kelihatan di belakang sheet — bukan lagi ke-swap total kayak
+     sebelumnya (display:none), biar kerasa kayak bottom sheet beneran nutupin
+     sebagian layar, bukan ganti halaman. */
+  .page-canvas .drawer-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(34, 27, 20, 0.45); /* --sm-ink dengan alpha, gak ada token warna overlay terpisah */
+    z-index: 40;
+    animation: drawer-backdrop-fade-in 200ms ease-out;
+  }
+
+  .page-canvas .canvas-body.has-drawer .drawer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    max-height: 82vh;
+    border-left: none;
+    border-radius: var(--sm-radius-lg) var(--sm-radius-lg) 0 0;
+    box-shadow: 0 -8px 30px rgba(34, 27, 20, 0.2);
+    z-index: 41;
+    animation: drawer-sheet-slide-up 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .page-canvas .drawer-handle {
+    display: block;
+    width: 36px;
+    height: 4px;
+    border-radius: var(--sm-radius-pill);
+    background: var(--sm-line);
+    margin: var(--sm-space-3) auto 0;
+    flex-shrink: 0;
+  }
+
+  .page-canvas .canvas-body.has-drawer .drawer-body {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 760px) {
+  .page-canvas .header-progress {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  /* 3 tombol teks penuh (To-Do/Bagikan/Export) + judul dokumen gak muat sejajar
+     di header 1-baris pada layar sempit (~375-414px) — teks di-sembunyiin,
+     sisain ikon aja (mirip .icon-btn), label tetap kebaca screen reader lewat
+     aria-label yang ditambahin di masing-masing tombol. */
+  .page-canvas .header-actions .sm-btn {
+    padding: 10px;
+    gap: 0;
+  }
+
+  .page-canvas .header-actions .btn-label {
+    display: none;
+  }
+
+  .page-canvas .canvas-legend {
+    gap: var(--sm-space-2);
+    padding: 6px 10px;
+    font-size: 10.5px;
+  }
+}
+
+/* ===== halaman share (/share/[shareId]) =====
+   Header di halaman ini gak punya header-progress/header-actions kayak canvas
+   asli, jadi butuh tinggi + padding sendiri — .canvas-header dan .canvas-body
+   di canvas asli saling gantung lewat calc(), jadi override di-scope ke
+   .page-share biar canvas asli gak ikut kena. */
+
+.page-share .canvas-header {
+  height: 72px;
+}
+
+.page-share .canvas-body {
+  height: calc(100vh - 72px);
+}
+
+.page-share .doc-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
