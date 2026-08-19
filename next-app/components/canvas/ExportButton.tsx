@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { toJpeg, toPng } from "html-to-image";
-import jsPDF from "jspdf";
-import { ImageDown } from "lucide-react";
+import { toPng } from "html-to-image";
+import { FileText, ImageDown } from "lucide-react";
 import { getNodesBounds, getViewportForBounds, useReactFlow } from "@xyflow/react";
+import { buildRoadmapDocx } from "@/lib/canvas/exportDocx";
+import { buildRoadmapPdf } from "@/lib/canvas/exportPdf";
+import type { MindmapEdge, MindmapNode } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,13 +21,24 @@ const MAX_EXPORT_WIDTH = 2400;
 const CHECK_DELAY_MS = 1000;
 const EXPORT_DELAY_MS = 1500;
 
-type ExportFormat = "png" | "pdf";
+type ExportFormat = "png" | "pdf" | "docx";
 type ExportStatus = "idle" | "checking" | "exporting";
 
 const BUTTON_LABEL: Record<ExportStatus, string> = {
   idle: "Export",
   checking: "Menyiapkan…",
   exporting: "Mengekspor…",
+};
+
+const FORMAT_BTN_STYLE: React.CSSProperties = { height: 40, paddingLeft: 28, paddingRight: 28 };
+const GROUP_LABEL_STYLE: React.CSSProperties = {
+  margin: "0 0 8px",
+  fontSize: 11,
+  fontWeight: 700,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+  color: "var(--sm-ink-45)",
+  textAlign: "center",
 };
 
 function slugify(text: string) {
@@ -37,8 +50,14 @@ function slugify(text: string) {
   );
 }
 
-export function ExportButton({ filename }: { filename: string }) {
-  const { getNodes } = useReactFlow();
+type ExportButtonProps = {
+  filename: string;
+  topic: string;
+  timeframe: string;
+};
+
+export function ExportButton({ filename, topic, timeframe }: ExportButtonProps) {
+  const { getNodes, getEdges } = useReactFlow<MindmapNode, MindmapEdge>();
   const [status, setStatus] = useState<ExportStatus>("idle");
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -46,6 +65,26 @@ export function ExportButton({ filename }: { filename: string }) {
     const nodes = getNodes();
     if (nodes.length === 0) return Promise.resolve();
 
+    // Dokumen (Word/PDF): teks asli disusun dari data node — bukan
+    // screenshot canvas, jadi gak butuh capture DOM sama sekali.
+    if (format === "docx") {
+      return buildRoadmapDocx({ title: filename, topic, timeframe }, nodes, getEdges()).then((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.setAttribute("download", `${slugify(filename)}.docx`);
+        a.setAttribute("href", url);
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    if (format === "pdf") {
+      const pdf = buildRoadmapPdf({ title: filename, topic, timeframe }, nodes, getEdges());
+      pdf.save(`${slugify(filename)}.pdf`);
+      return Promise.resolve();
+    }
+
+    // PNG: satu-satunya format yang masih screenshot canvas apa adanya.
     const bounds = getNodesBounds(nodes);
     const width = Math.min(bounds.width, MAX_EXPORT_WIDTH);
     const height = (width / bounds.width) * bounds.height;
@@ -54,7 +93,7 @@ export function ExportButton({ filename }: { filename: string }) {
     const viewportEl = document.querySelector<HTMLElement>(".react-flow__viewport");
     if (!viewportEl) return Promise.resolve();
 
-    const captureOptions = {
+    return toPng(viewportEl, {
       backgroundColor: "#F7F1E9",
       width,
       height,
@@ -64,31 +103,11 @@ export function ExportButton({ filename }: { filename: string }) {
         height: `${height}px`,
         transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`,
       },
-    };
-
-    if (format === "png") {
-      return toPng(viewportEl, captureOptions).then((dataUrl) => {
-        const a = document.createElement("a");
-        a.setAttribute("download", `${slugify(filename)}.png`);
-        a.setAttribute("href", dataUrl);
-        a.click();
-      });
-    }
-
-    // PDF: pakai JPEG (bukan PNG) buat gambar yang di-embed — jsPDF nge-decode
-    // ulang PNG jadi raw bitmap terus flate-compress sendiri (gak reuse
-    // kompresi PNG aslinya), hasilnya bisa 40x lebih gede dari PNG sumbernya.
-    // JPEG quality 0.92 ukurannya jauh lebih kecil dan tetap tajam buat teks/garis.
-    return toJpeg(viewportEl, { ...captureOptions, quality: 0.92 }).then((dataUrl) => {
-      // Halaman PDF ngikutin aspect ratio canvas, bukan ukuran kertas standar
-      // (A4 dst) — roadmap-nya lebar/panjang, biar gak kepotong atau nyisain white space.
-      const pdf = new jsPDF({
-        orientation: width >= height ? "landscape" : "portrait",
-        unit: "px",
-        format: [width, height],
-      });
-      pdf.addImage(dataUrl, "JPEG", 0, 0, width, height);
-      pdf.save(`${slugify(filename)}.pdf`);
+    }).then((dataUrl) => {
+      const a = document.createElement("a");
+      a.setAttribute("download", `${slugify(filename)}.png`);
+      a.setAttribute("href", dataUrl);
+      a.click();
     });
   }
 
@@ -129,39 +148,59 @@ export function ExportButton({ filename }: { filename: string }) {
             </div>
             <DialogTitle>Export canvas roadmap</DialogTitle>
             <DialogDescription>
-              Roadmap dan cabang mindmap yang lagi tampil akan diunduh. Pilih formatnya.
+              Pilih format unduhan — gambar canvas apa adanya, atau dokumen teks rapi yang bisa dibaca/diedit/di-search.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="justify-center" style={{ justifyContent: "center", alignItems: "center", gap: 20 }}>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div>
+              <p style={GROUP_LABEL_STYLE}>Gambar</p>
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <Button size="lg" className="px-7" style={FORMAT_BTN_STYLE} onClick={() => handleConfirm("png")}>
+                  PNG
+                </Button>
+              </div>
+            </div>
+
+            <div style={{ height: 1, background: "var(--sm-line)" }} />
+
+            <div>
+              <p style={GROUP_LABEL_STYLE}>Dokumen</p>
+              <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="px-7"
+                  style={{ ...FORMAT_BTN_STYLE, display: "inline-flex", alignItems: "center", gap: 8 }}
+                  onClick={() => handleConfirm("pdf")}
+                >
+                  <FileText className="size-4" strokeWidth={1.5} />
+                  PDF
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="px-7"
+                  style={{ ...FORMAT_BTN_STYLE, display: "inline-flex", alignItems: "center", gap: 8 }}
+                  onClick={() => handleConfirm("docx")}
+                >
+                  <FileText className="size-4" strokeWidth={1.5} />
+                  Word (.docx)
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="justify-center" style={{ justifyContent: "center" }}>
             <Button
-              variant="outline"
+              variant="ghost"
               size="lg"
               className="px-7"
-              style={{ height: 40, paddingLeft: 28, paddingRight: 28 }}
+              style={FORMAT_BTN_STYLE}
               onClick={() => setDialogOpen(false)}
             >
               Batal
             </Button>
-            <div style={{ width: 1, height: 28, background: "var(--sm-line)" }} />
-            <div style={{ display: "flex", gap: 8 }}>
-              <Button
-                variant="outline"
-                size="lg"
-                className="px-7"
-                style={{ height: 40, paddingLeft: 28, paddingRight: 28 }}
-                onClick={() => handleConfirm("pdf")}
-              >
-                PDF
-              </Button>
-              <Button
-                size="lg"
-                className="px-7"
-                style={{ height: 40, paddingLeft: 28, paddingRight: 28 }}
-                onClick={() => handleConfirm("png")}
-              >
-                PNG
-              </Button>
-            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

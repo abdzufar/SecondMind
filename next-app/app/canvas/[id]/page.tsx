@@ -160,7 +160,11 @@ export default function CanvasPage() {
                 <span className="btn-label">Bagikan</span>
               </button>
             )}
-            <ExportButton filename={mindmap?.title ?? "canvas"} />
+            <ExportButton
+              filename={mindmap?.title ?? "canvas"}
+              topic={mindmap?.topic ?? ""}
+              timeframe={mindmap?.timeframe ?? ""}
+            />
           </div>
         </header>
 
