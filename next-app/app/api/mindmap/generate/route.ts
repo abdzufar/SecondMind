@@ -42,16 +42,26 @@ export async function POST(req: NextRequest) {
 				const arrayBuffer = await file.arrayBuffer();
 				const buffer = Buffer.from(arrayBuffer);
 
-				if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
+				if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
 					// Using require to bypass ESM default export crash reported by frontend team
-					const pdfParse = require("pdf-parse");
-					const pdfData = await pdfParse(buffer);
+					const { PDFParse } = require("pdf-parse");
+					const parser = new PDFParse({ data: buffer });
+					const pdfData = await parser.getText();
 					fileContext = pdfData.text;
+					await parser.destroy();
 				} else {
 					fileContext = buffer.toString("utf-8");
 				}
-			} catch (e) {
+					if (fileContext.trim().length < 20) {
+						console.log("[PDF_WARNING]: Extracted text is suspiciously short. It might be a scanned image.");
+						fileContext = "[The uploaded PDF was empty or image-based. The AI could not read the text. Inform the user in the feasibilityWarning that you could not read their document.]";
+					}
+			} catch (e: any) {
 				console.error("[FILE_PARSE_ERROR]:", e);
+				return NextResponse.json(
+					{ error: "Gagal membaca PDF: " + (e.message || "File rusak atau format tidak didukung.") },
+					{ status: 400 }
+				);
 			}
 		}
 

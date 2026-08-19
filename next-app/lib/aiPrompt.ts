@@ -1,10 +1,23 @@
 export function getGeneratePrompt(topic: string, timeframe: string, language: string, verbosity: string = 'normal', fileContext: string = '') {
-  const contextBlock = fileContext ? `\nThe user has provided the following document content to base the roadmap on:\n"""\n${fileContext.substring(0, 50000)}\n"""\nIMPORTANT: Prioritize extracting concepts and structures directly from the provided document over general knowledge.` : '';
+  const contextBlock = fileContext ? `\n\n=== SOURCE DOCUMENT ===\n${fileContext.substring(0, 25000)}\n=== END SOURCE DOCUMENT ===\n` : '';
+  
+  let verbosityInstruction = "";
+  if (verbosity === "ringkas" || verbosity === "summary") {
+    verbosityInstruction = "You MUST NOT generate any 'mindmap-branch' nodes. Only generate the main 'roadmap-step' nodes.";
+  } else if (verbosity === "detail" || verbosity === "detailed") {
+    verbosityInstruction = "You MUST generate at least 3 to 5 highly specific 'mindmap-branch' nodes for every single 'roadmap-step'.";
+  } else {
+    verbosityInstruction = "Generate 1 to 2 'mindmap-branch' nodes per 'roadmap-step' as needed.";
+  }
   
   return `You are SecondMind, an expert educational architect.
-Your task is to generate a comprehensive learning roadmap for the topic: "${topic}".
+${contextBlock}
+Your task is to generate a comprehensive learning roadmap.
+If a SOURCE DOCUMENT is provided above, you MUST extract the roadmap steps and branches directly from its content. The user requested the following topic/focus for the roadmap: "${topic}".
+If no document is provided, rely on your general knowledge to build the roadmap for the topic: "${topic}".
+
 The user wants to complete this roadmap within: "${timeframe}".
-Language: "${language}".${contextBlock}
+Language: "${language}".
 
 You must output a strictly valid JSON object matching this schema exactly.
 IF the topic is harmful, illegal, explicitly violates safety guidelines, or is completely irrelevant to learning/education, you MUST strictly return ONLY this JSON object:
@@ -48,7 +61,7 @@ CRITICAL RULES:
 - If the topic is harmful or irrelevant, return ONLY the error JSON object.
 - Ensure every edge source and target exists in the nodes array.
 - Generate BOTH 'roadmap-step' nodes (the main timeline) and 'mindmap-branch' nodes (detailed sub-topics connected to the main steps).
-- Detail level should be: ${verbosity} (if 'detailed', generate many mindmap-branch nodes).
+- Detail level constraint: ${verbosityInstruction}
 - The roadmap should be a directed acyclic graph (DAG), progressing logically.`;
 }
 
