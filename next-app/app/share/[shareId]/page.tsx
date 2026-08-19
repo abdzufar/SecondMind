@@ -63,7 +63,7 @@ export default function SharePage() {
         <div className={`canvas-body${selectedNodeId ? " has-drawer" : ""}`}>
           <div className="canvas-area">
             {mindmap ? (
-              <CanvasView showCommandBar={false} />
+              <CanvasView showCommandBar={false} readOnly />
             ) : loadError ? (
               <div className="canvas-loading canvas-loading--error">
                 <p>{loadError}</p>

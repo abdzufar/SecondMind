@@ -1688,12 +1688,17 @@
    .canvas-body di canvas asli saling gantung lewat calc(), jadi override
    di-scope ke .page-share biar canvas asli gak ikut kena. */
 
-.page-share .canvas-header {
-  height: 72px;
-}
+/* Di-scope ke ≥901px — di bawah itu, breakpoint header-2-baris (900px, lihat
+   media query di atas) yang harus menang biar CTA "Coba gratis" gak kepotong
+   pas header-actions ikutan wrap ke baris kedua. */
+@media (min-width: 901px) {
+  .page-share .canvas-header {
+    height: 72px;
+  }
 
-.page-share .canvas-body {
-  height: calc(100vh - 72px);
+  .page-share .canvas-body {
+    height: calc(100vh - 72px);
+  }
 }
 
 .page-share .doc-info {
