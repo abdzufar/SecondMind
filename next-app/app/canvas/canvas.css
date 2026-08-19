@@ -1495,6 +1495,20 @@
 }
 
 @media (max-width: 900px) {
+  /* Command bar (chat AI) lebarnya ngikutin viewport (min(560px, 100vw-48px))
+     dan nempel di bottom-center — di layar sempit dia meluas sampai numpuk
+     kontrol zoom +/- React Flow yang nempel di bottom-right (dua-duanya
+     anchor ke bawah dengan offset yang mirip). Geser kontrol zoom naik ke
+     atas command bar-nya. */
+  /* Selector di-samain lengkap ke class asli React Flow (bukan cuma
+     .react-flow__controls) — React Flow sendiri nge-style lewat
+     .react-flow__panel.bottom.right (3 class dirantai), yang spesifisitasnya
+     lebih tinggi dari .page-canvas .react-flow__controls (2 class) dan bakal
+     menang/nimpa override ini kalau gak disamain selector-nya. */
+  .page-canvas .react-flow__panel.react-flow__controls.bottom.right {
+    bottom: 84px;
+  }
+
   /* Canvas tetap kelihatan di belakang sheet — bukan lagi ke-swap total kayak
      sebelumnya (display:none), biar kerasa kayak bottom sheet beneran nutupin
      sebagian layar, bukan ganti halaman. */
