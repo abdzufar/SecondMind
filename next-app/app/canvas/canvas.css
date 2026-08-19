@@ -232,42 +232,9 @@
 
 .page-canvas .header-actions {
   display: flex;
+  align-items: center;
   gap: var(--sm-space-3);
   flex-shrink: 0;
-}
-
-.page-canvas .header-progress {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sm-space-3);
-  min-width: 0;
-  padding: 0 var(--sm-space-5);
-  /* Judul panjang di .header-left bikin kontainer ini kepepet sempit — tanpa
-     ini, bar+label yang gak bisa nyusut bakal meluber ke judul/tombol aksi
-     di sebelahnya (bukan cuma ke-crop rapi). */
-  overflow: hidden;
-}
-
-.page-canvas .header-progress-bar {
-  width: min(220px, 100%);
-  min-width: 32px;
-  height: 6px;
-  border-radius: var(--sm-radius-pill);
-  background: var(--sm-paper);
-  overflow: hidden;
-  /* Sebelumnya flex-shrink:0 — gak bisa nyusut sama sekali, jadi begitu
-     .header-progress kepepet (judul panjang), bar+label ini meluber keluar
-     kontainer (numpuk ke judul/tombol) alih-alih ngecil ngikutin ruang. */
-  flex-shrink: 1;
-}
-
-.page-canvas .header-progress-fill {
-  height: 100%;
-  background: var(--sm-clay);
-  border-radius: var(--sm-radius-pill);
-  transition: width 200ms ease-out;
 }
 
 .page-canvas .header-progress-label {
@@ -278,11 +245,29 @@
   flex-shrink: 0;
 }
 
+/* Garis progress sekarang baris sendiri full-width nempel di bawah header
+   (bukan lagi rebutan ruang di tengah header sama judul/tombol aksi — itu
+   yang dulu bikin dia meluber kalau judulnya panjang, lihat commit
+   "fix: progress bar overlap on long titles"). PROGRESS_TRACK_HEIGHT (4px)
+   dipakein juga di .canvas-body's height calc di bawah. */
+.page-canvas .header-progress-track {
+  position: relative;
+  z-index: 25;
+  height: 4px;
+  background: var(--sm-paper);
+}
+
+.page-canvas .header-progress-fill {
+  height: 100%;
+  background: var(--sm-clay);
+  transition: width 200ms ease-out;
+}
+
 /* ===== body: canvas + drawer ===== */
 
 .page-canvas .canvas-body {
   position: relative;
-  height: calc(100vh - 56px);
+  height: calc(100vh - 56px - 4px);
   display: flex;
 }
 
@@ -1555,12 +1540,6 @@
   }
 }
 
-@media (max-width: 760px) {
-  .page-canvas .header-progress {
-    display: none;
-  }
-}
-
 @media (max-width: 560px) {
   /* 3 tombol teks penuh (To-Do/Bagikan/Export) + judul dokumen gak muat sejajar
      di header 1-baris pada layar sempit (~375-414px) — teks di-sembunyiin,
@@ -1582,11 +1561,59 @@
   }
 }
 
+/* Header jadi 2 baris mulai lebar tablet ke bawah — sebelumnya judul dokumen
+   sebaris sama label progress + tombol aksi, jadi kepotong parah/ketutupan
+   begitu judulnya lumayan panjang. Baris 1: back button + judul. Baris 2:
+   label progress + tombol aksi. Tinggi header jadi dinamis (bukan 56px
+   tetap), jadi .page-canvas dijadiin flex-column dan .canvas-body pakai
+   flex:1 buat ngisi sisa viewport — gantiin height:calc() yang sebelumnya
+   ngasumsiin header selalu 1 baris (cuma berlaku di breakpoint ini). 900px
+   dipilih biar konsisten sama breakpoint drawer-jadi-bottom-sheet di atas. */
+@media (max-width: 900px) {
+  .page-canvas {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  .page-canvas .canvas-header {
+    height: auto;
+    flex-wrap: wrap;
+    row-gap: var(--sm-space-2);
+    padding: var(--sm-space-3) var(--sm-space-4);
+    flex-shrink: 0;
+  }
+
+  .page-canvas .header-left {
+    flex: 1 1 100%;
+  }
+
+  .page-canvas .header-actions {
+    flex: 1 1 100%;
+    justify-content: space-between;
+  }
+
+  .page-canvas .header-progress-track {
+    flex-shrink: 0;
+  }
+
+  .page-canvas .offline-banner,
+  .page-canvas .feasibility-banner {
+    flex-shrink: 0;
+  }
+
+  .page-canvas .canvas-body {
+    height: auto;
+    flex: 1;
+    min-height: 0;
+  }
+}
+
 /* ===== halaman share (/share/[shareId]) =====
-   Header di halaman ini gak punya header-progress/header-actions kayak canvas
-   asli, jadi butuh tinggi + padding sendiri — .canvas-header dan .canvas-body
-   di canvas asli saling gantung lewat calc(), jadi override di-scope ke
-   .page-share biar canvas asli gak ikut kena. */
+   Header di halaman ini gak punya header-progress-track/header-actions kayak
+   canvas asli, jadi butuh tinggi + padding sendiri — .canvas-header dan
+   .canvas-body di canvas asli saling gantung lewat calc(), jadi override
+   di-scope ke .page-share biar canvas asli gak ikut kena. */
 
 .page-share .canvas-header {
   height: 72px;

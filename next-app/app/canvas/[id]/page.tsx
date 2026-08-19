@@ -124,16 +124,10 @@ export default function CanvasPage() {
             </div>
           </div>
 
-          <div className="header-progress">
-            <div className="header-progress-bar">
-              <div className="header-progress-fill" style={{ width: `${progress}%` }} />
-            </div>
+          <div className="header-actions">
             <span className="header-progress-label">
               {completedSteps}/{stepNodes.length} selesai
             </span>
-          </div>
-
-          <div className="header-actions">
             <button
               type="button"
               className="sm-btn sm-btn--ghost"
@@ -167,6 +161,10 @@ export default function CanvasPage() {
             />
           </div>
         </header>
+
+        <div className="header-progress-track">
+          <div className="header-progress-fill" style={{ width: `${progress}%` }} />
+        </div>
 
         {!isOnline && (
           <div className="offline-banner">
