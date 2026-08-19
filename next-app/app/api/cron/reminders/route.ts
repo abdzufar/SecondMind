@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import dbConnect from '@/lib/db';
 import Todo from '@/models/Todo';
+import User from '@/models/User';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 'fake-key');
 
@@ -14,6 +15,9 @@ export async function GET(req: NextRequest) {
     }
 
     await dbConnect();
+    
+    // Prevent TypeScript from removing the User import, which causes Mongoose MissingSchemaError
+    User.findOne; 
     
     const now = new Date();
     // We want to find todos due before the END of today. 
@@ -47,7 +51,7 @@ export async function GET(req: NextRequest) {
       await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL || 'SecondMind <reminders@secondmind.app>',
         to: userEmail,
-        subject: `Reminder: Your task "${todo.taskText}" is due today!`,
+        subject: `Pengingat: Tugas Anda "${todo.taskText}" jatuh tempo hari ini!`,
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; border: 1px solid #e7d9c6; border-radius: 8px;">
             <div style="text-align: center; margin-bottom: 24px;">
@@ -55,27 +59,27 @@ export async function GET(req: NextRequest) {
             </div>
             
             <div style="color: #6e6255; font-size: 16px; line-height: 24px;">
-              <p>Hello,</p>
-              <p>This is a friendly reminder that you have a task due today on your learning roadmap!</p>
+              <p>Halo,</p>
+              <p>Ini adalah pesan pengingat bahwa Anda memiliki tugas yang harus diselesaikan hari ini!</p>
               
               <div style="background-color: #f6e7e0; border-left: 4px solid #c75b39; padding: 16px; margin: 24px 0; border-radius: 4px;">
-                <h3 style="margin: 0 0 8px 0; color: #221b14; font-size: 18px; font-weight: 700;">Task Details</h3>
+                <h3 style="margin: 0 0 8px 0; color: #221b14; font-size: 18px; font-weight: 700;">Detail Tugas</h3>
                 <p style="margin: 0; color: #221b14; font-weight: 600;">${todo.taskText}</p>
                 ${todo.description ? `<div style="margin-top: 12px; font-size: 14px; color: #6e6255; white-space: pre-wrap;">${todo.description}</div>` : ''}
               </div>
 
               <div style="text-align: center; margin: 32px 0;">
                 <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/canvas/${todo.mindmapId}" style="background-color: #c75b39; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 700; display: inline-block;">
-                  View Roadmap
+                  Lihat Roadmap
                 </a>
               </div>
             </div>
             
             <div style="border-top: 1px solid #e7d9c6; margin-top: 32px; padding-top: 24px; text-align: center; color: #9a8b79; font-size: 12px;">
-              <p style="margin: 0 0 8px 0;">You are receiving this email because you have active tasks in SecondMind.</p>
+              <p style="margin: 0 0 8px 0;">Anda menerima email ini karena Anda memiliki tugas aktif di SecondMind.</p>
               <p style="margin: 0;">
                 <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/composer?settings=email" style="color: #c75b39; text-decoration: underline;">
-                  Manage Notification Preferences
+                  Kelola Preferensi Notifikasi
                 </a>
               </p>
             </div>
