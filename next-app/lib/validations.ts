@@ -43,3 +43,7 @@ export const ChatSchema = z.object({
   message: z.string().min(1, 'Message is required'),
   nodeId: z.string().optional()
 });
+
+export const UpdatePreferencesSchema = z.object({
+  emailRemindersEnabled: z.boolean()
+});

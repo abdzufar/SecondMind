@@ -29,8 +29,19 @@ export async function GET(req: NextRequest) {
     let emailsSent = 0;
 
     for (const todo of dueTodos) {
-      if (!todo.userId || !(todo.userId as unknown as { email: string }).email) continue;
-      const userEmail = (todo.userId as unknown as { email: string }).email;
+      if (!todo.userId) continue;
+      
+      const user = todo.userId as unknown as { email: string; emailRemindersEnabled?: boolean };
+      if (!user.email) continue;
+      
+      // If user has explicitly opted out of email reminders, skip sending but mark as sent
+      if (user.emailRemindersEnabled === false) {
+        todo.emailReminderSent = true;
+        await todo.save();
+        continue;
+      }
+      
+      const userEmail = user.email;
       
       // Dispatch email via Resend
       await resend.emails.send({
