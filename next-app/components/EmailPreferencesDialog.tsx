@@ -125,11 +125,26 @@ export function EmailPreferencesDialog({ open, onOpenChange }: EmailPreferencesD
 
         {error && <p className="text-sm text-destructive">{error}</p>}
 
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={handleCancel} disabled={isSaving}>
+        <DialogFooter className="justify-center" style={{ justifyContent: "center" }}>
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            className="px-7"
+            style={{ height: 40, paddingLeft: 28, paddingRight: 28 }}
+            onClick={handleCancel}
+            disabled={isSaving}
+          >
             Batal
           </Button>
-          <Button type="button" onClick={handleSave} disabled={isSaving || isLoading || !isOnline || !hasChanges}>
+          <Button
+            type="button"
+            size="lg"
+            className="px-7"
+            style={{ height: 40, paddingLeft: 28, paddingRight: 28 }}
+            onClick={handleSave}
+            disabled={isSaving || isLoading || !isOnline || !hasChanges}
+          >
             {isSaving ? "Menyimpan…" : "Simpan"}
           </Button>
         </DialogFooter>
