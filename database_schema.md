@@ -11,6 +11,7 @@ const UserSchema = new mongoose.Schema({
   email: { type: String, unique: true, required: true },
   image: { type: String },
   password: { type: String }, // Hashed password for Custom Credentials
+  emailRemindersEnabled: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now }
 });
 ```
@@ -46,9 +47,7 @@ const MindmapSchema = new mongoose.Schema({
     data: { 
       label: { type: String, required: true },
       description: { type: String, required: true }, // ENFORCED: AI must pre-generate details
-      timeOffsetDays: { type: Number, default: null },
-      userNotes: { type: String, default: "" },
-      isCompleted: { type: Boolean, default: false }
+      timeOffsetDays: { type: Number, default: null } // Gemini returns an integer. Frontend maps this to "Day X".
     }
   }],
   
@@ -71,7 +70,6 @@ const TodoSchema = new mongoose.Schema({
   mindmapId: { type: mongoose.Schema.Types.ObjectId, ref: 'Mindmap', required: true },
   
   taskText: { type: String, required: true },
-  description: { type: String, default: "" },
   dueDate: { type: Date, required: true },
   isCompleted: { type: Boolean, default: false },
   

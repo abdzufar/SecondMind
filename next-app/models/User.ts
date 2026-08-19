@@ -5,6 +5,7 @@ export interface IUser extends Document {
   email: string;
   image?: string;
   password?: string;
+  emailRemindersEnabled?: boolean;
   createdAt: Date;
 }
 
@@ -13,6 +14,7 @@ const UserSchema: Schema = new Schema({
   email: { type: String, required: true, unique: true },
   image: { type: String },
   password: { type: String },
+  emailRemindersEnabled: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now }
 });
 
