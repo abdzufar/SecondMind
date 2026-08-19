@@ -221,8 +221,13 @@
 }
 
 .page-canvas .doc-info span {
+  display: block;
+  min-width: 0;
   font-size: 12px;
   color: var(--sm-ink-45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .page-canvas .header-actions {
