@@ -4,9 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { Menu, X } from "lucide-react";
+import { Mail, Menu, X } from "lucide-react";
 import { clearOfflineCache } from "@/lib/offlineCache";
 import { getInitials } from "@/lib/utils";
+import { EmailPreferencesDialog } from "@/components/EmailPreferencesDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +23,7 @@ export default function LandingPage() {
   const artRef = useRef<HTMLDivElement>(null);
   const { data: session, status } = useSession();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [showEmailPrefs, setShowEmailPrefs] = useState(false);
   // CTA "Buat peta pertama" (hero + section akhir) ngarah ke /composer kalau
   // udah login — sebelumnya hardcode ke /register terus walau sesi aktif,
   // beda sama nav bar yang udah bener duluan (lihat §11 M11 CLAUDE.md).
@@ -116,6 +118,11 @@ export default function LandingPage() {
                         </div>
                       </DropdownMenuLabel>
                     </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="cursor-pointer" onClick={() => setShowEmailPrefs(true)}>
+                      <Mail />
+                      Pengaturan Email
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       variant="destructive"
@@ -381,6 +388,8 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      <EmailPreferencesDialog open={showEmailPrefs} onOpenChange={setShowEmailPrefs} />
     </div>
   );
 }

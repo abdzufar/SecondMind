@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import "./composer.css";
-import { WifiOff } from "lucide-react";
+import { Mail, WifiOff } from "lucide-react";
 import { deleteMindmap, getMindmaps, type GenerateMindmapInput, type MindmapSummary } from "@/lib/api";
 import { setPendingGenerateInput } from "@/lib/pendingGenerate";
 import { getInitials } from "@/lib/utils";
@@ -14,6 +14,7 @@ import { clearOfflineCache } from "@/lib/offlineCache";
 import { useCanvasStore } from "@/store/canvasStore";
 import { useHistoryStore } from "@/store/historyStore";
 import { InstallAppButton } from "@/components/InstallAppButton";
+import { EmailPreferencesDialog } from "@/components/EmailPreferencesDialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -93,6 +94,7 @@ export default function ComposerPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [showEmailPrefs, setShowEmailPrefs] = useState(false);
 
   useEffect(() => {
     function loadHistory() {
@@ -254,6 +256,11 @@ export default function ComposerPage() {
                   </div>
                 </DropdownMenuLabel>
               </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="cursor-pointer" onClick={() => setShowEmailPrefs(true)}>
+                <Mail />
+                Pengaturan Email
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 variant="destructive"
@@ -520,6 +527,8 @@ export default function ComposerPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <EmailPreferencesDialog open={showEmailPrefs} onOpenChange={setShowEmailPrefs} />
     </div>
   );
 }

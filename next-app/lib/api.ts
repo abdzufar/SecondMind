@@ -294,3 +294,32 @@ export async function generateTodos(mindmapId: string): Promise<{ success: boole
 
   return res.json();
 }
+
+export type UserPreferences = { emailRemindersEnabled: boolean };
+
+export async function getUserPreferences(): Promise<UserPreferences> {
+  const res = await fetch("/api/user/preferences", { cache: "no-store" });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error ?? `Gagal memuat preferensi (status ${res.status})`);
+  }
+
+  return res.json();
+}
+
+export async function updateEmailReminders(enabled: boolean): Promise<boolean> {
+  const res = await fetch("/api/user/preferences", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ emailRemindersEnabled: enabled }),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error ?? `Gagal menyimpan preferensi (status ${res.status})`);
+  }
+
+  const data: { success: boolean; emailRemindersEnabled: boolean } = await res.json();
+  return data.emailRemindersEnabled;
+}
