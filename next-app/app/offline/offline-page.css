@@ -1,0 +1,52 @@
+/* Offline fallback page — scoped under .page-offline */
+
+.page-offline {
+  min-height: 100%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sm-paper);
+}
+
+.page-offline .offline-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sm-space-4);
+  max-width: 360px;
+  padding: var(--sm-space-5);
+  text-align: center;
+}
+
+.page-offline .offline-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--sm-clay-tint);
+  color: var(--sm-clay);
+  margin-bottom: var(--sm-space-2);
+}
+
+.page-offline .offline-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.page-offline h1 {
+  font-size: var(--sm-fs-h3);
+  color: var(--sm-ink);
+}
+
+.page-offline p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--sm-ink-70);
+}
+
+.page-offline .sm-btn {
+  margin-top: var(--sm-space-2);
+}

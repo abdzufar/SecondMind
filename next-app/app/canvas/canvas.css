@@ -1414,8 +1414,7 @@
 .page-canvas .icon-btn:disabled,
 .page-canvas .complete-btn:disabled,
 .page-canvas .command-bar button:disabled,
-.page-canvas .ask-ai button:disabled,
-.page-canvas .history-delete:disabled {
+.page-canvas .ask-ai button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }

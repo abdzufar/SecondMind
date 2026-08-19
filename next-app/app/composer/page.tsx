@@ -50,6 +50,8 @@ function TrashIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
+const HISTORY_PREVIEW_LIMIT = 3;
+
 function formatSize(bytes: number) {
   const kb = bytes / 1024;
   return kb > 1024 ? (kb / 1024).toFixed(1) + " MB" : Math.round(kb) + " KB";
@@ -89,6 +91,7 @@ export default function ComposerPage() {
   const [deleteTarget, setDeleteTarget] = useState<MindmapSummary | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
   useEffect(() => {
     function loadHistory() {
@@ -182,6 +185,45 @@ export default function ComposerPage() {
     setPendingGenerateInput(payload);
     router.push("/loading");
   }
+
+  // Dipakai di list utama (3 item pertama) dan di modal "Lihat lainnya" (semua
+  // item) — biar dua-duanya konsisten tanpa duplikasi JSX.
+  function renderHistoryItem(item: MindmapSummary) {
+    return (
+      <div className="history-item" key={item._id}>
+        <Link className="history-item-link" href={`/canvas/${item._id}`}>
+          <div className="history-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+              <path d="M14 2v6h6" />
+            </svg>
+          </div>
+          <div className="history-info">
+            <strong>{item.title}</strong>
+            <span>
+              {item.topic} · {formatRelativeTime(item.createdAt)}
+            </span>
+          </div>
+          <span className="link-sm">Lihat →</span>
+        </Link>
+        <button
+          type="button"
+          className="history-delete"
+          aria-label={`Hapus ${item.title}`}
+          disabled={!isOnline}
+          onClick={() => {
+            setDeleteError(null);
+            setDeleteTarget(item);
+          }}
+        >
+          <TrashIcon className="size-4" />
+        </button>
+      </div>
+    );
+  }
+
+  const visibleHistory = history.slice(0, HISTORY_PREVIEW_LIMIT);
+  const hasMoreHistory = history.length > HISTORY_PREVIEW_LIMIT;
 
   return (
     <div className="page-composer">
@@ -396,41 +438,29 @@ export default function ComposerPage() {
               {historyStatus === "cached" && (
                 <p className="history-cached-note">Gak bisa nyambung ke server — nampilin riwayat tersimpan terakhir.</p>
               )}
-              {history.map((item) => (
-                <div className="history-item" key={item._id}>
-                  <Link className="history-item-link" href={`/canvas/${item._id}`}>
-                    <div className="history-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
-                        <path d="M14 2v6h6" />
-                      </svg>
-                    </div>
-                    <div className="history-info">
-                      <strong>{item.title}</strong>
-                      <span>
-                        {item.topic} · {formatRelativeTime(item.createdAt)}
-                      </span>
-                    </div>
-                    <span className="link-sm">Lihat →</span>
-                  </Link>
-                  <button
-                    type="button"
-                    className="history-delete"
-                    aria-label={`Hapus ${item.title}`}
-                    disabled={!isOnline}
-                    onClick={() => {
-                      setDeleteError(null);
-                      setDeleteTarget(item);
-                    }}
-                  >
-                    <TrashIcon className="size-4" />
-                  </button>
-                </div>
-              ))}
+              {visibleHistory.map(renderHistoryItem)}
+              {hasMoreHistory && (
+                <button type="button" className="history-more-btn" onClick={() => setIsHistoryModalOpen(true)}>
+                  Lihat semua riwayat ({history.length})
+                </button>
+              )}
             </div>
           )}
         </div>
       </main>
+
+      <Dialog open={isHistoryModalOpen} onOpenChange={setIsHistoryModalOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Semua Riwayat</DialogTitle>
+            <DialogDescription>Seluruh mindmap yang pernah kamu buat, {history.length} total.</DialogDescription>
+          </DialogHeader>
+          {historyStatus === "cached" && (
+            <p className="history-cached-note">Gak bisa nyambung ke server — nampilin riwayat tersimpan terakhir.</p>
+          )}
+          <div className="history-list history-list--modal">{history.map(renderHistoryItem)}</div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog
         open={!!deleteTarget}

@@ -63,7 +63,10 @@
   margin: 0;
 }
 
-.page-composer .history-cached-note {
+/* Gak diprefix `.page-composer` — sama kayak `.history-item` di bawah, dipakai
+   ulang di dalam modal "Semua Riwayat" yang di-portal Base UI ke luar
+   `.page-composer`. */
+.history-cached-note {
   margin: 0 0 var(--sm-space-3);
   padding: var(--sm-space-3);
   background: var(--sm-paper);
@@ -71,6 +74,37 @@
   border-radius: var(--sm-radius-md);
   color: var(--sm-ink-45);
   font-size: 12.5px;
+}
+
+.page-composer .history-more-btn {
+  width: 100%;
+  padding: var(--sm-space-3);
+  background: transparent;
+  border: 1px dashed var(--sm-line);
+  border-radius: var(--sm-radius-md);
+  color: var(--sm-clay);
+  font-family: var(--sm-font);
+  font-size: var(--sm-fs-small);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease-out,
+    background 150ms ease-out;
+}
+
+.page-composer .history-more-btn:hover {
+  border-color: var(--sm-clay);
+  background: var(--sm-clay-tint);
+}
+
+/* Dialog konten (modal "Semua Riwayat") di-portal ke luar .page-composer oleh
+   Base UI, jadi rule ini SENGAJA gak diprefix .page-composer — kalau diprefix,
+   gak akan pernah match. */
+.history-list--modal {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: var(--sm-space-2);
+  margin-right: calc(var(--sm-space-2) * -1);
 }
 
 .page-composer .account-chip {
@@ -397,13 +431,20 @@
   margin-bottom: var(--sm-space-4);
 }
 
-.page-composer .history-list {
+/* `.history-item` dan turunannya di bawah ini SENGAJA gak diprefix
+   `.page-composer` (beda dari `.history`/`.history-empty`/dll di sekitarnya) —
+   `renderHistoryItem()` di page.tsx dipakai ulang di dalam modal "Semua
+   Riwayat" (`<Dialog>`), dan Base UI nge-portal isi dialog ke `document.body`,
+   di LUAR `.page-composer`. Kalau diprefix, versi yang di dalam modal gak
+   bakal ke-style sama sekali (gotcha yang sama kayak `.share-url-row` di
+   ShareButton.tsx). */
+.history-list {
   display: flex;
   flex-direction: column;
   gap: var(--sm-space-3);
 }
 
-.page-composer .history-item {
+.history-item {
   display: flex;
   align-items: center;
   gap: var(--sm-space-3);
@@ -414,11 +455,11 @@
   transition: border-color 150ms ease-out;
 }
 
-.page-composer .history-item:hover {
+.history-item:hover {
   border-color: var(--sm-clay);
 }
 
-.page-composer .history-item-link {
+.history-item-link {
   display: flex;
   align-items: center;
   gap: var(--sm-space-4);
@@ -428,7 +469,7 @@
   text-decoration: none;
 }
 
-.page-composer .history-delete {
+.history-delete {
   flex-shrink: 0;
   width: 40px;
   height: 40px;
@@ -446,29 +487,29 @@
     color 150ms ease-out;
 }
 
-.page-composer .history-delete:hover {
+.history-delete:hover {
   background: color-mix(in oklch, var(--destructive) 12%, transparent);
   border-color: var(--destructive);
   color: var(--destructive);
 }
 
-.page-composer .history-delete:disabled {
+.history-delete:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
-.page-composer .history-delete:disabled:hover {
+.history-delete:disabled:hover {
   background: transparent;
   border-color: var(--sm-line);
   color: var(--sm-ink-45);
 }
 
-.page-composer .history-delete svg {
+.history-delete svg {
   width: 16px;
   height: 16px;
 }
 
-.page-composer .history-icon {
+.history-icon {
   width: 36px;
   height: 36px;
   border-radius: var(--sm-radius-sm);
@@ -479,29 +520,29 @@
   flex-shrink: 0;
 }
 
-.page-composer .history-icon svg {
+.history-icon svg {
   width: 16px;
   height: 16px;
   stroke: var(--sm-ink-45);
 }
 
-.page-composer .history-info {
+.history-info {
   flex: 1;
   min-width: 0;
 }
 
-.page-composer .history-info strong {
+.history-info strong {
   display: block;
   font-size: var(--sm-fs-body);
   color: var(--sm-ink);
 }
 
-.page-composer .history-info span {
+.history-info span {
   font-size: 12px;
   color: var(--sm-ink-45);
 }
 
-.page-composer .history-item .link-sm {
+.history-item .link-sm {
   font-size: var(--sm-fs-small);
   font-weight: 600;
   color: var(--sm-clay);
@@ -512,7 +553,7 @@
   transition: border-color 150ms ease-out;
 }
 
-.page-composer .history-item:hover .link-sm {
+.history-item:hover .link-sm {
   border-color: var(--sm-clay);
 }
 
@@ -584,17 +625,18 @@
 
   /* Icon(36) + judul + pill "Lihat →" + tombol hapus(40) berdesakan di ~375px
      kalau gap/padding-nya masih ukuran desktop — dikecilin biar .history-info
-     (yang udah truncate) punya lebih banyak ruang buat judulnya. */
-  .page-composer .history-item {
+     (yang udah truncate) punya lebih banyak ruang buat judulnya. Gak diprefix
+     `.page-composer` — alasan sama kayak block `.history-item` di atas. */
+  .history-item {
     gap: var(--sm-space-2);
     padding: var(--sm-space-3);
   }
 
-  .page-composer .history-item-link {
+  .history-item-link {
     gap: var(--sm-space-2);
   }
 
-  .page-composer .history-item .link-sm {
+  .history-item .link-sm {
     padding: 8px 14px;
   }
 }

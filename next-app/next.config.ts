@@ -20,4 +20,14 @@ export default withPWA({
   disable: process.env.NODE_ENV === "development",
   register: true,
   skipWaiting: true,
+  // Fallback pas navigasi (reload/tab baru/ketik URL langsung) gagal total
+  // karena offline DAN halamannya belum ke-precache — tanpa ini, gagalnya
+  // jatuh ke halaman error native browser (dinosaurus Chrome), bukan sesuatu
+  // yang di bawah kendali app. Nama route default next-pwa (`/_offline`)
+  // gak dipakai — App Router nganggep folder berawalan `_` sebagai "private
+  // folder" (dikecualikan dari routing), jadi `app/_offline/` gak akan
+  // pernah bisa diakses sebagai halaman sama sekali.
+  fallbacks: {
+    document: "/offline",
+  },
 })(nextConfig);
