@@ -581,14 +581,16 @@
 
 .page-landing .fgrid {
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  grid-template-columns: 1.6fr 1fr 1fr;
   gap: var(--sm-space-7);
 }
 
 @media (max-width: 760px) {
   .page-landing .fgrid {
-    grid-template-columns: 1fr 1fr;
-    gap: var(--sm-space-5);
+    /* 3 kolom total sekarang (brand + Aplikasi + Lainnya) — 2 kolom bikin
+       baris terakhir timpang (1 isi, 1 kosong), jadi ditumpuk 1 kolom aja. */
+    grid-template-columns: 1fr;
+    gap: var(--sm-space-6);
   }
 }
 
@@ -700,9 +702,6 @@
   }
   .page-landing .fgrid > div:nth-child(3) {
     transition-delay: 120ms;
-  }
-  .page-landing .fgrid > div:nth-child(4) {
-    transition-delay: 180ms;
   }
   .page-landing .showcase .preview-window {
     transition-delay: 90ms;

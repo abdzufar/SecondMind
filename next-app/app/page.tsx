@@ -345,7 +345,7 @@ export default function LandingPage() {
               <p className="fnote">Ubah dokumen jadi peta pikiran yang bisa ditelusuri.</p>
             </div>
             <div className="reveal">
-              <h4>Produk</h4>
+              <h4>Aplikasi</h4>
               <ul>
                 <li>
                   <Link href="/composer">Composer</Link>
@@ -359,30 +359,18 @@ export default function LandingPage() {
               </ul>
             </div>
             <div className="reveal">
-              <h4>Sumber</h4>
-              <ul>
-                <li>
-                  <a href="#">Dokumentasi</a>
-                </li>
-                <li>
-                  <a href="#">Repositori</a>
-                </li>
-                <li>
-                  <a href="#">Catatan rilis</a>
-                </li>
-              </ul>
-            </div>
-            <div className="reveal">
               <h4>Lainnya</h4>
               <ul>
                 <li>
-                  <a href="#">Ketentuan</a>
+                  <a href="https://github.com/abdzufar/SecondMind" target="_blank" rel="noopener noreferrer">
+                    Repositori
+                  </a>
                 </li>
                 <li>
-                  <a href="#">Privasi</a>
+                  <Link href="/terms">Ketentuan</Link>
                 </li>
                 <li>
-                  <a href="#">Kontak</a>
+                  <Link href="/privacy">Privasi</Link>
                 </li>
               </ul>
             </div>
