@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
   // ada `--webpack`), key `webpack` yang nempel itu bukan kesalahan.
   turbopack: {},
   serverExternalPackages: ["pdf-parse", "pdfjs-dist", "@napi-rs/canvas"],
+  // Next.js dev server nganggep dirinya "localhost" walau di-bind ke semua
+  // interface — request dev-only (termasuk websocket HMR) dari origin lain
+  // (mis. IP LAN buat akses dari HP) diblokir kecuali di-whitelist di sini.
+  allowedDevOrigins: ["192.168.1.13"],
 };
 
 // next-pwa cuma jalan pas `next build --webpack` (package.json) — Turbopack

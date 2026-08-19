@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { applyEdgeChanges, applyNodeChanges, addEdge as reactFlowAddEdge, reconnectEdge as reactFlowReconnectEdge, type EdgeChange, type NodeChange, type Connection, type Edge } from "@xyflow/react";
 import type { MindmapEdge, MindmapNode, WireTodo } from "@/lib/types";
-import { getLayoutedElements, removeNodeCascade } from "@/lib/canvas/layout";
+import { getLayoutedElements, pruneOrphanedBranches, removeNodeCascade } from "@/lib/canvas/layout";
 import { getTodos } from "@/lib/api";
 
 type CanvasState = {
@@ -53,7 +53,8 @@ export const useCanvasStore = create<CanvasState>()(
       isOnline: true,
       setIsOnline: (isOnline) => set({ isOnline }),
       onNodesChange: (changes) => set({ nodes: applyNodeChanges(changes, get().nodes) }),
-      onEdgesChange: (changes) => set({ edges: applyEdgeChanges(changes, get().edges) }),
+      onEdgesChange: (changes) =>
+        set((state) => pruneOrphanedBranches(state.nodes, applyEdgeChanges(changes, state.edges))),
       selectNode: (id) => set({ selectedNodeId: id }),
       clearSelection: () => set({ selectedNodeId: null }),
       toggleNodeComplete: (id) =>
@@ -71,7 +72,8 @@ export const useCanvasStore = create<CanvasState>()(
           nodes: state.nodes.map((n) => (n.id === id ? { ...n, data: { ...n.data, userNotes: notes } } : n)),
         })),
       deleteNode: (id) => set((state) => removeNodeCascade(state.nodes, state.edges, id)),
-      deleteEdge: (id) => set((state) => ({ edges: state.edges.filter((e) => e.id !== id) })),
+      deleteEdge: (id) =>
+        set((state) => pruneOrphanedBranches(state.nodes, state.edges.filter((e) => e.id !== id))),
       setGraph: (nodes, edges, mindmapId) =>
         set({ ...getLayoutedElements(nodes, edges), mindmapId: mindmapId ?? get().mindmapId }),
       appendNodes: (newNodes, newEdges) =>
@@ -90,7 +92,7 @@ export const useCanvasStore = create<CanvasState>()(
         set((state) => {
           const newEdges = reactFlowReconnectEdge(oldEdge, newConnection, state.edges);
           const uniqueEdges = newEdges.filter((v, i, a) => a.findIndex((t) => t.id === v.id) === i);
-          return { edges: uniqueEdges };
+          return pruneOrphanedBranches(state.nodes, uniqueEdges);
         }),
       fetchTodos: async (mindmapId) => {
         set({ todosStatus: "loading" });

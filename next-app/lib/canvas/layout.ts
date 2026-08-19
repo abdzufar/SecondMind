@@ -162,3 +162,47 @@ export function removeNodeCascade(nodes: MindmapNode[], edges: MindmapEdge[], id
 
   return getLayoutedElements(renumberedNodes, remainingEdges);
 }
+
+// BFS dari semua roadmap-step lewat edge (source -> target) buat nemuin cabang
+// mana yang beneran masih kejangkau dari rantai roadmap — dipisah dari sekadar
+// "punya edge apa nggak" karena cabang nested (§9 M5 CLAUDE.md) bisa masih
+// terhubung ke induknya sendiri padahal induknya udah kepencar dari step.
+function getReachableBranchIds(nodes: MindmapNode[], edges: MindmapEdge[]): Set<string> {
+  const nodeTypeById = new Map(nodes.map((node) => [node.id, node.type]));
+  const reachable = new Set<string>();
+  let frontier = nodes.filter((node) => node.type === "roadmap-step").map((node) => node.id);
+
+  while (frontier.length > 0) {
+    const next: string[] = [];
+    edges.forEach((edge) => {
+      if (!frontier.includes(edge.source)) return;
+      if (nodeTypeById.get(edge.target) !== "mindmap-branch" || reachable.has(edge.target)) return;
+      reachable.add(edge.target);
+      next.push(edge.target);
+    });
+    frontier = next;
+  }
+
+  return reachable;
+}
+
+// Cabang yang gak lagi kejangkau dari roadmap-step manapun (mis. wire
+// penghubungnya dihapus manual lewat drag-wire delete — §9 M5 CLAUDE.md)
+// dihapus otomatis, bareng sub-cabang di bawahnya yang ikut kepencar — biar
+// gak nyangkut sebagai node nyantol yang bakal jatuh ke posisi fallback jauh
+// di bawah pas layout ulang (Pass 3 di atas). roadmap-step sengaja gak kena
+// logic ini — kehilangan koneksi di step resikonya lebih besar, tetap harus
+// lewat tombol delete node eksplisit yang ada dialog konfirmasinya.
+export function pruneOrphanedBranches(nodes: MindmapNode[], edges: MindmapEdge[]) {
+  const reachable = getReachableBranchIds(nodes, edges);
+  const orphanIds = new Set(
+    nodes.filter((node) => node.type === "mindmap-branch" && !reachable.has(node.id)).map((node) => node.id)
+  );
+
+  if (orphanIds.size === 0) return { nodes, edges };
+
+  const remainingNodes = nodes.filter((node) => !orphanIds.has(node.id));
+  const remainingEdges = edges.filter((edge) => !orphanIds.has(edge.source) && !orphanIds.has(edge.target));
+
+  return getLayoutedElements(remainingNodes, remainingEdges);
+}

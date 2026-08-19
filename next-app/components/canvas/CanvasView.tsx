@@ -84,8 +84,12 @@ export function CanvasView({
     if (!isOnline) return;
     if (mindmapId) {
       setTimeout(() => {
-        const { edges: currentEdges } = useCanvasStore.getState();
-        saveMindmap(mindmapId, { edges: currentEdges });
+        // `nodes` diikutkan (bukan cuma `edges`) karena edge yang kehapus bisa
+        // mancing cabang jadi gak kejangkau lagi dan ikut kehapus otomatis
+        // (`pruneOrphanedBranches` di canvasStore.ts) — kalau cuma `edges` yang
+        // disimpan, node yang udah kehapus di canvas bakal nongol lagi pas reload.
+        const { nodes: currentNodes, edges: currentEdges } = useCanvasStore.getState();
+        saveMindmap(mindmapId, { nodes: currentNodes, edges: currentEdges });
       }, 0);
     }
   }
@@ -96,8 +100,8 @@ export function CanvasView({
     reconnectEdge(oldEdge, newConnection);
     if (mindmapId) {
       setTimeout(() => {
-        const { edges: currentEdges } = useCanvasStore.getState();
-        saveMindmap(mindmapId, { edges: currentEdges });
+        const { nodes: currentNodes, edges: currentEdges } = useCanvasStore.getState();
+        saveMindmap(mindmapId, { nodes: currentNodes, edges: currentEdges });
       }, 0);
     }
   }
@@ -107,8 +111,8 @@ export function CanvasView({
     deleteEdge(edge.id);
     if (mindmapId) {
       setTimeout(() => {
-        const { edges: currentEdges } = useCanvasStore.getState();
-        saveMindmap(mindmapId, { edges: currentEdges });
+        const { nodes: currentNodes, edges: currentEdges } = useCanvasStore.getState();
+        saveMindmap(mindmapId, { nodes: currentNodes, edges: currentEdges });
       }, 0);
     }
   }
