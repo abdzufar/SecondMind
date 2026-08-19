@@ -1358,13 +1358,48 @@
 }
 
 .page-canvas .todo-item-description {
-  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  line-height: 1.55;
   color: var(--sm-ink-70);
-  white-space: pre-wrap;
+}
+
+.page-canvas .todo-item-description strong {
+  color: var(--sm-ink);
+  font-weight: 700;
+}
+
+.page-canvas .todo-desc-bullet {
+  position: relative;
+  padding-left: 14px;
+}
+
+.page-canvas .todo-desc-bullet::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 8px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--sm-clay);
 }
 
 .page-canvas .todo-item.is-done .todo-item-description {
   color: var(--sm-ink-45);
+}
+
+.page-canvas .todo-item.is-done .todo-item-description strong {
+  color: inherit;
+}
+
+.page-canvas .todo-item.is-done .todo-desc-bullet::before {
+  background: var(--sm-ink-45);
 }
 
 .page-canvas .todo-item-due {
@@ -1411,8 +1446,32 @@
   color: var(--sm-ink);
 }
 
+.page-canvas .todo-form-description {
+  /* flex-shrink:0 penting — tanpa ini, flex-wrap milih nyusutin textarea biar
+     tetep muat sebaris sama input task (bukan wrap ke baris sendiri kayak
+     maksudnya `100%` basis), hasilnya dua field keliatan kepepet sebelah-
+     sebelahan alih-alih masing-masing lega di barisnya sendiri. */
+  flex: 1 0 100%;
+  min-height: 56px;
+  box-sizing: border-box;
+  padding: var(--sm-space-2) var(--sm-space-3);
+  border: 1px solid var(--sm-line);
+  border-radius: var(--sm-radius-sm);
+  background: var(--sm-paper);
+  color: var(--sm-ink);
+  font-family: var(--sm-font);
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.page-canvas .todo-form-description::placeholder {
+  color: var(--sm-ink-45);
+}
+
 .page-canvas .todo-form-text:focus-visible,
-.page-canvas .todo-form-date:focus-visible {
+.page-canvas .todo-form-date:focus-visible,
+.page-canvas .todo-form-description:focus-visible {
   border-color: var(--sm-clay);
   outline: none;
   box-shadow: 0 0 0 3px var(--sm-clay-tint);

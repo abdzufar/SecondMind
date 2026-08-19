@@ -37,6 +37,7 @@ export function TodoPanel({ mindmapId, mindmapCreatedAt, selectedNodeLabel }: To
   const isOnline = useCanvasStore((s) => s.isOnline);
 
   const [taskText, setTaskText] = useState("");
+  const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAutoGenerating, setIsAutoGenerating] = useState(false);
@@ -71,11 +72,13 @@ export function TodoPanel({ mindmapId, mindmapCreatedAt, selectedNodeLabel }: To
     createTodo({
       mindmapId,
       taskText: taskText.trim(),
+      description: description.trim(),
       timeOffsetDays: dateToOffsetDays(dueDate, mindmapCreatedAt),
     })
       .then((created) => {
         addTodo(created);
         setTaskText("");
+        setDescription("");
         setDueDate("");
       })
       .catch(() => setFormError("Gagal menambah task. Coba lagi."))
@@ -111,6 +114,35 @@ export function TodoPanel({ mindmapId, mindmapCreatedAt, selectedNodeLabel }: To
   const overdueItems = sorted.filter((t) => new Date(t.dueDate) < now);
   const upcomingItems = sorted.filter((t) => new Date(t.dueDate) >= now);
 
+  // Tiap baris (dipisah Enter) otomatis jadi 1 bullet — user gak perlu ketik
+  // "- " manual. Prefix "- " tetap di-strip kalau ada (kompatibel sama
+  // deskripsi auto-generate lama dari app/api/todo/generate/route.ts yang
+  // formatnya "- Label: Teks"). Kalau baris itu ada pola "Label: Teks",
+  // bagian labelnya ditebalin; kalau enggak, ya bullet biasa tanpa bold.
+  function renderDescriptionLines(description: string) {
+    return description
+      .split("\n")
+      .filter((line) => line.trim().length > 0)
+      .map((line, i) => {
+        const content = line.startsWith("- ") ? line.slice(2) : line;
+        const colonIndex = content.indexOf(": ");
+        const label = colonIndex > -1 ? content.slice(0, colonIndex) : null;
+        const rest = label ? content.slice(colonIndex + 2) : content;
+
+        return (
+          <li key={i} className="todo-desc-bullet">
+            {label ? (
+              <>
+                <strong>{label}:</strong> {rest}
+              </>
+            ) : (
+              rest
+            )}
+          </li>
+        );
+      });
+  }
+
   function renderTodoItem(todo: WireTodo) {
     return (
       <li key={todo._id} className={`todo-item${todo.isCompleted ? " is-done" : ""}`}>
@@ -124,7 +156,7 @@ export function TodoPanel({ mindmapId, mindmapCreatedAt, selectedNodeLabel }: To
         />
         <div className="todo-item-body">
           <span className="todo-item-text">{todo.taskText}</span>
-          {todo.description && <span className="todo-item-description">{todo.description}</span>}
+          {todo.description && <ul className="todo-item-description">{renderDescriptionLines(todo.description)}</ul>}
           <span className="todo-item-due">{formatDueDate(todo.dueDate)}</span>
         </div>
       </li>
@@ -196,6 +228,13 @@ export function TodoPanel({ mindmapId, mindmapCreatedAt, selectedNodeLabel }: To
           }}
           className="todo-form-text"
           aria-label="Nama task"
+        />
+        <textarea
+          placeholder="Deskripsi (opsional)…"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="todo-form-description"
+          aria-label="Deskripsi task"
         />
         <input
           type="date"
