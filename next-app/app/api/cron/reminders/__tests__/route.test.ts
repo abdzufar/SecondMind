@@ -81,4 +81,45 @@ describe('/api/cron/reminders', () => {
     const updatedTodo = await Todo.findById(dueTodo._id);
     expect(updatedTodo?.emailReminderSent).toBe(true);
   });
+
+  it('should skip sending emails if user opted out, but mark as sent', async () => {
+    const user = await User.create({ name: 'Test User', email: 'test@example.com', emailRemindersEnabled: false });
+    const map = await Mindmap.create({ userId: user._id, title: 'Map', topic: 'React', timeframe: '1 day', language: 'en', nodes: [], edges: [] });
+    
+    const pastDate = new Date();
+    pastDate.setDate(pastDate.getDate() - 1);
+    
+    const dueTodo = await Todo.create({
+      userId: user._id,
+      mindmapId: map._id,
+      taskText: 'Learn hooks',
+      dueDate: pastDate,
+      isCompleted: false,
+      emailReminderSent: false
+    });
+
+    const req = new NextRequest('http://localhost:3000/api/cron/reminders', {
+      headers: { 'Authorization': 'Bearer test-secret' }
+    });
+
+    const res = await GET(req);
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    
+    // Should NOT have sent an email
+    expect(data.emailsSent).toBe(0);
+    
+    // Check if DB was still updated correctly
+    const updatedTodo = await Todo.findById(dueTodo._id);
+    expect(updatedTodo?.emailReminderSent).toBe(true);
+  });
+
+  it('should handle database errors gracefully', async () => {
+    jest.spyOn(Todo, 'find').mockImplementationOnce(() => { throw new Error('DB Error'); });
+    const req = new NextRequest('http://localhost:3000/api/cron/reminders', {
+      headers: { 'Authorization': 'Bearer test-secret' }
+    });
+    const res = await GET(req);
+    expect(res.status).toBe(500);
+  });
 });

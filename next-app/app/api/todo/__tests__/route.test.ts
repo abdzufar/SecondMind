@@ -66,4 +66,30 @@ describe('/api/todo CRUD Operations', () => {
     expect(data.length).toBe(1);
     expect(data[0].taskText).toBe('Task 1');
   });
+
+  it('POST should return 404 if mindmap does not exist', async () => {
+    const req = new NextRequest(`http://localhost:3000/api/todo`, {
+      method: 'POST',
+      body: JSON.stringify({ mindmapId: '64b5f8a0e4b0a1a1a1a1a999', taskText: 'Task', timeOffsetDays: 1 })
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(404);
+  });
+
+  it('GET should return 500 on database error', async () => {
+    jest.spyOn(Todo, 'find').mockImplementationOnce(() => { throw new Error('DB Error'); });
+    const req = new NextRequest(`http://localhost:3000/api/todo?mindmapId=${mockMapId}`);
+    const res = await GET(req);
+    expect(res.status).toBe(500);
+  });
+
+  it('POST should return 500 on database error', async () => {
+    jest.spyOn(Mindmap, 'findOne').mockImplementationOnce(() => { throw new Error('DB Error'); });
+    const req = new NextRequest(`http://localhost:3000/api/todo`, {
+      method: 'POST',
+      body: JSON.stringify({ mindmapId: mockMapId, taskText: 'Task', timeOffsetDays: 1 })
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(500);
+  });
 });
