@@ -1093,6 +1093,42 @@
   box-shadow: 0 0 0 3px var(--sm-clay-tint);
 }
 
+.page-canvas .branch-section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--sm-clay);
+}
+
+.page-canvas .branch-section-title svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+.page-canvas .branch-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: var(--sm-radius-pill);
+  background: var(--sm-clay-tint);
+  color: var(--sm-clay);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.page-canvas .branch-section-empty {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--sm-ink-45);
+}
+
 .page-canvas .sibling-list {
   display: flex;
   flex-wrap: wrap;

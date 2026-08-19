@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { GitBranch } from "lucide-react";
 import { elaborateNode, saveMindmap } from "@/lib/api";
 import { removeNodeCascade } from "@/lib/canvas/layout";
 import { useCanvasStore } from "@/store/canvasStore";
@@ -113,12 +114,19 @@ export function Drawer({
   const parentEdge = isBranch ? edges.find((e) => e.target === node?.id) : undefined;
   const parentStep = parentEdge ? nodes.find((n) => n.id === parentEdge.source) : undefined;
 
-  const stepId = isBranch ? parentStep?.id : node?.id;
-  const siblingIds = edges.filter((e) => e.source === stepId && e.target !== node?.id).map((e) => e.target);
-  const siblings = nodes.filter((n) => siblingIds.includes(n.id));
-
   const typeLabel = isBranch ? "Cabang mindmap" : "Langkah roadmap";
-  const siblingsLabel = isBranch ? "Cabang lain di langkah ini" : "Cabang di langkah ini";
+
+  // Cuma dihitung buat roadmap-step (bukan mindmap-branch) — klik anak node
+  // (cabang) gak lagi nampilin seksi ini sama sekali, sesuai redesign yang
+  // diminta. Filter eksplisit `type === "mindmap-branch"` (bukan cuma
+  // `source === node.id`) sekalian benerin bug lama: tanpa itu, edge spine
+  // ke step SELANJUTNYA ikut kehitung sebagai "cabang" (lihat catatan M5 di
+  // CLAUDE.md).
+  const stepBranches = !isBranch
+    ? nodes.filter(
+        (n) => n.type === "mindmap-branch" && edges.some((e) => e.source === node?.id && e.target === n.id),
+      )
+    : [];
 
   function handleStartEdit() {
     if (!node) return;
@@ -390,16 +398,28 @@ export function Drawer({
 
           <div className="drawer-divider"></div>
 
-          <div className="drawer-section">
-            <h4>{siblingsLabel}</h4>
-            <div className="sibling-list">
-              {siblings.map((s) => (
-                <button type="button" key={s.id} className="sibling" onClick={() => selectNode(s.id)}>
-                  {s.data.label}
-                </button>
-              ))}
+          {!isBranch && (
+            <div className="drawer-section">
+              <h4 className="branch-section-title">
+                <GitBranch aria-hidden="true" />
+                Cabang yang Tumbuh di Sini
+                {stepBranches.length > 0 && <span className="branch-count-badge">{stepBranches.length}</span>}
+              </h4>
+              {stepBranches.length > 0 ? (
+                <div className="sibling-list">
+                  {stepBranches.map((s) => (
+                    <button type="button" key={s.id} className="sibling" onClick={() => selectNode(s.id)}>
+                      {s.data.label}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="branch-section-empty">
+                  Belum ada cabang di langkah ini — coba &quot;Pecah jadi sub-cabang&quot; di bawah.
+                </p>
+              )}
             </div>
-          </div>
+          )}
 
           <div className="ai-zone">
             <span className="ai-zone-title">
