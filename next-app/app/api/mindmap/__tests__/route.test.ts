@@ -41,4 +41,10 @@ describe('GET /api/mindmap', () => {
     expect(data[0].nodes).toBeUndefined();
     expect(data[0].edges).toBeUndefined();
   });
+
+  it('should return 500 on database error', async () => {
+    jest.spyOn(Mindmap, 'find').mockImplementationOnce(() => { throw new Error('DB Error'); });
+    const response = await GET();
+    expect(response.status).toBe(500);
+  });
 });
