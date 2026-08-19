@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import "./composer.css";
 import { Mail, WifiOff } from "lucide-react";
@@ -74,6 +74,7 @@ function formatRelativeTime(iso: string) {
 
 export default function ComposerPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session } = useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const timeframeRef = useRef<HTMLSelectElement>(null);
@@ -95,6 +96,21 @@ export default function ComposerPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [showEmailPrefs, setShowEmailPrefs] = useState(false);
+
+  useEffect(() => {
+    // Link "Kelola preferensi notifikasi" di footer email reminder (dikerjain
+    // partner di sisi backend) ngarah ke `/composer?settings=email` — begitu
+    // ke-load, buka dialog preferensi email otomatis. Query param langsung
+    // dibuang lagi (`router.replace`) biar gak nyangkut di URL dan gak buka
+    // ulang dialognya kalau halaman ini di-refresh manual.
+    function applySettingsParam() {
+      if (searchParams.get("settings") === "email") {
+        setShowEmailPrefs(true);
+        router.replace("/composer");
+      }
+    }
+    applySettingsParam();
+  }, [searchParams, router]);
 
   useEffect(() => {
     function loadHistory() {
